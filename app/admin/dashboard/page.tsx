@@ -56,21 +56,30 @@ export default async function AdminDashboardPage() {
   const actionTakenRequests = requestsList.filter((r: any) => r.action_taken === true).length;
   const pendingRequests = requestsList.filter((r: any) => r.action_taken === false || !r.action_taken).length;
 
+  // استعلام الوظائف وتصنيفها بشكل مرن
   const { data: jobsData, count: totalJobs } = await supabase
     .from('jobs')
     .select('*', { count: 'exact' });
 
   const jobsList = jobsData || [];
-  const activeJobs = jobsList.filter((j: any) => j.status === 'active').length;
-  const inactiveJobs = jobsList.filter((j: any) => j.status !== 'active').length;
+  // فحص مرن للحالة (يقبل الحروف الكبيرة والصغيرة أو القيم المنطقية)
+  const activeJobs = jobsList.filter((j: any) => 
+    j.status === 'active' || j.status === 'Active' || j.is_active === true
+  ).length;
+  
+  const inactiveJobs = (totalJobs || jobsList.length) - activeJobs;
 
+  // استعلام المتقدمين وتصنيفهم بشكل مرن
   const { data: careersData, count: totalCareers } = await supabase
     .from('careers')
     .select('*', { count: 'exact' });
 
   const careersList = careersData || [];
-  const advertisedApplicants = careersList.filter((c: any) => c.job_id !== null).length;
-  const directApplicants = careersList.filter((c: any) => c.job_id === null).length;
+  const advertisedApplicants = careersList.filter((c: any) => 
+    c.job_id !== null && c.job_id !== '' && c.job_id !== undefined
+  ).length;
+  
+  const directApplicants = (totalCareers || careersList.length) - advertisedApplicants;
 
   const { data: rolesData } = await supabase.from('roles').select('id, name, display_name');
   const allRoles = rolesData || [];

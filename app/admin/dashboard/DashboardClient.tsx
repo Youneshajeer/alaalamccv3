@@ -186,6 +186,34 @@ export default function DashboardClient({
                 <span className="text-emerald-700 dark:text-emerald-400">{lang === 'ar' ? 'توظيف مباشر' : 'Direct Hiring'}</span>
                 <span className="font-black text-emerald-600">{stats.jobs.direct}</span>
               </div>
+              <div>
+                 {permissions?.canViewJobs ? (
+                <Link
+                  href="/admin/dashboard/direct-job-applications"
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-sm transition-all flex items-center gap-1 cursor-pointer"
+                >
+                  <span>{lang === 'ar' ? 'طلبات العمل المباشر ←' : 'Direct job request →'}</span>
+                </Link>
+              ) : (
+                <span className="bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold px-3 py-1.5 rounded-xl text-xs cursor-not-allowed">
+                  {lang === 'ar' ? 'مغلق' : 'Locked'}
+                </span>
+              )}
+              </div>
+              <div>
+                 {permissions?.canViewJobs ? (
+                <Link
+                  href="/admin/dashboard/job-applications"
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-sm transition-all flex items-center gap-1 cursor-pointer"
+                >
+                  <span>{lang === 'ar' ? 'سجل المتقدمين  ←' : 'Job Applications  →'}</span>
+                </Link>
+              ) : (
+                <span className="bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold px-3 py-1.5 rounded-xl text-xs cursor-not-allowed">
+                  {lang === 'ar' ? 'مغلق' : 'Locked'}
+                </span>
+              )}
+              </div>
             </div>
           </div>
         </div>

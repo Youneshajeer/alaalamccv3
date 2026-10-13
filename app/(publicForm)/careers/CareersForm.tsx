@@ -280,7 +280,7 @@ export default  function CareersForm({ lang, t, jobId, jobDetails }: CareersForm
             {t.form.selectDepartment}
           </label>
           <select
-            disabled={Boolean(jobId)}
+           // disabled={Boolean(jobId)}
             value={selectedDeptId}
            onChange={(e) => {
               setSelectedDeptId(e.target.value);
