@@ -1,132 +1,18 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-
-const dictionary = {
-  ar: {
-    badge: "شريكك التشغيلي المعتمد في السعودية",
-    titleMain: "لماذا يثق بنا",
-    titleHighlight: "قادة الأعمال والشركات؟",
-    description: "نحن لا نكتفي بتقديم خدمات مركز اتصال تقليدي، بل نبني لمؤسستك مركز عمليات مخصص يرفع من ثقة عملائك، ويحميك تنظيمياً، ويضمن أعلى كفاءة تشغيلية.",
-    coreFeatures: [
-      {
-        id: "security",
-        icon: "🛡️",
-        badge: "تشفير وأمان مؤسسي",
-        title: "أمان بُني على خبرة تقنية متقدمة",
-        desc: "بنية تحتية محمية بأحدث بروتوكولات أمن الشبكات المؤسسية، مصممة خصيصاً للتعامل مع البيانات الحساسة وفق أعلى معايير السرية والتشفير المعتمدة.",
-        highlight: "تشفير بيانات رفيع المستوى",
-      },
-      {
-        id: "compliance",
-        icon: "🏛",
-        badge: "امتثال نظامي 100% 🇸🇦",
-        title: "التزام كامل بالأنظمة والتشريعات المحلية",
-        desc: "مرخصون نظامياً لتقديم خدمات مراكز الاتصال وإسناد الأعمال، مع ضمان استضافة وحفظ كافة البيانات داخل مراكز بيانات معتمدة محلياً في السعودية.",
-        highlight: "استضافة البيانات داخل المملكة",
-      },
-      {
-        id: "talent",
-        icon: "👥",
-        badge: "كوادر وطنية مؤهلة",
-        title: "فريق عمل سعودي بإشراف تشغيلي مباشر",
-        desc: "نخبة من الكفاءات الوطنية المُدرّبة على أعلى معايير خدمة العملاء والمبيعات الهاتفية، تحت قيادة وإشراف ميداني مستمر لضمان أعلى درجات الجودة.",
-        highlight: "إشراف تشغيلي حثيث",
-      },
-      {
-        id: "scalability",
-        icon: "⚡",
-        badge: "توسع مرن بلا احتكاك",
-        title: "سعة تشغيلية مرنة تتكيف مع نموك",
-        desc: "إمكانية البدء بفريق عمل متخصص صغير وتوسعة المقاعد التشغيلية فوراً وبسلاسة تامة مع نمو نشاطك التجاري ودون الحاجة لإعادة التأسيس.",
-        highlight: "تدرّج تشغيلي فوري",
-      }
-    ],
-    enterpriseStats: [
-      { number: "100%", label: "استضافة سحابية داخل السعودية", icon: "🇸🇦" },
-      { number: "99.9%", label: "جاهزية واستقرار الخدمة (SLA)", icon: "⚡" },
-      { number: "100%", label: "سجل التجاري المعتمد", icon: "📜" },
-      { number: "24/7", label: "مراقبة وإشراف تشغيلي مستمر", icon: "🎧" }
-    ],
-    ctaTitle: "دعنا نُصمّم مركز الاتصال الخـاص بمؤسستك",
-    ctaDesc: "تواصل مع مستشاري التشغيل لدينا للحصول على دراسة احتياج مخصصة وخطة تشغيل سريعة الانطلاق.",
-    ctaButton: "احجز جلسة استشارية"
-  },
-  en: {
-    badge: "Your Certified Operational Partner in Saudi Arabia",
-    titleMain: "Why Business Leaders",
-    titleHighlight: "Trust Us?",
-    description: "We don't just provide traditional call center services; we build a dedicated operations center for your enterprise that boosts customer trust, ensures regulatory compliance, and guarantees top operational efficiency.",
-    coreFeatures: [
-      {
-        id: "security",
-        icon: "🛡️",
-        badge: "Enterprise Security & Encryption",
-        title: "Security Built on Advanced Technical Expertise",
-        desc: "Infrastructure protected by the latest enterprise network security protocols, custom-designed to handle sensitive customer data under strict confidentiality and encryption standards.",
-        highlight: "High-level data encryption",
-      },
-      {
-        id: "compliance",
-        icon: "🏛️",
-        badge: "100% Regulatory Compliance 🇸🇦",
-        title: "Full Commitment to Local Regulations & Laws",
-        desc: "Officially licensed to provide call center and business outsourcing services, ensuring all data is hosted and stored locally within certified data centers in Saudi Arabia.",
-        highlight: "Data hosting inside the Kingdom",
-      },
-      {
-        id: "talent",
-        icon: "👥",
-        badge: "Qualified National Talents",
-        title: "Saudi Workforce with Direct Operational Supervision",
-        desc: "Elite national talents trained to the highest global customer service and telemarketing standards, operating under continuous field supervision to ensure peak quality.",
-        highlight: "Active operational supervision",
-      },
-      {
-        id: "scalability",
-        icon: "⚡",
-        badge: "Frictionless Scalability",
-        title: "Flexible Capacity That Adapts to Your Growth",
-        desc: "Start with a small specialized team and expand operational seats instantly and seamlessly as your business grows without the need to rebuild systems.",
-        highlight: "Instant operational scaling",
-      }
-    ],
-    enterpriseStats: [
-      { number: "100%", label: "Cloud Hosting in Saudi Arabia", icon: "🇸🇦" },
-      { number: "99.9%", label: "Service Availability & SLA", icon: "⚡" },
-      { number: "100%", label: "Certified Commercial Register", icon: "📜" },
-      { number: "24/7", label: "Continuous Monitoring & Ops", icon: "🎧" }
-    ],
-    ctaTitle: "Let Us Design Your Enterprise Call Center",
-    ctaDesc: "Contact our operations consultants to get a customized needs assessment and a rapid deployment plan.",
-    ctaButton: "Book a Consultation Session"
-  }
-};
+import { useTranslation } from '@/utils/useTranslation';
+import React from 'react';
+import EnterpriseStats from '@/components/EnterpriseStats';
 
 export default function WhyUs() {
-  const [lang, setLang] = useState<'ar' | 'en'>('ar');
-
-  useEffect(() => {
-    const savedLang = (localStorage.getItem('lang') as 'ar' | 'en') || 'ar';
-    setLang(savedLang);
-
-    const checkLangInterval = setInterval(() => {
-      const currentLang = (localStorage.getItem('lang') as 'ar' | 'en') || 'ar';
-      if (currentLang !== lang) {
-        setLang(currentLang);
-      }
-    }, 100);
-
-    return () => clearInterval(checkLangInterval);
-  }, [lang]);
-
-  const t = dictionary[lang];
+  const { lang, t } = useTranslation();
+  const whyUsText = t.whyUsComponent;
 
   return (
     <section id="why-us" className={`py-24 bg-white text-slate-900 relative overflow-hidden ${lang === 'ar' ? 'dir-rtl' : 'dir-ltr'}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       
-      <div className="absolute top-1/4 -right-28 w-125 h-125 bg-emerald-100/40 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="absolute bottom-10 -left-28 w-125 h-125 bg-sky-100/40 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute top-1/4 -right-28 w-125 h-125 bg-emerald-100/45 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute bottom-10 -left-28 w-125 h-125 bg-sky-100/45 rounded-full blur-[120px] pointer-events-none"></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-20">
         
@@ -136,23 +22,23 @@ export default function WhyUs() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
             </span>
-            {t.badge}
+            {whyUsText?.badge}
           </div>
 
           <h2 className="text-3xl sm:text-5xl font-black text-slate-900 leading-tight tracking-tight">
-            {t.titleMain} <br />
+            {whyUsText?.titleMain} <br />
             <span className="bg-linear-to-r from-amber-500 via-amber-600 to-yellow-600 bg-clip-text text-transparent">
-              {t.titleHighlight}
+              {whyUsText?.titleHighlight}
             </span>
           </h2>
 
           <p className="text-slate-600 text-base sm:text-lg leading-relaxed font-normal">
-            {t.description}
+            {whyUsText?.description}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {t.coreFeatures.map((feature) => (
+          {whyUsText?.coreFeatures?.map((feature: any) => (
             <div
               key={feature.id}
               className={`group relative bg-white border border-slate-200/90 rounded-3xl p-8 sm:p-10 transition-all duration-300 hover:shadow-2xl hover:shadow-slate-200/80 hover:border-emerald-400/80 flex flex-col justify-between overflow-hidden ${lang === 'ar' ? 'text-right' : 'text-left'}`}
@@ -192,39 +78,24 @@ export default function WhyUs() {
           ))}
         </div>
 
-        <div className="bg-slate-950 text-white rounded-3xl p-8 sm:p-12 shadow-2xl border border-slate-800 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-          
-          <div className="relative z-10 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center divide-y lg:divide-y-0 lg:divide-x lg:divide-x-reverse divide-slate-800/80">
-            {t.enterpriseStats.map((stat, idx) => (
-              <div key={idx} className={`${idx !== 0 ? 'pt-6 lg:pt-0' : ''} space-y-2`}>
-                <div className="text-2xl sm:text-3xl font-black text-amber-400 flex items-center justify-center gap-2">
-                  <span>{stat.number}</span>
-                </div>
-                <div className="text-xs sm:text-sm text-slate-300 font-medium">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <EnterpriseStats enterpriseStats={whyUsText?.enterpriseStats} lang={lang} />
 
-       <div className={`bg-linear-to-r from-slate-900 via-slate-900 to-slate-950 border border-slate-800 text-white rounded-3xl p-8 sm:p-12 flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
+        <div className={`bg-linear-to-r from-slate-900 via-slate-900 to-slate-950 border border-slate-800 text-white rounded-3xl p-8 sm:p-12 flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
           <div className="space-y-3">
             <h3 className="text-2xl sm:text-3xl font-black">
-              {t.ctaTitle}
+              {whyUsText?.ctaTitle}
             </h3>
             <p className="text-slate-300 text-sm sm:text-base max-w-xl">
-              {t.ctaDesc}
+              {whyUsText?.ctaDesc}
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
             <a
-            href={`/request-service?service=infrastructure&lang=${lang}`}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-6 py-3.5 rounded-xl shadow-lg shadow-emerald-600/20 transition-all text-sm whitespace-nowrap active:scale-95"
-          >
-              {t.ctaButton}
+              href={`/request-service?service=infrastructure&lang=${lang}`}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-6 py-3.5 rounded-xl shadow-lg shadow-emerald-600/20 transition-all text-sm whitespace-nowrap active:scale-95 text-center"
+            >
+              {whyUsText?.ctaButton}
             </a>
           </div>
         </div>

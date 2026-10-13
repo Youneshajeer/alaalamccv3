@@ -1,5 +1,8 @@
+import { cookies } from 'next/headers';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import GlobalToast from '@/components/GlobalToast';
+import { GlobalTranslationProvider } from '@/utils/GlobalTranslationProvider';
 import './globals.css'; 
 import type { Metadata } from 'next';
 
@@ -69,15 +72,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const cookieStore = await cookies();
+  const lang = (cookieStore.get('lang')?.value as 'ar' | 'en') || 'ar';
+  const dir = lang === 'ar' ? 'rtl' : 'ltr';
+
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning>
+    <html lang={lang} dir={dir} suppressHydrationWarning>
       <head>
-        {/* كود الـ Schema Markup الخاص بالكيان التجاري لمحركات البحث */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -109,11 +115,14 @@ export default function RootLayout({
         />
       </head>
       <body className="font-sans antialiased min-h-screen flex flex-col justify-between bg-white dark:bg-slate-950 text-slate-900 dark:text-white">
-        <Header />
-        <main className="grow">
-          {children}
-        </main>
-        <Footer />
+        <GlobalTranslationProvider initialLang={lang}>
+          <GlobalToast />
+          <Header />
+          <main className="grow" >
+            {children}
+          </main>
+          <Footer />
+        </GlobalTranslationProvider>
       </body>
     </html>
   );

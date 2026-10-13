@@ -1,16 +1,11 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslation } from '@/utils/useTranslation';
 
 export default function Footer() {
-  const [lang, setLang] = useState<'ar' | 'en'>('ar');
-
-  useEffect(() => {
-    const savedLang = (localStorage.getItem('lang') as 'ar' | 'en') || 'ar';
-    setLang(savedLang);
-  }, []);
-
+  const { lang,t } = useTranslation();
+ 
   return (
     <footer id="contact" className="bg-slate-950 text-slate-400 py-12 border-t border-slate-800 text-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">

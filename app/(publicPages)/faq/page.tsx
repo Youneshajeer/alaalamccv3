@@ -1,30 +1,12 @@
 'use client';
+import React, { useState } from 'react';
+import { useTranslation } from '@/utils/useTranslation';
 
-import React, { useState, useEffect } from 'react';
-import ar from '@/i18n/ar.json';
-import en from '@/i18n/en.json';
-
-const dictionaries = { ar, en };
 
 export default function FAQPage() {
-  const [lang, setLang] = useState<'ar' | 'en'>('ar');
-  const [openIdx, setOpenIdx] = useState<number | null>(0);
-
-  useEffect(() => {
-    const savedLang = (localStorage.getItem('lang') as 'ar' | 'en') || 'ar';
-    setLang(savedLang);
-
-    const checkLangInterval = setInterval(() => {
-      const currentLang = (localStorage.getItem('lang') as 'ar' | 'en') || 'ar';
-      if (currentLang !== lang) {
-        setLang(currentLang);
-      }
-    }, 100);
-
-    return () => clearInterval(checkLangInterval);
-  }, [lang]);
-
-  const t = dictionaries[lang].faq;
+ const { lang, t } = useTranslation();
+ const faqText = t.faq;
+ const [openIdx, setOpenIdx] = useState<number | null>(null);
 
   const toggleAccordion = (idx: number) => {
     setOpenIdx(openIdx === idx ? null : idx);
@@ -38,20 +20,20 @@ export default function FAQPage() {
         <div className={`space-y-4 text-center sm:${lang === 'ar' ? 'text-right' : 'text-left'}`}>
           <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-emerald-50 dark:bg-slate-900 border border-emerald-200/80 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs sm:text-sm font-bold shadow-sm mx-auto sm:mx-0">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-            <span>{t.eyebrow}</span>
+            <span>{faqText.eyebrow}</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
-            {t.title}
+            {faqText.title}
           </h1>
 
           <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl font-normal leading-relaxed">
-            {t.description}
+            {faqText.description}
           </p>
         </div>
 
         <div className="space-y-4">
-          {t.questions.map((item, idx) => {
+          {faqText.questions.map((item, idx) => {
             const isOpen = openIdx === idx;
             return (
               <div 

@@ -1,52 +1,30 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
-
-import ar from '@/i18n/ar.json';
-import en from '@/i18n/en.json';
-const dictionaries = { ar, en };
-
-export default function ContactPage() {
-  const [lang, setLang] = useState<'ar' | 'en'>('ar');
-  useEffect(() => {
-    const savedLang = (localStorage.getItem('lang') as 'ar' | 'en') || 'ar';
-    setLang(savedLang);
-
-    const checkLangInterval = setInterval(() => {
-      const currentLang = (localStorage.getItem('lang') as 'ar' | 'en') || 'ar';
-      if (currentLang !== lang) {
-        setLang(currentLang);
-      }
-    }, 100);
-
-    return () => clearInterval(checkLangInterval);
-  }, [lang]);
-
-  const t = dictionaries[lang].contactUs;
+import { getTranslation } from "@/utils/getTranslation";
+export default async function ContactPage() {
+ const { lang, t } = await getTranslation();  
+  const contactText = t.contactUs; 
 
   return (
     <div className={`min-h-screen flex flex-col justify-between bg-white dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-300 ${lang === 'ar' ? 'dir-rtl' : 'dir-ltr'}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
 
       <main className="grow py-16 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full space-y-16">
         
-        {/* رأس الصفحة */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-emerald-50 dark:bg-slate-900 border border-emerald-200/80 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs sm:text-sm font-bold shadow-sm">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-            <span>{t.eyebrow}</span>
+            <span>{contactText.eyebrow}</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
-            {t.title}
+            {contactText.title}
           </h1>
 
           <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
-            {t.description}
+            {contactText.description}
           </p>
 
           <div className="pt-2">
             <span className="inline-block text-xs sm:text-sm text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-4 py-2 rounded-xl border border-emerald-200/60 dark:border-emerald-800/50 font-medium">
-              ⚡ {t.speedBadge}
+              ⚡ {contactText.speedBadge}
             </span>
           </div>
         </div>
@@ -56,7 +34,7 @@ export default function ContactPage() {
           <div className="bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 space-y-6 shadow-sm flex flex-col justify-between">
             <div className="space-y-6">
               <h3 className="text-xl font-bold text-slate-900 dark:text-white pb-2 border-b border-slate-200 dark:border-slate-800">
-                {t.info.title}
+                {contactText.info.title}
               </h3>
 
               <div className="space-y-5 text-sm sm:text-base text-slate-600 dark:text-slate-300">
@@ -67,7 +45,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <strong className="block text-slate-900 dark:text-white mb-0.5">{lang === 'ar' ? 'العنوان' : 'Address'}</strong>
-                    <span className="leading-relaxed">{t.info.address}</span>
+                    <span className="leading-relaxed">{contactText.info.address}</span>
                   </div>
                 </div>
 
@@ -78,11 +56,11 @@ export default function ContactPage() {
                   <div>
                     <strong className="block text-slate-900 dark:text-white mb-0.5">{lang === 'ar' ? 'الهاتف' : 'Phone'}</strong>
                     <div className="flex flex-col gap-1 font-medium dir-ltr text-right">
-                      <a href={`tel:${t.info.phone1}`} className="hover:text-emerald-600 transition-colors">
-                        {t.info.phone1}
+                      <a href={`tel:${contactText.info.phone1}`} className="hover:text-emerald-600 transition-colors">
+                        {contactText.info.phone1}
                       </a>
-                      <a href={`tel:${t.info.phone2}`} className="hover:text-emerald-600 transition-colors">
-                        {t.info.phone2}
+                      <a href={`tel:${contactText.info.phone2}`} className="hover:text-emerald-600 transition-colors">
+                        {contactText.info.phone2}
                       </a>
                     </div>
                   </div>
@@ -93,9 +71,9 @@ export default function ContactPage() {
                     ✉️️
                   </div>
                   <div>
-                    <strong className="block text-slate-900 dark:text-white mb-0.5">{t.info.generalEmailTitle}</strong>
-                    <a href={`mailto:${t.info.generalEmailVal}`} className="hover:text-emerald-600 transition-colors font-medium">
-                      {t.info.generalEmailVal}
+                    <strong className="block text-slate-900 dark:text-white mb-0.5">{contactText.info.generalEmailTitle}</strong>
+                    <a href={`mailto:${contactText.info.generalEmailVal}`} className="hover:text-emerald-600 transition-colors font-medium">
+                      {contactText.info.generalEmailVal}
                     </a>
                   </div>
                 </div>
@@ -105,9 +83,9 @@ export default function ContactPage() {
                     💼
                   </div>
                   <div>
-                    <strong className="block text-slate-900 dark:text-white mb-0.5">{t.info.salesEmailTitle}</strong>
-                    <a href={`mailto:${t.info.salesEmailVal}`} className="hover:text-emerald-600 transition-colors font-medium">
-                      {t.info.salesEmailVal}
+                    <strong className="block text-slate-900 dark:text-white mb-0.5">{contactText.info.salesEmailTitle}</strong>
+                    <a href={`mailto:${contactText.info.salesEmailVal}`} className="hover:text-emerald-600 transition-colors font-medium">
+                      {contactText.info.salesEmailVal}
                     </a>
                   </div>
                 </div>
@@ -117,9 +95,9 @@ export default function ContactPage() {
                     🛠️
                   </div>
                   <div>
-                    <strong className="block text-slate-900 dark:text-white mb-0.5">{t.info.supportEmailTitle}</strong>
-                    <a href={`mailto:${t.info.supportEmailVal}`} className="hover:text-emerald-600 transition-colors font-medium">
-                      {t.info.supportEmailVal}
+                    <strong className="block text-slate-900 dark:text-white mb-0.5">{contactText.info.supportEmailTitle}</strong>
+                    <a href={`mailto:${contactText.info.supportEmailVal}`} className="hover:text-emerald-600 transition-colors font-medium">
+                      {contactText.info.supportEmailVal}
                     </a>
                   </div>
                 </div>
@@ -128,7 +106,7 @@ export default function ContactPage() {
             </div>
 
             <div className="pt-4 mt-4 border-t border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-emerald-700 dark:text-emerald-400 font-semibold">
-              🕒 {t.info.hours}
+              🕒 {contactText.info.hours}
             </div>
           </div>
 
@@ -143,7 +121,7 @@ export default function ContactPage() {
                 {lang === 'ar' ? 'التزام مؤسسي ودعم 24/7' : 'Institutional Commitment & 24/7 Support'}
               </h3>
               <p className="text-sm sm:text-base text-emerald-100 leading-relaxed font-normal">
-                {t.info.supportNote}
+                {contactText.info.supportNote}
               </p>
             </div>
 

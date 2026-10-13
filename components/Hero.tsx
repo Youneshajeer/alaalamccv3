@@ -24,15 +24,12 @@ export default function Hero() {
     return () => clearInterval(checkLangInterval);
   }, [lang]);
 
-  // جلب ترجمة الهيرو ديناميكياً بناءً على اللغة المفعلة حالياً
   const t: any = dictionaries[lang]?.home?.hero || {};
   const translatedSlides = t?.slides || [];
   const cta = dictionaries[lang]?.common?.cta || { requestDemo: 'اطلب عرض خدمة', viewServices: 'استعرض الخدمات' };
   
-  // ترجمة كلمة المزيد الخاصة بمؤشر التمرير
   const scrollText = lang === 'en' ? 'More' : 'المزيد';
 
-  // مصفوفة الشرائح المعتمدة على ملفات الترجمة للغتين العربية والإنجليزية
   const slides = [
     {
       image: '/images/gallery/sa-hosting.png',
@@ -72,7 +69,6 @@ export default function Hero() {
     }
   ];
 
-  // التبديل التلقائي للشرائح كل 6 ثوانٍ
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -125,7 +121,6 @@ export default function Hero() {
         }
       `}</style>
 
-      {/* خلفيات الصور المتغيرة بملء الشاشة */}
       {slides.map((slide, idx) => (
         <div
           key={idx}
@@ -142,10 +137,8 @@ export default function Hero() {
         </div>
       ))}
 
-      {/* المحتوى الرئيسي للـ Hero */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-25 w-full h-full flex flex-col justify-between py-12">
         
-        {/* قسم ميزات التشغيل في أعلى الشاشة */}
         <div className="w-full max-w-3xl mx-auto bg-slate-950/60 backdrop-blur-xl border border-slate-800/80 px-6 py-3.5 rounded-2xl shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
           
           <div className={`flex items-center gap-3.5 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
@@ -162,7 +155,6 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* مؤشرات النقاط */}
           <div className="flex items-center gap-2 shrink-0">
             {slides.map((_, idx) => (
               <button
@@ -178,7 +170,6 @@ export default function Hero() {
 
         </div>
 
-        {/* النصوص الوسطى المتغيرة */}
         <div key={currentSlide} className="space-y-4 animate-fade-in max-w-4xl mx-auto text-center my-auto">
           
           <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-slate-900/80 border border-emerald-500/60 backdrop-blur-md shadow-xl mx-auto">
@@ -196,10 +187,8 @@ export default function Hero() {
             {activeSlide.description}
           </p>
 
-          {/* سطر الأزرار يوسطه أزرار الانتقال الجانبية لتكون موازية تماماً للأزرار */}
           <div className="flex items-center justify-center gap-3 sm:gap-6 pt-2">
             
-            {/* سهم الانتقال السابق (موازي لليسار/اليمين حسب الاتجاه) */}
             <button
               onClick={handlePrev}
               className="w-11 h-11 rounded-full bg-slate-900/90 hover:bg-blue-600 text-white border border-slate-700 flex items-center justify-center shadow-xl backdrop-blur-md transition-all active:scale-95 cursor-pointer group shrink-0"
@@ -210,7 +199,6 @@ export default function Hero() {
               </svg>
             </button>
 
-            {/* الأزرار الرئيسية */}
             <div className="flex flex-wrap gap-3 sm:gap-4 justify-center">
               <a
                 href="/contact"
@@ -226,7 +214,6 @@ export default function Hero() {
               </a>
             </div>
 
-            {/* سهم الانتقال التالي */}
             <button
               onClick={handleNext}
               className="w-11 h-11 rounded-full bg-slate-900/90 hover:bg-blue-600 text-white border border-slate-700 flex items-center justify-center shadow-xl backdrop-blur-md transition-all active:scale-95 cursor-pointer group shrink-0"
@@ -239,7 +226,6 @@ export default function Hero() {
 
           </div>
 
-          {/* مؤشر السكرول (المزيد) تحت الأزرار مباشرة */}
           <div className="pt-3 flex flex-col items-center justify-center text-slate-300 animate-bounce pointer-events-none">
             <span className="text-xs font-semibold tracking-wider mb-0.5">{scrollText}</span>
             <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -249,7 +235,6 @@ export default function Hero() {
 
         </div>
 
-        {/* مساحة فارغة سفلية للموازنة */}
         <div></div>
 
       </div>

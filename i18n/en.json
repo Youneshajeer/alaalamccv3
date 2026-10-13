@@ -1,4 +1,3 @@
-
 {
   "common": {
     "cta": {
@@ -10,7 +9,145 @@
       "startSession": "Start Your First Session"
     }
   },
-
+  "whyUsComponent": {
+    "badge": "Your Certified Operational Partner in Saudi Arabia",
+    "titleMain": "Why Business Leaders",
+    "titleHighlight": "Trust Us?",
+    "description": "We don't just provide traditional call center services; we build a dedicated operations center for your enterprise that boosts customer trust, ensures regulatory compliance, and guarantees top operational efficiency.",
+    "coreFeatures": [
+      {
+        "id": "security",
+        "icon": "🛡️",
+        "badge": "Enterprise Security & Encryption",
+        "title": "Security Built on Advanced Technical Expertise",
+        "desc": "Infrastructure protected by the latest enterprise network security protocols, custom-designed to handle sensitive customer data under strict confidentiality and encryption standards.",
+        "highlight": "High-level data encryption"
+      },
+      {
+        "id": "compliance",
+        "icon": "🏛️",
+        "badge": "100% Regulatory Compliance 🇸🇦",
+        "title": "Full Commitment to Local Regulations & Laws",
+        "desc": "Officially licensed to provide call center and business outsourcing services, ensuring all data is hosted and stored locally within certified data centers in Saudi Arabia.",
+        "highlight": "Data hosting inside the Kingdom"
+      },
+      {
+        "id": "talent",
+        "icon": "👥",
+        "badge": "Qualified National Talents",
+        "title": "Saudi Workforce with Direct Operational Supervision",
+        "desc": "Elite national talents trained to the highest global customer service and telemarketing standards, operating under continuous field supervision to ensure peak quality.",
+        "highlight": "Active operational supervision"
+      },
+      {
+        "id": "scalability",
+        "icon": "⚡",
+        "badge": "Frictionless Scalability",
+        "title": "Flexible Capacity That Adapts to Your Growth",
+        "desc": "Start with a small specialized team and expand operational seats instantly and seamlessly as your business grows without the need to rebuild systems.",
+        "highlight": "Instant operational scaling"
+      }
+    ],
+    "enterpriseStats": [
+      {
+        "number": "100%",
+        "label": "Cloud Hosting in Saudi Arabia",
+        "icon": "🇸🇦"
+      },
+      {
+        "number": "99.9%",
+        "label": "Service Availability & SLA",
+        "icon": "⚡"
+      },
+      {
+        "number": "100%",
+        "label": "Certified Commercial Register",
+        "icon": "📜"
+      },
+      {
+        "number": "24/7",
+        "label": "Continuous Monitoring & Ops",
+        "icon": "🎧"
+      }
+    ],
+    "ctaTitle": "Let Us Design Your Enterprise Call Center",
+    "ctaDesc": "Contact our operations consultants to get a customized needs assessment and a rapid deployment plan.",
+    "ctaButton": "Book a Consultation Session"
+  },
+  "jobApplications": {
+    "backToJobs": "Back to Jobs List",
+    "supervisor": "Supervisor",
+    "applicantsFor": "Applicants for job:",
+    "noAdditionalDetails": "No additional details",
+    "viewAdDetails": "View Ad Details",
+    "totalApplicants": "Total Applicants:",
+    "matchingResults": "Matching Results:",
+    "cancelFilters": "Reset Filters",
+    "email": "Email:",
+    "phone": "Phone:",
+    "specialty": "Specialty:",
+    "experience": "Experience:",
+    "years": "years",
+    "notAvailable": "N/A",
+    "notSpecified": "Not specified",
+    "viewCv": "View CV",
+    "downloadCv": "Download CV Directly",
+    "delete": "Delete Application",
+    "confirmDelete": "Are you sure you want to permanently delete this application?",
+    "listTitle": "Jobs with Applicants",
+    "noJobsWithApplications": "No jobs currently have applications.",
+    "noMatchingJobs": "No matching jobs found for current applications.",
+    "fetchError": "An error occurred while fetching job applications.",
+    "noJobDescription": "No additional job details.",
+    "viewApplicants": "View Applicants",
+    "filters": {
+      "searchLabel": "Search Applicant",
+      "searchPlaceholder": "Search by name, email or phone...",
+      "statusLabel": "Application Status",
+      "allStatuses": "All Statuses",
+      "specialtyLabel": "Specialty",
+      "allSpecialties": "All Specialties",
+      "experienceLabel": "Experience Years",
+      "allExperiences": "All Experiences",
+      "exp0to2": "0 to 2 years",
+      "exp3to5": "3 to 5 years",
+      "exp5plus": "More than 5 years",
+      "fromDateLabel": "From Apply Date",
+      "toDateLabel": "To Apply Date"
+    },
+    "table": {
+      "applicantInfo": "Applicant & Contact Info",
+      "specialtyAndExp": "Specialty & Experience",
+      "applyDate": "Apply Date",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "reviewed": "Reviewed",
+      "pending": "Pending Review"
+    },
+    "errors": {
+      "statusUpdate": "An error occurred while updating status",
+      "delete": "An error occurred while deleting",
+      "noCv": "No CV attached",
+      "download": "Failed to download CV"
+    },
+    "modal": {
+      "title": "Job Ad Details",
+      "jobTitle": "Job Title",
+      "createdAt": "Created Date",
+      "deadline": "Deadline",
+      "status": "Current Status",
+      "closed": "Closed",
+      "active": "Active",
+      "description": "Full Job Description & Requirements",
+      "noDescription": "No additional description available for this job.",
+      "close": "Close"
+    },
+    "noMatchingApplications": "No job applications match the specified search or filters."
+  },
   "home": {
     "hero": {
       "eyebrow": "Business Process Outsourcing & Call Center",
@@ -18,60 +155,50 @@
       "titleHighlight": "so you can focus on growing your business",
       "description": "Alaalam Communications & IT Solutions builds and operates dedicated call centers for businesses across Saudi Arabia — covering inbound services, telesales, technical support, and written communication channels, powered by infrastructure hosted within the Kingdom."
     },
-
     "quickFeatures": {
       "title": "Built for Fast Deployment",
-
       "saudiHosting": {
         "icon": "🇸🇦",
         "title": "Saudi-Based Hosting",
         "description": "Reliable cloud infrastructure hosted in Riyadh"
       },
-
       "registered": {
         "icon": "📜",
         "title": "Regulatory Registration",
         "description": "Registered with the relevant authority for call center services"
       },
-
       "multichannel": {
         "icon": "💬",
         "title": "Multichannel Support",
         "description": "Phone, WhatsApp, email, and live chat"
       },
-
       "flexibleCapacity": {
         "icon": "📈",
         "title": "Flexible Capacity",
         "description": "From a small dedicated team to expanded operations as needed"
       }
     },
-
     "services": {
       "eyebrow": "Call Center Services",
       "title": "End-to-End Solutions for Your Customer Operations",
-
       "inbound": {
         "number": "01",
         "icon": "🎧",
         "title": "Inbound & Customer Support",
         "description": "Handle customer inquiries, complaints, and service requests according to your business policies while delivering a consistently professional customer experience."
       },
-
       "outbound": {
         "number": "02",
         "icon": "📞",
         "title": "Telesales",
         "description": "Outbound sales and marketing campaigns, lead qualification, and appointment scheduling for field sales teams to help increase sales."
       },
-
       "technicalSupport": {
         "number": "03",
         "icon": "🛠",
         "title": "Technical Support",
         "description": "First-level technical support, ticket management, and structured escalation to your technical team with fast and professional resolution."
       },
-
       "writtenChannels": {
         "number": "04",
         "icon": "📩",
@@ -79,65 +206,72 @@
         "description": "WhatsApp Business, email, and live chat — managed with the same high standards applied to voice support."
       }
     },
-
     "whyUs": {
       "eyebrow": "Your Trusted Partner",
       "title": "Why do our partners trust us?",
-
       "security": {
         "icon": "🛡️",
         "title": "Security Built on Technical Expertise",
         "description": "Enterprise-grade network security infrastructure designed to protect sensitive customer data according to high security and confidentiality standards."
       },
-
       "compliance": {
         "icon": "🏛️",
         "title": "Regulatory Compliance from Day One",
         "description": "Officially registered for call center services, with data hosted and its location maintained entirely within the Kingdom of Saudi Arabia."
       },
-
       "saudiTeam": {
         "icon": "👥",
         "title": "Specialized Saudi Team",
         "description": "Qualified and professionally trained Saudi talent delivering customer service according to international standards, supported by direct operational supervision."
       },
-
       "scalability": {
         "icon": "⚡",
         "title": "Seamless Scalability",
         "description": "Start with a focused team and expand your operational capacity smoothly as your business grows, without rebuilding your systems."
-      }
+      },
+      "enterpriseStats": [
+        {
+          "number": "100%",
+          "label": "100% Local Hosting"
+        },
+        {
+          "number": "99.9%",
+          "label": "System Availability"
+        },
+        {
+          "number": "100%",
+          "label": "Commercial Registration"
+        },
+        {
+          "number": "24/7",
+          "label": "Monitoring & Support"
+        }
+      ]
     },
-
     "workflow": {
       "eyebrow": "Partnership Journey",
       "title": "How We Work",
-
       "step1": {
         "number": "1",
         "title": "Discovery Session",
         "description": "We understand your business, expected call volumes, quality requirements, and operational needs to define the right setup."
       },
-
       "step2": {
         "number": "2",
         "title": "Custom Setup",
         "description": "Develop call scripts, integrate your systems, and prepare the dedicated team assigned to your account."
       },
-
       "step3": {
         "number": "3",
         "title": "Pilot Operation",
         "description": "Run a controlled performance period with daily reporting and real-time adjustments before full-scale deployment."
       },
-
       "step4": {
         "number": "4",
         "title": "Go-Live & Scale",
         "description": "Move into full operations with ongoing reporting and the flexibility to increase capacity as your business grows."
       }
     },
-
     "stats": {
       "callResponse": {
         "value": "95%+",
@@ -153,7 +287,23 @@
       }
     }
   },
-
+  "customerService": {
+    "successTitle": "Message Sent Successfully",
+    "successDesc": "Thank you for contacting us. Our customer service team will respond shortly.",
+    "returnHome": "Return to Home",
+    "formTitle": "Customer Service & Contact",
+    "formDesc": "We are happy to receive your inquiries. Our team will respond as soon as possible.",
+    "company": "Company / Entity Name",
+    "companyPlaceholder": "Enter company or entity name",
+    "name": "Full Name",
+    "namePlaceholder": "Enter your full name",
+    "email": "Email Address",
+    "phone": "Phone Number",
+    "message": "Message",
+    "messagePlaceholder": "Write your message details here...",
+    "send": "Send Message",
+    "sending": "Sending..."
+  },
   "services": {
     "hero": {
       "eyebrow": "Call Center & Business Process Outsourcing ",
@@ -161,7 +311,6 @@
       "titleHighlight": "Built to Grow Your Business in Saudi Arabia",
       "description": "We operate and manage dedicated call centers for businesses through reliable cloud infrastructure hosted within the Kingdom, delivering high standards of security and service quality through qualified Saudi talent."
     },
-
     "inbound": {
       "number": "01",
       "icon": "🎧",
@@ -174,7 +323,6 @@
         "Real-time customer satisfaction measurement (CSAT)"
       ]
     },
-
     "outbound": {
       "number": "02",
       "icon": "📞",
@@ -187,7 +335,6 @@
         "Customized sales scripts"
       ]
     },
-
     "technicalSupport": {
       "number": "03",
       "icon": "🛠",
@@ -200,7 +347,6 @@
         "Issue documentation through a dedicated knowledge base"
       ]
     },
-
     "omnichannel": {
       "number": "04",
       "icon": "📩",
@@ -213,7 +359,6 @@
         "Unified conversation history across all communication channels"
       ]
     },
-
     "infrastructure": {
       "stats": {
         "sla": {
@@ -229,12 +374,10 @@
           "label": "Data Hosting"
         }
       },
-
       "title": "Infrastructure Fully Hosted Within the Kingdom of Saudi Arabia",
       "description": "All systems are aligned with applicable national requirements and support direct CRM integration with your existing systems."
     }
   },
-
   "whyUs": {
     "hero": {
       "eyebrow": "Your Trusted Operational Partner in Saudi Arabia",
@@ -242,7 +385,6 @@
       "titleHighlight": "Trust Alaalam",
       "description": "We go beyond traditional call center services. We build a dedicated operations center for your organization that strengthens customer trust, supports regulatory requirements, and delivers greater operational efficiency."
     },
-
     "advantages": {
       "security": {
         "icon": "🛡️",
@@ -251,7 +393,6 @@
         "description": "Infrastructure protected by advanced enterprise network security protocols, specifically designed to handle sensitive data according to high confidentiality and encryption standards.",
         "link": "Advanced Data Encryption"
       },
-
       "compliance": {
         "icon": "🏛️",
         "title": "100% Regulatory Compliance 🇸🇦",
@@ -259,7 +400,6 @@
         "description": "Registered to provide call center and business process outsourcing services, with data hosted and retained within locally approved data centers in Saudi Arabia.",
         "link": "Data Hosted in Saudi Arabia"
       },
-
       "saudiTeam": {
         "icon": "👥",
         "title": "Qualified Saudi Talent",
@@ -267,7 +407,6 @@
         "description": "A team of Saudi professionals trained to high standards in customer service and telesales, supported by continuous field supervision to maintain service quality.",
         "link": "Dedicated Operational Oversight"
       },
-
       "scalability": {
         "icon": "⚡",
         "title": "Seamless Scalability",
@@ -276,7 +415,6 @@
         "link": "Instant Operational Scaling"
       }
     },
-
     "stats": {
       "hosting": {
         "value": "100%",
@@ -295,13 +433,11 @@
         "label": "Continuous Operational Monitoring"
       }
     },
-
     "cta": {
       "title": "Let's Build Your Dedicated Call Center",
       "description": "Speak with our operations consultants for a customized needs assessment and a fast deployment plan."
     }
   },
-
   "howItWorks": {
     "hero": {
       "eyebrow": "Our Proven Partnership & Operations Process",
@@ -309,7 +445,6 @@
       "titleHighlight": "Step by Step Toward Success",
       "description": "We follow a structured and efficient operational methodology designed to reduce risk and launch your organization's call center with high levels of efficiency and professionalism."
     },
-
     "steps": {
       "step1": {
         "number": "01",
@@ -324,7 +459,6 @@
           "Select the appropriate voice and written communication channels"
         ]
       },
-
       "step2": {
         "number": "02",
         "icon": "⚙️",
@@ -338,7 +472,6 @@
           "Train and prepare the dedicated operational team"
         ]
       },
-
       "step3": {
         "number": "03",
         "icon": "🧪",
@@ -352,7 +485,6 @@
           "Optimize response scripts based on feedback"
         ]
       },
-
       "step4": {
         "number": "04",
         "icon": "🚀",
@@ -367,132 +499,131 @@
         ]
       }
     },
-
     "cta": {
       "title": "Ready to Take the First Step?",
       "description": "Contact us today to book a complimentary discovery session and assess the operational requirements of your business."
     }
   },
-
   "contact": {
     "title": "Contact Us",
     "description": "Talk to our team about your organization's call center requirements."
   },
   "privacy": {
-  "eyebrow": "Privacy & Security",
-  "title": "Privacy Policy",
-  "lastUpdated": "Last Updated: October 2026",
-  "intro": "At World Business Solutions for IT and Communications, we are committed to protecting your personal and corporate privacy. This policy outlines how we collect, use, and protect your information.",
-  "sections": [
-    {
-      "title": "1. Information Collection",
-      "content": "We collect information you provide directly when registering, requesting a consultation, or contacting us, such as your name, email, phone number, and organization details."
-    },
-    {
-      "title": "2. Use of Data",
-      "content": "We use the collected data to deliver and improve call center services, respond to inquiries, send operational updates, and ensure compliance with regulatory standards within the Kingdom."
-    },
-    {
-      "title": "3. Data Security & Protection",
-      "content": "We implement top-tier encryption and enterprise security protocols to protect your data from unauthorized access, modification, or disclosure, with all data hosted locally in Saudi Arabia."
-    },
-    {
-      "title": "4. User Rights",
-      "content": "You have the right to request access to, correction of, or deletion of your personal data held by us in accordance with applicable laws and regulations in the Kingdom of Saudi Arabia."
+    "eyebrow": "Privacy & Security",
+    "title": "Privacy Policy",
+    "lastUpdated": "Last Updated: October 2026",
+    "intro": "At World Business Solutions for IT and Communications, we are committed to protecting your personal and corporate privacy. This policy outlines how we collect, use, and protect your information.",
+    "sections": [
+      {
+        "title": "1. Information Collection",
+        "content": "We collect information you provide directly when registering, requesting a consultation, or contacting us, such as your name, email, phone number, and organization details."
+      },
+      {
+        "title": "2. Use of Data",
+        "content": "We use the collected data to deliver and improve call center services, respond to inquiries, send operational updates, and ensure compliance with regulatory standards within the Kingdom."
+      },
+      {
+        "title": "3. Data Security & Protection",
+        "content": "We implement top-tier encryption and enterprise security protocols to protect your data from unauthorized access, modification, or disclosure, with all data hosted locally in Saudi Arabia."
+      },
+      {
+        "title": "4. User Rights",
+        "content": "You have the right to request access to, correction of, or deletion of your personal data held by us in accordance with applicable laws and regulations in the Kingdom of Saudi Arabia."
+      }
+    ]
+  },
+  "terms": {
+    "eyebrow": "Terms & Conditions",
+    "title": "Terms of Service",
+    "lastUpdated": "Last Updated: October 2026",
+    "intro": "Welcome to World Business Solutions for IT and Communications. By accessing our website and using our services, you agree to comply with the following terms and conditions.",
+    "sections": [
+      {
+        "title": "1. Acceptance of Terms",
+        "content": "By using our website or contracting with us for call center and outsourcing services, you acknowledge that you have read, understood, and agreed to all terms and conditions herein."
+      },
+      {
+        "title": "2. Scope of Services",
+        "content": "We provide dedicated call center services, cloud operations, technical support, and customer experience management in accordance with signed agreements and Service Level Agreements (SLAs)."
+      },
+      {
+        "title": "3. Client Obligations",
+        "content": "The client agrees to provide accurate and correct information, and not to use the services for any purposes that violate the laws and regulations in the Kingdom of Saudi Arabia."
+      },
+      {
+        "title": "4. Intellectual Property",
+        "content": "All contents, designs, texts, and software on the website are the exclusive property of World Business Solutions and may not be copied or used without prior written permission."
+      }
+    ]
+  },
+  "acceptableUse": {
+    "eyebrow": "Usage Standards",
+    "title": "Acceptable Use Policy",
+    "lastUpdated": "Last Updated: October 2026",
+    "intro": "This policy outlines the rules and regulations governing the use of World Business Solutions services and website, ensuring a secure and reliable environment for all users.",
+    "sections": [
+      {
+        "title": "1. Lawful Use",
+        "content": "Our services and website must be used solely for lawful purposes in full compliance with all applicable laws and regulations in the Kingdom of Saudi Arabia, avoiding any illegal or fraudulent activities."
+      },
+      {
+        "title": "2. Prohibited Conduct",
+        "content": "It is strictly prohibited to attempt to breach or disrupt network infrastructure, transmit malware, or gain unauthorized access to data systems or call centers belonging to the company or its clients."
+      },
+      {
+        "title": "3. Account Security",
+        "content": "The client is fully responsible for maintaining the confidentiality of their account details and passwords, and must notify us immediately of any unauthorized use or potential security breach."
+      },
+      {
+        "title": "4. Violation Procedures",
+        "content": "The company reserves the right to immediately suspend or terminate services for any user found in violation of this policy, taking necessary legal actions when required."
+      }
+    ]
+  },
+  "faq": {
+    "eyebrow": "FAQ",
+    "title": "Answers to Your Key Inquiries",
+    "description": "Learn more about our operational services, security standards, and how to easily build and set up your enterprise call center.",
+    "questions": [
+      {
+        "q": "What core services does World Business Solutions provide?",
+        "a": "We provide comprehensive solutions for managing and operating call centers and business outsourcing, including structural and operational setup, qualified national talents, cloud data hosting inside the Kingdom, and IVR and CRM systems."
+      },
+      {
+        "q": "Is all data hosted and stored within the Kingdom of Saudi Arabia?",
+        "a": "Yes, we are fully committed to local regulations and laws, ensuring that all data hosting and system operations take place within certified and secure data centers in Saudi Arabia."
+      },
+      {
+        "q": "How can I start building a call center for my organization?",
+        "a": "You can contact us directly by booking a consultation session through our website, where our operations consultants will assess your organization's needs and deliver a customized, rapid deployment plan."
+      },
+      {
+        "q": "Do you provide 24/7 technical support and operational supervision?",
+        "a": "Yes, we provide continuous operational monitoring and supervision 24/7 to ensure the highest levels of system stability and service availability (SLA)."
+      }
+    ]
+  },
+  "contactUs": {
+    "eyebrow": "Verified Communication Channels",
+    "title": "We Are Here to Support & Grow Your Business 24/7",
+    "description": "Our operational team and experts in IT and telecom are ready to answer your inquiries and deliver customized solutions for your enterprise with utmost professionalism and speed around the clock.",
+    "speedBadge": "Customer service and technical support available 24/7",
+    "info": {
+      "title": "Contact Details & Locations",
+      "address": "2457 Yahya Bin Waqid Al-Taei Street - Al-Manar District - Jeddah - Kingdom of Saudi Arabia",
+      "generalEmailTitle": "General Email",
+      "generalEmailVal": "info@alaalamcc.com",
+      "salesEmailTitle": "Sales",
+      "salesEmailVal": "sales@alaalamcc.com",
+      "supportEmailTitle": "Technical Support",
+      "supportEmailVal": "support@alaalamcc.com",
+      "phone1": "+966 55 711 1069",
+      "phone2": "+966 54 793 8719",
+      "hours": "Working Hours: Available 24 hours a day",
+      "supportNote": "We strive to respond to all inquiries and requests received via email and phone as quickly as possible to ensure your business continuity with high efficiency at all times."
     }
-  ]
-},
-"terms": {
-  "eyebrow": "Terms & Conditions",
-  "title": "Terms of Service",
-  "lastUpdated": "Last Updated: October 2026",
-  "intro": "Welcome to World Business Solutions for IT and Communications. By accessing our website and using our services, you agree to comply with the following terms and conditions.",
-  "sections": [
-    {
-      "title": "1. Acceptance of Terms",
-      "content": "By using our website or contracting with us for call center and outsourcing services, you acknowledge that you have read, understood, and agreed to all terms and conditions herein."
-    },
-    {
-      "title": "2. Scope of Services",
-      "content": "We provide dedicated call center services, cloud operations, technical support, and customer experience management in accordance with signed agreements and Service Level Agreements (SLAs)."
-    },
-    {
-      "title": "3. Client Obligations",
-      "content": "The client agrees to provide accurate and correct information, and not to use the services for any purposes that violate the laws and regulations in the Kingdom of Saudi Arabia."
-    },
-    {
-      "title": "4. Intellectual Property",
-      "content": "All contents, designs, texts, and software on the website are the exclusive property of World Business Solutions and may not be copied or used without prior written permission."
-    }
-  ]
-},
-"acceptableUse": {
-  "eyebrow": "Usage Standards",
-  "title": "Acceptable Use Policy",
-  "lastUpdated": "Last Updated: October 2026",
-  "intro": "This policy outlines the rules and regulations governing the use of World Business Solutions services and website, ensuring a secure and reliable environment for all users.",
-  "sections": [
-    {
-      "title": "1. Lawful Use",
-      "content": "Our services and website must be used solely for lawful purposes in full compliance with all applicable laws and regulations in the Kingdom of Saudi Arabia, avoiding any illegal or fraudulent activities."
-    },
-    {
-      "title": "2. Prohibited Conduct",
-      "content": "It is strictly prohibited to attempt to breach or disrupt network infrastructure, transmit malware, or gain unauthorized access to data systems or call centers belonging to the company or its clients."
-    },
-    {
-      "title": "3. Account Security",
-      "content": "The client is fully responsible for maintaining the confidentiality of their account details and passwords, and must notify us immediately of any unauthorized use or potential security breach."
-    },
-    {
-      "title": "4. Violation Procedures",
-      "content": "The company reserves the right to immediately suspend or terminate services for any user found in violation of this policy, taking necessary legal actions when required."
-    }
-  ]
-},"faq": {
-  "eyebrow": "FAQ",
-  "title": "Answers to Your Key Inquiries",
-  "description": "Learn more about our operational services, security standards, and how to easily build and set up your enterprise call center.",
-  "questions": [
-    {
-      "q": "What core services does World Business Solutions provide?",
-      "a": "We provide comprehensive solutions for managing and operating call centers and business outsourcing, including structural and operational setup, qualified national talents, cloud data hosting inside the Kingdom, and IVR and CRM systems."
-    },
-    {
-      "q": "Is all data hosted and stored within the Kingdom of Saudi Arabia?",
-      "a": "Yes, we are fully committed to local regulations and laws, ensuring that all data hosting and system operations take place within certified and secure data centers in Saudi Arabia."
-    },
-    {
-      "q": "How can I start building a call center for my organization?",
-      "a": "You can contact us directly by booking a consultation session through our website, where our operations consultants will assess your organization's needs and deliver a customized, rapid deployment plan."
-    },
-    {
-      "q": "Do you provide 24/7 technical support and operational supervision?",
-      "a": "Yes, we provide continuous operational monitoring and supervision 24/7 to ensure the highest levels of system stability and service availability (SLA)."
-    }
-  ]
-},
-"contactUs": {
-  "eyebrow": "Verified Communication Channels",
-  "title": "We Are Here to Support & Grow Your Business 24/7",
-  "description": "Our operational team and experts in IT and telecom are ready to answer your inquiries and deliver customized solutions for your enterprise with utmost professionalism and speed around the clock.",
-  "speedBadge": "Customer service and technical support available 24/7",
-  "info": {
-    "title": "Contact Details & Locations",
-    "address": "2457 Yahya Bin Waqid Al-Taei Street - Al-Manar District - Jeddah - Kingdom of Saudi Arabia",
-    "generalEmailTitle": "General Email",
-    "generalEmailVal": "info@alaalamcc.com",
-    "salesEmailTitle": "Sales",
-    "salesEmailVal": "sales@alaalamcc.com",
-    "supportEmailTitle": "Technical Support",
-    "supportEmailVal": "support@alaalamcc.com",
-    "phone1": "+966 55 711 1069",
-    "phone2": "+966 54 793 8719",
-    "hours": "Working Hours: Available 24 hours a day",
-    "supportNote": "We strive to respond to all inquiries and requests received via email and phone as quickly as possible to ensure your business continuity with high efficiency at all times."
-  }
-},
-"careers": {
+  },
+  "careers": {
     "eyebrow": "Join Our Team",
     "title": "Submit Your Resume",
     "description": "We are always looking for qualified national talents to join our operational ecosystem in contact centers and technology.",
@@ -504,7 +635,14 @@
       "phone": "Mobile Number",
       "phonePlaceholder": "05XXXXXXXX",
       "experience": "Years of Experience",
-    "experiencePlaceholder": "Select years of experience...",
+      "experiencePlaceholder": "Select years of experience...",
+      "experienceOptions": {
+        "fresh": "Fresh Graduate (No Experience)",
+        "lessThan1": "Less than 1 year",
+        "oneToTwo": "1-2 years",
+        "threeToFive": "3-5 years",
+        "moreThan5": "More than 5 years"
+      },
       "selectDepartment": "Select Department / Major",
       "selectPosition": "Select Target Position",
       "positionPlaceholder": "Select available position...",
@@ -517,133 +655,220 @@
         "id": "accounting_finance",
         "name": "Accounting & Finance",
         "positions": [
-          "General Accountant",
-          "Cost Accountant",
-          "Collections & Financial Follow-up Specialist",
-          "Financial Analyst",
-          "Internal Auditor",
-          "Finance & Administrative Assistant",
-          "Payroll & Financial HR Specialist"
+          {
+            "id": "general_accountant",
+            "name": "General Accountant"
+          },
+          {
+            "id": "cost_accountant",
+            "name": "Cost Accountant"
+          },
+          {
+            "id": "financial_collection_specialist",
+            "name": "Financial Collection & Follow-up Specialist"
+          },
+          {
+            "id": "financial_analyst",
+            "name": "Financial Analyst"
+          },
+          {
+            "id": "internal_auditor",
+            "name": "Internal Auditor"
+          },
+          {
+            "id": "financial_admin_assistant",
+            "name": "Financial & Administrative Assistant"
+          },
+          {
+            "id": "payroll_finance_hr_specialist",
+            "name": "Payroll & Financial HR Specialist"
+          }
         ]
       },
       {
         "id": "networks_it",
         "name": "Networks, Infrastructure & IT",
         "positions": [
-          "Network & Infrastructure Engineer",
-          "Systems Administrator",
-          "IT Support Specialist",
-          "Cybersecurity Analyst",
-          "Database Administrator",
-          "Information Security & Hardware Maintenance Engineer",
-          "Network & Telecom Installation Technician"
+          {
+            "id": "network_infrastructure_engineer",
+            "name": "Network & Infrastructure Engineer"
+          },
+          {
+            "id": "systems_administrator",
+            "name": "Systems Administrator"
+          },
+          {
+            "id": "it_support_specialist",
+            "name": "IT Support Specialist"
+          },
+          {
+            "id": "cybersecurity_analyst",
+            "name": "Cybersecurity Analyst"
+          },
+          {
+            "id": "database_administrator",
+            "name": "Database Administrator"
+          },
+          {
+            "id": "info_security_pc_maintenance_engineer",
+            "name": "Information Security & PC Maintenance Engineer"
+          },
+          {
+            "id": "network_telecom_installation_technician",
+            "name": "Network & Telecom Installation Technician"
+          }
         ]
       },
       {
         "id": "admin_secretariat",
-        "name": "Administration, Secretariat & Office Support",
+        "name": "Administration, Secretariat & Office Services",
         "positions": [
-          "Executive Secretary / Office Manager",
-          "Administrative & HR Officer",
-          "Archive & Digital Documentation Specialist",
-          "Receptionist & Front Desk Agent",
-          "Data Entry & Administrative Coordinator",
-          "Administrative Projects Coordinator"
+          {
+            "id": "office_manager_executive_secretary",
+            "name": "Office Manager / Executive Secretary"
+          },
+          {
+            "id": "admin_hr_officer",
+            "name": "Administrative & HR Officer"
+          },
+          {
+            "id": "archive_electronic_documentation_specialist",
+            "name": "Archive & E-Documentation Specialist"
+          },
+          {
+            "id": "receptionist",
+            "name": "Visitor Receptionist & Office Service"
+          },
+          {
+            "id": "data_entry_admin_coordinator",
+            "name": "Data Entry & Administrative Coordinator"
+          },
+          {
+            "id": "administrative_projects_coordinator",
+            "name": "Administrative Projects Coordinator"
+          }
         ]
       },
       {
         "id": "call_center",
         "name": "Call Center & Customer Service",
         "positions": [
-          "Inbound Customer Service Agent",
-          "Telesales Representative",
-          "Omni-Channel / Social Media Support Specialist",
-          "QA Analyst / Evaluator",
-          "Call Center Supervisor",
-          "Call Center Operations Manager"
+          {
+            "id": "inbound_customer_service_agent",
+            "name": "Inbound Customer Service Agent"
+          },
+          {
+            "id": "telesales_representative",
+            "name": "Telesales Representative"
+          },
+          {
+            "id": "written_social_channels_support_specialist",
+            "name": "Written Channels & Social Media Support Specialist"
+          },
+          {
+            "id": "qa_analyst",
+            "name": "Call Quality Assurance Analyst (QA)"
+          },
+          {
+            "id": "call_center_operations_supervisor",
+            "name": "Call Center Operations Supervisor"
+          },
+          {
+            "id": "call_center_manager",
+            "name": "Call Center Manager"
+          }
         ]
       },
       {
         "id": "ai_robotics",
-        "name": "AI & Software Robotics (RPA)",
+        "name": "Artificial Intelligence & Software Robotics",
         "positions": [
-          "RPA Developer",
-          "AI & Conversational Bot Engineer",
-          "Data Analyst"
+          {
+            "id": "rpa_developer",
+            "name": "RPA Developer"
+          },
+          {
+            "id": "ai_bot_engineer",
+            "name": "AI & Conversational Bot Engineer"
+          },
+          {
+            "id": "data_analyst",
+            "name": "Data Analyst"
+          }
         ]
       }
     ]
   },
-"notFound": {
-  "code": "404",
-  "eyebrow": "Oops, Page Not Found",
-  "title": "The page you are looking for is unavailable or has been moved",
-  "description": "It seems the link you entered might be incorrect or the page has been moved or deleted. You can return to the homepage or reach out through our 24/7 available contact channels.",
-  "backHome": "Back to Home",
-  "contactUs": "Contact Us"
-},
-"errorPage": {
-  "code": "500",
-  "eyebrow": "An Unexpected Error Occurred",
-  "title": "Sorry, we encountered a problem processing your request",
-  "description": "An unexpected system or server error has occurred. Our technical team is available around the clock to resolve such issues. You can try again or contact us directly.",
-  "retry": "Try Again",
-  "backHome": "Back to Home"
-},
-"requestService": {
-  "badge": "BPO Services",
-  "title": "Request Service Call-back",
-  "subtitle": "Enter your details and our operations team will contact you shortly to confirm your request.",
-  "serviceLabel": "Requested Service",
-  "servicePlaceholder": "No service selected",
- "companyLabel": "Company / Organization Name",
-  "companyPlaceholder": "Enter your company or organization name",
-  "nameLabel": "Full Name",
-  "namePlaceholder": "Enter your full name",
-  "phoneLabel": "Mobile Number",
-  "phonePlaceholder": "05XXXXXXXX",
-  "messageLabel": "Your Note or Request",
-  "messagePlaceholder": "Write your notes or additional details...",
-  "submitBtn": "Submit Call-back Request",
-  "successTitle": "Request Submitted Successfully",
-  "successDesc": "Thank you! Your request has been received and our team will contact you soon."
-},
-"slides": [
-  {
-    "image": "/images/gallery/sa-hosting.png",
-    "eyebrow": "100% Saudi Cloud Hosting",
-    "title": "We run your customer communication, while you focus on growing your business",
-    "description": "Alaalam Telecom & IT builds and operates dedicated contact centers for companies in Saudi Arabia — inbound, telemarketing, technical support, and written communication channels, on infrastructure hosted within the Kingdom.",
-    "featureIcon": "🏢",
-    "featureTitle": "Saudi Cloud Hosting",
-    "featureDesc": "Flexible infrastructure hosted within the Kingdom ensuring high reliability and security."
+  "notFound": {
+    "code": "404",
+    "eyebrow": "Oops, Page Not Found",
+    "title": "The page you are looking for is unavailable or has been moved",
+    "description": "It seems the link you entered might be incorrect or the page has been moved or deleted. You can return to the homepage or reach out through our 24/7 available contact channels.",
+    "backHome": "Back to Home",
+    "contactUs": "Contact Us"
   },
-  {
-    "image": "/images/gallery/callCenterRegistration.png",
-    "eyebrow": "Compliant & Registered",
-    "title": "Integrated infrastructure for professional contact centers",
-    "description": "We enable your company to provide exceptional communication services in accordance with the highest regulatory and local standards approved in the Kingdom of Saudi Arabia.",
-    "featureIcon": "📜",
-    "featureTitle": "Registered & Compliant",
-    "featureDesc": "Full compliance with regulatory requirements for the telecom and IT sector."
+  "errorPage": {
+    "code": "500",
+    "eyebrow": "An Unexpected Error Occurred",
+    "title": "Sorry, we encountered a problem processing your request",
+    "description": "An unexpected system or server error has occurred. Our technical team is available around the clock to resolve such issues. You can try again or contact us directly.",
+    "retry": "Try Again",
+    "backHome": "Back to Home"
   },
-  {
-    "image": "/images/gallery/watsapp-calls.png",
-    "eyebrow": "Multi-Channel Communication",
-    "title": "Smart interactive management via phone and written chat",
-    "description": "Connect with your customers seamlessly through multiple channels including calls, WhatsApp, and live chat, ensuring immediate response and high service quality.",
-    "featureIcon": "💬",
-    "featureTitle": "Multi-Channel",
-    "featureDesc": "Manage calls, WhatsApp, and live chat seamlessly from a single unified platform."
+  "requestService": {
+    "badge": "BPO Services",
+    "title": "Request Service Call-back",
+    "subtitle": "Enter your details and our operations team will contact you shortly to confirm your request.",
+    "serviceLabel": "Requested Service",
+    "servicePlaceholder": "No service selected",
+    "companyLabel": "Company / Organization Name",
+    "companyPlaceholder": "Enter your company or organization name",
+    "nameLabel": "Full Name",
+    "namePlaceholder": "Enter your full name",
+    "phoneLabel": "Mobile Number",
+    "phonePlaceholder": "05XXXXXXXX",
+    "messageLabel": "Your Note or Request",
+    "messagePlaceholder": "Write your notes or additional details...",
+    "submitBtn": "Submit Call-back Request",
+    "successTitle": "Request Submitted Successfully",
+    "successDesc": "Thank you! Your request has been received and our team will contact you soon."
   },
-  {
-    "image": "/images/gallery/team.png",
-    "eyebrow": "Flexible Capacity & Qualified Teams",
-    "title": "Professional teams managed efficiently to meet your needs",
-    "description": "We free up your energy and provide you with the necessary staff and systems to manage customer interactions with flexible efficiency that suits your fast business growth.",
-    "featureIcon": "👥",
-    "featureTitle": "Flexible Capacity",
-    "featureDesc": "Professional workforce and operational capacity that scales effortlessly with your business."
-  }
-]
+  "slides": [
+    {
+      "image": "/images/gallery/sa-hosting.png",
+      "eyebrow": "100% Saudi Cloud Hosting",
+      "title": "We run your customer communication, while you focus on growing your business",
+      "description": "Alaalam Telecom & IT builds and operates dedicated contact centers for companies in Saudi Arabia — inbound, telemarketing, technical support, and written communication channels, on infrastructure hosted within the Kingdom.",
+      "featureIcon": "🏢",
+      "featureTitle": "Saudi Cloud Hosting",
+      "featureDesc": "Flexible infrastructure hosted within the Kingdom ensuring high reliability and security."
+    },
+    {
+      "image": "/images/gallery/callCenterRegistration.png",
+      "eyebrow": "Compliant & Registered",
+      "title": "Integrated infrastructure for professional contact centers",
+      "description": "We enable your company to provide exceptional communication services in accordance with the highest regulatory and local standards approved in the Kingdom of Saudi Arabia.",
+      "featureIcon": "📜",
+      "featureTitle": "Registered & Compliant",
+      "featureDesc": "Full compliance with regulatory requirements for the telecom and IT sector."
+    },
+    {
+      "image": "/images/gallery/watsapp-calls.png",
+      "eyebrow": "Multi-Channel Communication",
+      "title": "Smart interactive management via phone and written chat",
+      "description": "Connect with your customers seamlessly through multiple channels including calls, WhatsApp, and live chat, ensuring immediate response and high service quality.",
+      "featureIcon": "💬",
+      "featureTitle": "Multi-Channel",
+      "featureDesc": "Manage calls, WhatsApp, and live chat seamlessly from a single unified platform."
+    },
+    {
+      "image": "/images/gallery/team.png",
+      "eyebrow": "Flexible Capacity & Qualified Teams",
+      "title": "Professional teams managed efficiently to meet your needs",
+      "description": "We free up your energy and provide you with the necessary staff and systems to manage customer interactions with flexible efficiency that suits your fast business growth.",
+      "featureIcon": "👥",
+      "featureTitle": "Flexible Capacity",
+      "featureDesc": "Professional workforce and operational capacity that scales effortlessly with your business."
+    }
+  ]
 }

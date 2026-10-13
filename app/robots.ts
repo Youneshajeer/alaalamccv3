@@ -7,7 +7,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/private/', '/api/'], // استثناء الصفحات الخاصة أو الـ API
+      disallow: ['/private/', '/api/'],
     },
     sitemap: `${baseUrl}/sitemap.xml`,
   };

@@ -1,75 +1,55 @@
-'use client';
 
-import React, { useState, useEffect } from 'react';
-import ar from '@/i18n/ar.json';
-import en from '@/i18n/en.json';
+import { getTranslation } from "@/utils/getTranslation";
 
-const dictionaries = { ar, en };
 
-export default function Services() {
-  const [lang, setLang] = useState<'ar' | 'en'>('ar');
-
-  useEffect(() => {
-    const savedLang = (localStorage.getItem('lang') as 'ar' | 'en') || 'ar';
-    setLang(savedLang);
-
-    const checkLangInterval = setInterval(() => {
-      const currentLang = (localStorage.getItem('lang') as 'ar' | 'en') || 'ar';
-      if (currentLang !== lang) {
-        setLang(currentLang);
-      }
-    }, 100);
-
-    return () => clearInterval(checkLangInterval);
-  }, [lang]);
-
-  const dict = dictionaries[lang];
-  const t = dict.services;
-  const commonT = dict.common;
+export default async function  Services() {
+const { lang, t } = await getTranslation();
+ const serviceText =t.services;
+  const commonText = t.common;
 
   const servicesList = [
     {
       id: 'inbound',
-      num: t.inbound.number,
-      icon: t.inbound.icon,
-      title: t.inbound.title,
-      desc: t.inbound.description,
-      badge: t.inbound.badge,
-      features: t.inbound.features
+      num: serviceText.inbound.number,
+      icon: serviceText.inbound.icon,
+      title: serviceText.inbound.title,
+      desc: serviceText.inbound.description,
+      badge: serviceText.inbound.badge,
+      features: serviceText.inbound.features
     },
     {
       id: 'outbound',
-      num: t.outbound.number,
-      icon: t.outbound.icon,
-      title: t.outbound.title,
-      desc: t.outbound.description,
-      badge: t.outbound.badge,
-      features: t.outbound.features
+      num: serviceText.outbound.number,
+      icon: serviceText.outbound.icon,
+      title: serviceText.outbound.title,
+      desc: serviceText.outbound.description,
+      badge: serviceText.outbound.badge,
+      features: serviceText.outbound.features
     },
     {
-      id: 'technicalSupport',
-      num: t.technicalSupport.number,
-      icon: t.technicalSupport.icon,
-      title: t.technicalSupport.title,
-      desc: t.technicalSupport.description,
-      badge: t.technicalSupport.badge,
-      features: t.technicalSupport.features
+      id: 'technical-support',
+      num: serviceText.technicalSupport.number,
+      icon: serviceText.technicalSupport.icon,
+      title: serviceText.technicalSupport.title,
+      desc: serviceText.technicalSupport.description,
+      badge: serviceText.technicalSupport.badge,
+      features: serviceText.technicalSupport.features
     },
     {
-      id: 'omnichannel',
-      num: t.omnichannel.number,
-      icon: t.omnichannel.icon,
-      title: t.omnichannel.title,
-      desc: t.omnichannel.description,
-      badge: t.omnichannel.badge,
-      features: t.omnichannel.features
+      id: 'omni-channel',
+      num: serviceText.omnichannel.number,
+      icon: serviceText.omnichannel.icon,
+      title: serviceText.omnichannel.title,
+      desc: serviceText.omnichannel.description,
+      badge: serviceText.omnichannel.badge,
+      features: serviceText.omnichannel.features
     }
   ];
 
   const qualityMetrics = [
-    { label: t.infrastructure.stats.sla.label, value: t.infrastructure.stats.sla.value },
-    { label: t.infrastructure.stats.csat.label, value: t.infrastructure.stats.csat.value },
-    { label: t.infrastructure.stats.hosting.label, value: t.infrastructure.stats.hosting.value },
+    { label: serviceText.infrastructure.stats.sla.label, value: serviceText.infrastructure.stats.sla.value },
+    { label: serviceText.infrastructure.stats.csat.label, value: serviceText.infrastructure.stats.csat.value },
+    { label: serviceText.infrastructure.stats.hosting.label, value: serviceText.infrastructure.stats.hosting.value },
   ];
 
   return (
@@ -86,18 +66,18 @@ export default function Services() {
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-xs sm:text-sm font-bold shadow-sm">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            {t.hero.eyebrow}
+            {serviceText.hero.eyebrow}
           </div>
 
           <h2 className="text-3xl sm:text-5xl font-black leading-tight">
-            {t.hero.title} <br />
+            {serviceText.hero.title} <br />
             <span className="bg-linear-to-r from-amber-500 via-amber-600 to-yellow-600 dark:from-amber-400 dark:to-yellow-400 bg-clip-text text-transparent">
-              {t.hero.titleHighlight}
+              {serviceText.hero.titleHighlight}
             </span>
           </h2>
 
           <p className="text-slate-600 dark:text-slate-400 text-base sm:text-lg leading-relaxed font-normal">
-            {t.hero.description}
+            {serviceText.hero.description}
           </p>
         </div>
 
@@ -145,10 +125,10 @@ export default function Services() {
 
               <div className="pt-4">
                 <a
-                  href={`/request-service?service=${service.id}&lang=${lang}`}
+                  href={`/request-service?service=${service.id}`}
                   className="block text-center w-full bg-slate-900 dark:bg-slate-800 hover:bg-emerald-600 dark:hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 text-sm shadow-md active:scale-95"
                 >
-                  {commonT.cta.requestService}
+                  {commonText.cta.requestService}
                 </a>
               </div>
             </div>
@@ -175,18 +155,18 @@ export default function Services() {
         <div className="bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/80 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
           <div className="space-y-1.5">
             <h4 className="text-base sm:text-lg font-bold text-emerald-950 dark:text-emerald-300 flex items-center gap-2">
-              <span>🇸🇦</span> {t.infrastructure.title}
+              <span>🇸🇦</span> {serviceText.infrastructure.title}
             </h4>
             <p className="text-xs sm:text-sm text-emerald-800 dark:text-emerald-400">
-              {t.infrastructure.description}
+              {serviceText.infrastructure.description}
             </p>
           </div>
 
           <a
-            href={`/request-service?service=infrastructure&lang=${lang}`}
+            href={`/request-service?service=infrastructure`}
             className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-6 py-3.5 rounded-xl shadow-lg shadow-emerald-600/20 transition-all text-sm whitespace-nowrap active:scale-95"
           >
-            {commonT.cta.requestQuote}
+            {commonText.cta.requestQuote}
           </a>
         </div>
 

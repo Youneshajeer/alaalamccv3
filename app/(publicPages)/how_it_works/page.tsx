@@ -1,33 +1,10 @@
-'use client';
+import { getTranslation } from "@/utils/getTranslation";
+export default async function HowItWorks() {
+ const { lang, t } =  await getTranslation();
+ const howItWorksText=t.howItWorks
+ const commonText=t.common
 
-import React, { useState, useEffect } from 'react';
-import ar from '@/i18n/ar.json';
-import en from '@/i18n/en.json';
-
-const dictionaries = { ar, en };
-
-export default function HowItWorks() {
-  const [lang, setLang] = useState<'ar' | 'en'>('ar');
-
-  useEffect(() => {
-    const savedLang = (localStorage.getItem('lang') as 'ar' | 'en') || 'ar';
-    setLang(savedLang);
-
-    const checkLangInterval = setInterval(() => {
-      const currentLang = (localStorage.getItem('lang') as 'ar' | 'en') || 'ar';
-      if (currentLang !== lang) {
-        setLang(currentLang);
-      }
-    }, 100);
-
-    return () => clearInterval(checkLangInterval);
-  }, [lang]);
-
-  const dict = dictionaries[lang];
-  const t = dict.howItWorks;
-  const commonT = dict.common;
-
-  const stepsList = [t.steps.step1, t.steps.step2, t.steps.step3, t.steps.step4];
+  const stepsList = [howItWorksText.steps.step1, howItWorksText.steps.step2, howItWorksText.steps.step3, howItWorksText.steps.step4];
 
   return (
     <section 
@@ -44,18 +21,18 @@ export default function HowItWorks() {
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200/80 dark:border-emerald-800/80 text-emerald-800 dark:text-emerald-400 text-xs sm:text-sm font-bold shadow-sm">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            {t.hero.eyebrow}
+            {howItWorksText.hero.eyebrow}
           </div>
 
           <h2 className="text-3xl sm:text-5xl font-black leading-tight tracking-tight">
-            {t.hero.title} <br />
+            {howItWorksText.hero.title} <br />
             <span className="bg-linear-to-r from-amber-500 via-amber-600 to-yellow-600 dark:from-amber-400 dark:to-yellow-400 bg-clip-text text-transparent">
-              {t.hero.titleHighlight}
+              {howItWorksText.hero.titleHighlight}
             </span>
           </h2>
 
           <p className="text-slate-600 dark:text-slate-400 text-base sm:text-lg leading-relaxed font-normal">
-            {t.hero.description}
+            {howItWorksText.hero.description}
           </p>
         </div>
 
@@ -122,10 +99,10 @@ export default function HowItWorks() {
 
           <div className="space-y-3 relative z-10">
             <h3 className="text-2xl sm:text-3xl font-black">
-              {t.cta.title}
+              {howItWorksText.cta.title}
             </h3>
             <p className="text-slate-300 text-sm sm:text-base max-w-xl">
-              {t.cta.description}
+              {howItWorksText.cta.description}
             </p>
           </div>
 
@@ -134,7 +111,7 @@ export default function HowItWorks() {
   href={`/request-service?service=consultation&lang=${lang}`}
   className="bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold px-8 py-4 rounded-xl shadow-lg shadow-emerald-500/25 transition-all text-center text-sm whitespace-nowrap active:scale-95"
 >
-              {commonT.cta.startSession}
+              {commonText.cta.startSession}
             </a>
           </div>
         </div>

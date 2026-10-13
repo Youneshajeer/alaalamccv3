@@ -2,32 +2,23 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useGlobalLang } from '@/utils/GlobalTranslationProvider';
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [lang, setLang] = useState<'ar' | 'en'>('ar');
   const [mounted, setMounted] = useState(false);
+
+  const { lang, setLang } = useGlobalLang();
 
   useEffect(() => {
     setMounted(true);
-    
     const isDark = document.documentElement.classList.contains('dark') || 
-                   localStorage.getItem('theme') === 'dark';
-    
+                   (typeof window !== 'undefined' && localStorage.getItem('theme') === 'dark');
     if (isDark) {
       setIsDarkMode(true);
       document.documentElement.classList.add('dark');
-    } else {
-      setIsDarkMode(false);
-      document.documentElement.classList.remove('dark');
     }
-
-    // استرجاع اللغة
-    const savedLang = (localStorage.getItem('lang') as 'ar' | 'en') || 'ar';
-    setLang(savedLang);
-    document.documentElement.dir = savedLang === 'ar' ? 'rtl' : 'ltr';
-    document.documentElement.lang = savedLang;
   }, []);
 
   const navLinks = [
@@ -35,8 +26,7 @@ export default function Header() {
     { name: lang === 'ar' ? 'خدماتنا' : 'Services', href: '/services' },
     { name: lang === 'ar' ? 'لماذا نحن' : 'Why Us', href: '/why_us' },
     { name: lang === 'ar' ? 'آلية العمل' : 'How It Works', href: '/how_it_works' },
-    { name: lang === 'ar' ? 'الوظائف' : 'Careers', href: '/careers' },
-
+    { name: lang === 'ar' ? 'الوظائف' : 'careers', href: '/jobs' },
   ];
 
   const handleToggleDarkMode = (e: React.MouseEvent) => {
@@ -45,7 +35,6 @@ export default function Header() {
     
     const root = document.documentElement;
     const hasDark = root.classList.contains('dark');
-    
     if (hasDark) {
       root.classList.remove('dark');
       localStorage.setItem('theme', 'light');
@@ -63,11 +52,6 @@ export default function Header() {
     
     const nextLang = lang === 'ar' ? 'en' : 'ar';
     setLang(nextLang);
-    localStorage.setItem('lang', nextLang);
-    document.documentElement.dir = nextLang === 'ar' ? 'rtl' : 'ltr';
-    document.documentElement.lang = nextLang;
-    
-    window.location.reload();
   };
 
   return (
@@ -76,11 +60,7 @@ export default function Header() {
         
         <Link href="/" className="flex items-center gap-3.5 group">
           <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-white flex items-center justify-center shadow-md border border-slate-100 p-1 group-hover:scale-105 transition-transform">
-            <img 
-              src="/images/logo.png" 
-              alt="شعار شركة حلول العالم" 
-              className="h-10 sm:h-12 w-auto object-contain" 
-            />
+            <img src="/images/logo.png" alt="Alaalam" className="h-10 sm:h-12 w-auto object-contain" />
           </div>
           <div>
             <span className="text-lg sm:text-xl font-black bg-linear-to-r from-slate-900 via-emerald-800 to-amber-600 dark:from-white dark:via-emerald-400 dark:to-amber-400 bg-clip-text text-transparent block leading-tight">
@@ -94,11 +74,7 @@ export default function Header() {
 
         <nav className="hidden lg:flex items-center gap-7 text-sm font-bold text-slate-700 dark:text-slate-200">
           {navLinks.map((link, idx) => (
-            <Link 
-              key={idx} 
-              href={link.href} 
-              className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors py-1 relative after:content-[''] after:absolute after:bottom-0 after:right-0 after:w-0 after:h-0.5 after:bg-emerald-500 hover:after:w-full after:transition-all"
-            >
+            <Link key={idx} href={link.href} className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors py-1 relative after:content-[''] after:absolute after:bottom-0 after:right-0 after:w-0 after:h-0.5 after:bg-emerald-500 hover:after:w-full after:transition-all">
               {link.name}
             </Link>
           ))}
@@ -109,7 +85,7 @@ export default function Header() {
             type="button"
             onClick={handleToggleDarkMode}
             className="p-2.5 rounded-xl cursor-pointer text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-90 transition-all select-none"
-            aria-label="تبديل الوضع"
+            aria-label="Toggle Theme"
           >
             {mounted && isDarkMode ? '☀️' : '🌙'}
           </button>
@@ -121,31 +97,28 @@ export default function Header() {
           >
             {lang === 'ar' ? 'EN' : 'عربي'}
           </button>
- 
-          <div className="hidden lg:flex items-center gap-3 border-r border-slate-200 dark:border-slate-800 pr-3">
-            {/*
-            <Link 
-              href="/login" 
-              className="text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors px-2 py-1"
-            >
-              {lang === 'ar' ? 'تسجيل دخول' : 'Login'}
-            </Link>
-            
-            <Link 
-              href="/register" 
-              className="text-xs font-bold px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-            >
-              {lang === 'ar' ? 'تسجيل' : 'Register'}
-            </Link>
-            */}
-            <Link
-              href="/contact"
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-5 py-2.5 rounded-xl shadow-md text-xs whitespace-nowrap active:scale-95 transition-all"
-            >
-            
-              {lang === 'ar' ? 'تواصل معنا' : 'Contact Us'}
-            </Link>
-          </div>
+
+         <div className="hidden lg:flex items-center gap-3 border-r border-slate-200 dark:border-slate-800 pr-3">
+  <Link 
+    href="/contact" 
+    className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-4 py-2.5 rounded-xl shadow-md text-xs whitespace-nowrap active:scale-95 transition-all"
+  >
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+    </svg>
+    <span>{lang === 'ar' ? 'معلومات التواصل' : 'Contact Info'}</span>
+  </Link>
+
+  <Link 
+    href="/customer-service" 
+    className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-4 py-2.5 rounded-xl shadow-md text-xs whitespace-nowrap active:scale-95 transition-all"
+  >
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+    </svg>
+    <span>{lang === 'ar' ? 'تواصل مباشر' : 'Get in Touch'}</span>
+  </Link>
+</div>
 
           <button
             type="button"
@@ -186,39 +159,61 @@ export default function Header() {
                 className="flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-extrabold text-slate-800 dark:text-slate-100 hover:bg-emerald-50 dark:hover:bg-slate-900 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all"
               >
                 <span>{link.name}</span>
-                <span className="text-slate-400 text-xs">←</span>
+                <span className="text-slate-400 text-xs">{lang === 'ar' ? '←' : '→'}</span>
               </Link>
             ))}
           </div>
 
           <hr className="border-slate-100 dark:border-slate-800/80 my-2" />
 
-          <div className="grid grid-cols-2 gap-3 pt-1">
-            {/*
-            <Link
-              href="/login"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-center py-3 text-xs font-black text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-2xl transition-colors"
-            >
-              {lang === 'ar' ? 'تسجيل دخول' : 'Login'}
-            </Link> 
-            <Link
-              href="/register"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-center py-3 text-xs font-black text-slate-900 dark:text-white bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 rounded-2xl transition-colors"
-            >
-              {lang === 'ar' ? 'إنشاء حساب' : 'Register'}
-            </Link>
-            */}
-          </div>
-
           <Link
-            href="/contact"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 rounded-2xl shadow-lg shadow-emerald-600/20 text-sm active:scale-95 transition-all"
-          >
-            {lang === 'ar' ? 'تواصل معنا' : 'Contact Us'}
-          </Link>
+  href="/contact"
+  onClick={() => setIsMobileMenuOpen(false)}
+  className="flex items-center justify-center gap-2 w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 px-4 rounded-2xl shadow-lg shadow-emerald-600/20 text-sm active:scale-95 transition-all"
+>
+  {/* أيقونة معلومات الاتصال / دفتر العناوين */}
+  <svg 
+    className="w-4 h-4" 
+    fill="none" 
+    stroke="currentColor" 
+    viewBox="0 0 24 24"
+  >
+    <path 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+      strokeWidth="2" 
+      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" 
+    />
+  </svg>
+
+  <span>
+    {lang === 'ar' ? 'معلومات التواصل' : 'Contact Information'}
+  </span>
+</Link>
+         <Link
+  href="/customer-service"
+  onClick={() => setIsMobileMenuOpen(false)}
+  className="flex items-center justify-center gap-2 w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 px-4 rounded-2xl shadow-lg shadow-emerald-600/20 text-sm active:scale-95 transition-all"
+>
+  {/* أيقونة المسجات / المحادثة */}
+  <svg 
+    className="w-4 h-4" 
+    fill="none" 
+    stroke="currentColor" 
+    viewBox="0 0 24 24"
+  >
+    <path 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+      strokeWidth="2" 
+      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" 
+    />
+  </svg>
+
+  <span>
+    {lang === 'ar' ? 'تواصل مباشر' : 'Get in Touch'}
+  </span>
+</Link>
         </div>
       </div>
     </header>

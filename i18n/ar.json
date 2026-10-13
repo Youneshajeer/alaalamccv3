@@ -9,6 +9,132 @@
       "startSession": "ابدئ الجلسة الأولى الآن"
     }
   },
+  
+  "whyUsComponent": {
+    "badge": "شريكك التشغيلي المعتمد في السعودية",
+    "titleMain": "لماذا يثق بنا",
+    "titleHighlight": "قادة الأعمال والشركات؟",
+    "description": "نحن لا نكتفي بتقديم خدمات مركز اتصال تقليدي، بل نبني لمؤسستك مركز عمليات مخصص يرفع من ثقة عملائك، ويحميك تنظيمياً، ويضمن أعلى كفاءة تشغيلية.",
+    "coreFeatures": [
+      {
+        "id": "security",
+        "icon": "🛡️",
+        "badge": "تشفير وأمان مؤسسي",
+        "title": "أمان بُني على خبرة تقنية متقدمة",
+        "desc": "بنية تحتية محمية بأحدث بروتوكولات أمن الشبكات المؤسسية، مصممة خصيصاً للتعامل مع البيانات الحساسة وفق أعلى معايير السرية والتشفير المعتمدة.",
+        "highlight": "تشفير بيانات رفيع المستوى"
+      },
+      {
+        "id": "compliance",
+        "icon": "🏛",
+        "badge": "امتثال نظامي 100% 🇸🇦",
+        "title": "التزام كامل بالأنظمة والتشريعات المحلية",
+        "desc": "مرخصون نظامياً لتقديم خدمات مراكز الاتصال وإسناد الأعمال، مع ضمان استضافة وحفظ كافة البيانات داخل مراكز بيانات معتمدة محلياً في السعودية.",
+        "highlight": "استضافة البيانات داخل المملكة"
+      },
+      {
+        "id": "talent",
+        "icon": "👥",
+        "badge": "كوادر وطنية مؤهلة",
+        "title": "فريق عمل سعودي بإشراف تشغيلي مباشر",
+        "desc": "نخبة من الكفاءات الوطنية المُدرّبة على أعلى معايير خدمة العملاء والمبيعات الهاتفية، تحت قيادة وإشراف ميداني مستمر لضمان أعلى درجات الجودة.",
+        "highlight": "إشراف تشغيلي حثيث"
+      },
+      {
+        "id": "scalability",
+        "icon": "⚡",
+        "badge": "توسع مرن بلا احتكاك",
+        "title": "سعة تشغيلية مرنة تتكيف مع نموك",
+        "desc": "إمكانية البدء بفريق عمل متخصص صغير وتوسعة المقاعد التشغيلية فوراً وبسلاسة تامة مع نمو نشاطك التجاري ودون الحاجة لإعادة التأسيس.",
+        "highlight": "تدرّج تشغيلي فوري"
+      }
+    ],
+    "enterpriseStats": [
+      { "number": "100%", "label": "استضافة سحابية داخل السعودية", "icon": "🇸🇦" },
+      { "number": "99.9%", "label": "جاهزية واستقرار الخدمة (SLA)", "icon": "⚡" },
+      { "number": "100%", "label": "سجل التجاري المعتمد", "icon": "📜" },
+      { "number": "24/7", "label": "مراقبة وإشراف تشغيلي مستمر", "icon": "🎧" }
+    ],
+    "ctaTitle": "دعنا نُصمّم مركز الاتصال الخـاص بمؤسستك",
+    "ctaDesc": "تواصل مع مستشاري التشغيل لدينا للحصول على دراسة احتياج مخصصة وخطة تشغيل سريعة الانطلاق.",
+    "ctaButton": "احجز جلسة استشارية"
+  },
+
+ 
+  "jobApplications": {
+    "backToJobs": "العودة لقائمة الوظائف",
+    "supervisor": "المسؤول",
+    "applicantsFor": " الوظيفة:",
+    "noAdditionalDetails": "لا توجد تفاصيل إضافية",
+    "viewAdDetails": "عرض تفاصيل الإعلان",
+    "totalApplicants": "إجمالي المتقدمين:",
+    "matchingResults": "النتائج المطابقة:",
+    "cancelFilters": "إلغاء الفلاتر",
+    "email": "البريد:",
+    "phone": "الهاتف:",
+    "specialty": "التخصص:",
+    "experience": "الخبرة:",
+    "years": "سنوات",
+    "notAvailable": "غير متوفر",
+    "notSpecified": "غير محدد",
+    "viewCv": "عرض السيرة الذاتية",
+    "downloadCv": "تحميل السيرة الذاتية مباشرة",
+    "delete": "حذف الطلب",
+    "confirmDelete": "هل أنت متأكد من حذف هذا الطلب نهائياً؟",
+    "listTitle": "الوظائف التي تحتوي على متقدمين",
+"noJobsWithApplications": "لا توجد أي وظائف عليها طلبات توظيف حالياً.",
+"noMatchingJobs": "لا توجد وظائف مطابقة للطلبات الحالية.",
+"fetchError": "حدث خطأ أثناء جلب طلبات التوظيف.",
+"noJobDescription": "لا توجد تفاصيل إضافية للوظيفة.",
+"viewApplicants": "عرض المتقدمين",
+    "filters": {
+      "searchLabel": "بحث بالمتقدم",
+      "searchPlaceholder": "ابحث بالاسم، البريد أو الهاتف...",
+      "statusLabel": "حالة الطلب",
+      "allStatuses": "جميع الحالات",
+      "specialtyLabel": "التخصص",
+      "allSpecialties": "جميع التخصصات",
+      "experienceLabel": "سنوات الخبرة",
+      "allExperiences": "جميع الخبرات",
+      "exp0to2": "من 0 إلى سنتين",
+      "exp3to5": "من 3 إلى 5 سنوات",
+      "exp5plus": "أكثر من 5 سنوات",
+      "fromDateLabel": "من تاريخ التقديم",
+      "toDateLabel": "إلى تاريخ التقديم"
+    },
+    "table": {
+      "applicantInfo": "المتقدم ومعلومات الاتصال",
+      "specialtyAndExp": "التخصص والخبرة",
+      "applyDate": "تاريخ التقديم",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "status": {
+      "accepted": "مقبول",
+      "rejected": "مرفوض",
+      "reviewed": "تمت المراجعة",
+      "pending": "قيد المراجعة"
+    },
+    "errors": {
+      "statusUpdate": "حدث خطأ أثناء تحديث الحالة",
+      "delete": "حدث خطأ أثناء الحذف",
+      "noCv": "لا يوجد سيرة ذاتية مرفقة",
+      "download": "فشل في تحميل السيرة الذاتية"
+    },
+    "modal": {
+      "title": "تفاصيل إعلان الوظيفة",
+      "jobTitle": "المسمى الوظيفي",
+      "createdAt": "تاريخ الإنشاء",
+      "deadline": "الموعد النهائي",
+      "status": "الحالة الحالية",
+      "closed": "مغلق",
+      "active": "نشط",
+      "description": "وصف الوظيفة والمتطلبات الكاملة",
+      "noDescription": "لا يوجد وصف إضافي متوفر لهذه الوظيفة.",
+      "close": "إغلاق"
+    },
+    "noMatchingApplications": "لا توجد طلبات توظيف مطابقة للبحث أو الفلاتر المحددة."
+  },
 
   "home": {
     "hero": {
@@ -105,7 +231,13 @@
         "icon": "⚡",
         "title": "تدرّج بلا احتكاك",
         "description": "إمكانية البدء بفريق صغير وتوسعة السعة التشغيلية تدريجياً وبسلاسة تامة دون الحاجة لإعادة بناء الأنظمة."
-      }
+      },
+      "enterpriseStats": [
+  { "number": "100%", "label": "استضافة محلية 100%" },
+  { "number": "99.9%", "label": "جاهزية الأنظمة" },
+  { "number": "100%", "label": "السجل التجاري الموحد" },
+  { "number": "24/7", "label": "دعم فني ومراقبة" }
+]
     },
 
     "workflow": {
@@ -152,6 +284,25 @@
       }
     }
   },
+  
+"customerService": {
+  "successTitle": "تم إرسال رسالتك بنجاح",
+  "successDesc": "شكراً لتواصلك معنا، سيقوم فريق خدمة العملاء بالرد عليك في أقرب وقت.",
+  "returnHome": "العودة إلى الرئيسية",
+  "formTitle": "خدمة العملاء والتواصل ",
+  "formDesc": "يسعدنا استقبال استفساراتكم ورسائلكم، وسيقوم فريقنا بالرد في أقرب وقت.",
+  "company": "اسم الشركة / الجهة",
+  "companyPlaceholder": "أدخل اسم شركتك أو جهتك",
+  "name": "الاسم الكامل",
+  "namePlaceholder": "أدخل اسمك الكامل",
+  "email": "البريد الإلكتروني",
+  "phone": "رقم الجوال",
+  "message": "الرسالة",
+  "messagePlaceholder": "اكتب تفاصيل رسالتك هنا...",
+  "send": "إرسال الرسالة",
+  "sending": "جاري الإرسال..."
+},
+
 
   "services": {
     "hero": {
@@ -492,7 +643,15 @@
     "supportNote": "نحرص على الرد على كافة الاستفسارات والطلبات الواردة عبر البريد الإلكتروني والهاتف في أسرع وقت ممكن لضمان استمرارية أعمالكم بكفاءة عالية طوال الوقت."
   }
 },
+ "experienceOptions": {
+  "fresh": "حديث التخرج (بدون خبرة)",
+  "lessThan1": "أقل من سنة",
+  "oneToTwo": "من سنة إلى سنتين",
+  "threeToFive": "من 3 إلى 5 سنوات",
+  "moreThan5": "أكثر من 5 سنوات"
+},
 "careers": {
+  
     "eyebrow": "انضم إلى فريقنا",
     "title": "قدم سيرتك الذاتية",
     "description": "نحن نبحث دائماً عن الكوادر الوطنية المؤهلة للانضمام إلى منظومتنا التشغيلية في مراكز الاتصال والتقنية.",
@@ -504,7 +663,14 @@
       "phone": "رقم الجوال",
       "phonePlaceholder": "05XXXXXXXX",
       "experience": "عدد سنوات الخبرة",
-       "experiencePlaceholder": "اختر عدد سنوات الخبرة...",
+      "experiencePlaceholder": "اختر عدد سنوات الخبرة...",
+      "experienceOptions": {
+  "fresh": "حديث التخرج (بدون خبرة)",
+  "lessThan1": "أقل من سنة",
+  "oneToTwo": "من سنة إلى سنتين",
+  "threeToFive": "من 3 إلى 5 سنوات",
+  "moreThan5": "أكثر من 5 سنوات"
+},
       "selectDepartment": "اختر القسم أو التخصص الرئيسي",
       "selectPosition": "اختر المسمى الوظيفي المستهدف",
       "positionPlaceholder": "اختر المسمى الوظيفي المتاح...",
@@ -512,68 +678,68 @@
       "submit": "إرسال طلب التوظيف",
       "success": "شكراً لك! تم استلام سيرتك الذاتية بنجاح وسيتواصل معك فريق التوظيف في حال مطابقة الشروط."
     },
-    "departments": [
-      {
-        "id": "accounting_finance",
-        "name": "المحاسبة والمالية",
-        "positions": [
-          "محاسب عام",
-          "محاسب تكاليف",
-          "أخصائي تحصيل ومتابعة مالية",
-          "محلل مالي",
-          "مدقق حسابات داخلي",
-          "مساعد مالي وإداري",
-          "أخصائي رواتب وشؤون موظفين مالية"
-        ]
-      },
-      {
-        "id": "networks_it",
-        "name": "الشبكات والبنية التحتية وتقنية المعلومات",
-        "positions": [
-          "مهندس شبكات وبنية تحتية (Network Engineer)",
-          "مسؤول أنظمة شبكات (Systems Administrator)",
-          "أخصائي دعم فني (IT Support Specialist)",
-          "محلل أمن سيبراني",
-          "مسؤول قواعد بيانات (Database Administrator)",
-          "مهندس أمن معلومات وصيانة حاسب آلي",
-          "فني تركيبات شبكات واتصالات"
-        ]
-      },
-      {
-        "id": "admin_secretariat",
-        "name": "الإدارة، السكرتارية وخدمة المكاتب",
-        "positions": [
-          "مدير مكتب / سكرتير تنفيذي",
-          "مسؤول إداري وموارد بشرية",
-          "أخصائي أرشيف وتوثيق إلكتروني",
-          "مستقبل زوار وخدمة استقبال (Receptionist)",
-          "مُدخل بيانات وتنسيق إداري",
-          "منسق مشاريع إدارية"
-        ]
-      },
-      {
-        "id": "call_center",
-        "name": "مراكز الاتصال وخدمة العملاء",
-        "positions": [
-          "ممثل خدمة عملاء هاتفية (Inbound Agent)",
-          "ممثل مبيعات هاتفية (Telesales)",
-          "أخصائي دعم القنوات المكتوبة ووسائل التواصل",
-          "مُقيم ومحلل جودة مكالمات (QA Analyst)",
-          "مشرف تشغيلي لمركز الاتصال (Supervisor)",
-          "مدير تشغيل مركز الاتصال (Call Center Manager)"
-        ]
-      },
-      {
-        "id": "ai_robotics",
-        "name": "الذكاء الاصطناعي والروبوتكس البرمجي",
-        "positions": [
-          "مطور أتمتة العمليات الروبوتية (RPA Developer)",
-          "مهندس ذكاء اصطناعي وتحادثي (AI Bot Engineer)",
-          "محلل بيانات"
-        ]
-      }
+   "departments": [
+  {
+    "id": "accounting_finance",
+    "name": "المحاسبة والمالية",
+    "positions": [
+      { "id": "general_accountant", "name": "محاسب عام" },
+      { "id": "cost_accountant", "name": "محاسب تكاليف" },
+      { "id": "financial_collection_specialist", "name": "أخصائي تحصيل ومتابعة مالية" },
+      { "id": "financial_analyst", "name": "محلل مالي" },
+      { "id": "internal_auditor", "name": "مدقق حسابات داخلي" },
+      { "id": "financial_admin_assistant", "name": "مساعد مالي وإداري" },
+      { "id": "payroll_finance_hr_specialist", "name": "أخصائي رواتب وشؤون موظفين مالية" }
     ]
-  
+  },
+  {
+    "id": "networks_it",
+    "name": "الشبكات والبنية التحتية وتقنية المعلومات",
+    "positions": [
+      { "id": "network_infrastructure_engineer", "name": "مهندس شبكات وبنية تحتية (Network Engineer)" },
+      { "id": "systems_administrator", "name": "مسؤول أنظمة شبكات (Systems Administrator)" },
+      { "id": "it_support_specialist", "name": "أخصائي دعم فني (IT Support Specialist)" },
+      { "id": "cybersecurity_analyst", "name": "محلل أمن سيبراني" },
+      { "id": "database_administrator", "name": "مسؤول قواعد بيانات (Database Administrator)" },
+      { "id": "info_security_pc_maintenance_engineer", "name": "مهندس أمن معلومات وصيانة حاسب آلي" },
+      { "id": "network_telecom_installation_technician", "name": "فني تركيبات شبكات واتصالات" }
+    ]
+  },
+  {
+    "id": "admin_secretariat",
+    "name": "الإدارة، السكرتارية وخدمة المكاتب",
+    "positions": [
+      { "id": "office_manager_executive_secretary", "name": "مدير مكتب / سكرتير تنفيذي" },
+      { "id": "admin_hr_officer", "name": "مسؤول إداري وموارد بشرية" },
+      { "id": "archive_electronic_documentation_specialist", "name": "أخصائي أرشيف وتوثيق إلكتروني" },
+      { "id": "receptionist", "name": "مستقبل زوار وخدمة استقبال (Receptionist)" },
+      { "id": "data_entry_admin_coordinator", "name": "مُدخل بيانات وتنسيق إداري" },
+      { "id": "administrative_projects_coordinator", "name": "منسق مشاريع إدارية" }
+    ]
+  },
+  {
+    "id": "call_center",
+    "name": "مراكز الاتصال وخدمة العملاء",
+    "positions": [
+      { "id": "inbound_customer_service_agent", "name": "ممثل خدمة عملاء هاتفية (Inbound Agent)" },
+      { "id": "telesales_representative", "name": "ممثل مبيعات هاتفية (Telesales)" },
+      { "id": "written_social_channels_support_specialist", "name": "أخصائي دعم القنوات المكتوبة ووسائل التواصل" },
+      { "id": "qa_analyst", "name": "مُقيم ومحلل جودة مكالمات (QA Analyst)" },
+      { "id": "call_center_operations_supervisor", "name": "مشرف تشغيلي لمركز الاتصال (Supervisor)" },
+      { "id": "call_center_manager", "name": "مدير تشغيل مركز الاتصال (Call Center Manager)" }
+    ]
+  },
+  {
+    "id": "ai_robotics",
+    "name": "الذكاء الاصطناعي والروبوتكس البرمجي",
+    "positions": [
+      { "id": "rpa_developer", "name": "مطور أتمتة العمليات الروبوتية (RPA Developer)" },
+      { "id": "ai_bot_engineer", "name": "مهندس ذكاء اصطناعي وتحادثي (AI Bot Engineer)" },
+      { "id": "data_analyst", "name": "محلل بيانات" }
+    ]
+  }
+]
+ 
 },
 "notFound": {
   "code": "404",
