@@ -9,6 +9,7 @@ export const revalidate = 0;
 export default async function AdminUsersPage() {
   const supabase = await getSupabaseServerClient();
 
+  // جلب دور المستخدم وبياناته حصرياً من جدول الأدوار الحديث عبر الدالة المحدثة
   const authData = await getCurrentUserRole();
   
   if (!authData || !authData.user || !authData.isAuthorized) {
@@ -23,7 +24,7 @@ export default async function AdminUsersPage() {
   const canManageUsers = await hasPermission('users.manage');
   const canViewActivityLogs = await hasPermission('activity_logs.view') || canManageUsers;
 
-  // الشرط الموحد والآمن للسماح للمدراء والمشرفين بالدخول فوراً
+  // الشرط الموحد والآمن للسماح للمدراء والمشرفين بالدخول فوراً بناءً على جدول الأدوار فقط
   const isSuperAdminOrAdmin = userRoleName === 'super_admin' || userRoleName === 'admin' || userRoleName === 'supervisor';
 
   if (!isSuperAdminOrAdmin && (!canViewDashboard || !canManageUsers)) {
@@ -31,10 +32,11 @@ export default async function AdminUsersPage() {
       <div className="p-8 bg-red-50 text-red-700 rounded-3xl m-8 border border-red-200" dir="rtl">
         <h2 className="text-xl font-black">🚫 تم رفض الدخول بواسطة شرط الحماية في النظام</h2>
         <p className="mt-2 text-sm">البريد الإلكتروني الحالي: <b>{userEmail}</b></p>
-        <p className="mt-1 text-sm">الدور المستخرج: <b className="underline">{userRoleName}</b></p>
+        <p className="mt-1 text-sm">الدور المستخرج (من جدول الأدوار): <b className="underline">{userRoleName}</b></p>
       </div>
     );
   }
+
   const { data: roles, error: rolesError } = await supabase.from('roles').select('*');
   if (rolesError) console.error('Roles Error:', rolesError.message);
 
@@ -74,6 +76,7 @@ export default async function AdminUsersPage() {
       user_roles: assignedRole ? [{ roles: assignedRole }] : [],
     };
   });
+
   return (
     <div>
       <UsersManagerClient

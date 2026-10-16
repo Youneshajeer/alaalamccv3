@@ -25,7 +25,8 @@ export async function getCurrentUserRole() {
   const roleDisplayName = roleData?.display_name || userRole;
   const roleId = userRoleRecord?.role_id;
 
-  if (userRole === 'super_admin' || userRole === 'admin') {
+  // الحفاظ على شرط السماح المباشر للمدراء، وتمت إضافة المشرف (supervisor) لضمان عدم إغلاق الصلاحية أمامه
+  if (userRole === 'super_admin' || userRole === 'admin' || userRole === 'supervisor') {
     return { 
       user, 
       role: userRole, 
@@ -38,6 +39,7 @@ export async function getCurrentUserRole() {
     return { user, role: userRole, roleDisplayName, isAuthorized: false };
   }
 
+  // الاحتفاظ بالمنطق الأصلي الكامل لفحص جدول الصلاحيات للأدوار الأخرى المخصصة
   const { count, error: permError } = await supabase
     .from('role_permissions')
     .select('*', { count: 'exact', head: true })
