@@ -101,7 +101,7 @@ export default async function RootLayout({
               },
               "contactPoint": {
                 "@type": "ContactPoint",
-                "telephone": "+966-XXX-XXXX",
+                "telephone": "+966 54 793 8719",
                 "contactType": "customer service",
                 "areaServed": "SA",
                 "availableLanguage": ["Arabic", "English"]
@@ -118,7 +118,7 @@ export default async function RootLayout({
         <GlobalTranslationProvider initialLang={lang}>
           <GlobalToast />
           <Header />
-          <main className="grow" >
+          <main className="grow">
             {children}
           </main>
           <Footer />

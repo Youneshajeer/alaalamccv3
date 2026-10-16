@@ -1,8 +1,11 @@
-import { hasPermission } from '@/lib/supabase/permissions';
 import { redirect, notFound } from 'next/navigation';
 import { getSupabaseServerClient } from '@/lib/supabase/supabase-server';
 import { getJobDetailsAndApplications } from '../actions';
 import JobDetailsClient from './JobDetailsClient';
+import { hasPermission } from '@/lib/supabase/permissions';
+import { getCurrentUserRole } from '@/lib/supabase/auth';
+export const revalidate = 0;
+
 
 interface PageProps {
   params: Promise<{
@@ -12,14 +15,20 @@ interface PageProps {
 
 export default async function JobDetailsPage({ params }: PageProps) {
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect('/admin/login');
+  const authData = await getCurrentUserRole();
+  
+  if (!authData || !authData.user || !authData.isAuthorized) {
+    redirect('/admin/login?error=unauthorized');
   }
 
-  const allowed = await hasPermission('jobs.view');
-  if (!allowed) {
+  const { user, role } = authData;
+  const userRole = role || 'supervisor';
+
+  const canViewDashboard = await hasPermission('dashboard.view');
+  const canViewCareers = await hasPermission('careers.view');
+
+  if (!canViewDashboard || !canViewCareers) {
     redirect('/admin/dashboard?error=unauthorized');
   }
 
@@ -34,14 +43,6 @@ export default async function JobDetailsPage({ params }: PageProps) {
   if (!res.success || !res.job) {
     notFound();
   }
-
-  const { data: currentProfile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .maybeSingle();
-
-  const userRole = currentProfile?.role || 'admin';
 
   return (
     <JobDetailsClient

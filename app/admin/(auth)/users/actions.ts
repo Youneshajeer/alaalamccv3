@@ -4,24 +4,180 @@ import { getSupabaseServerClient, getSupabaseAdminClient } from '@/lib/supabase/
 import { revalidatePath } from 'next/cache';
 import { createUserSchema } from '@/lib/validations/adminValidations';
 import { hasPermission } from '@/lib/supabase/permissions';
+import { logActivity } from '@/lib/supabase/logger'; 
 import crypto from 'crypto';
-async function logActivity(supabase: any, actionType: string, targetTable: string, targetId: string | null, description: string) {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const adminClient = getSupabaseAdminClient();
-      await adminClient.from('activity_logs').insert({
-        user_id: user.id,
-        user_email: user.email || 'unknown',
-        action_type: actionType,
-        target_table: targetTable,
-        target_id: targetId,
-        description: description,
-      });
-    }
-  } catch (err) {
-    console.error('Failed to log activity:', err);
+
+export interface ActivityLogFilterOptions {
+  page?: number;
+  limit?: number;
+  emailQuery?: string;
+  actionType?: string;
+  targetTable?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export async function getActivityLogs(options: ActivityLogFilterOptions = {}) {
+  const supabase = await getSupabaseServerClient();
+
+  const canView = await hasPermission('activity_logs.view') || await hasPermission('users.manage');
+  if (!canView) {
+    return { success: false, error: 'غير مصرح لك بالاطلاع على سجلات النشاطات.', logs: [], totalCount: 0 };
   }
+
+  const page = options.page || 1;
+  const limit = options.limit || 15;
+  const offset = (page - 1) * limit;
+
+  let query = supabase
+    .from('activity_logs')
+    .select('*', { count: 'exact' })
+    .order('created_at', { ascending: false });
+
+  if (options.emailQuery && options.emailQuery.trim() !== '') {
+    query = query.ilike('user_email', `%${options.emailQuery.trim()}%`);
+  }
+
+  if (options.actionType && options.actionType !== 'ALL') {
+    query = query.eq('action_type', options.actionType);
+  }
+
+  if (options.targetTable && options.targetTable !== 'ALL') {
+    query = query.eq('target_table', options.targetTable);
+  }
+
+  if (options.startDate) {
+    query = query.gte('created_at', `${options.startDate}T00:00:00.000Z`);
+  }
+
+  if (options.endDate) {
+    query = query.lte('created_at', `${options.endDate}T23:59:59.999Z`);
+  }
+
+  query = query.range(offset, offset + limit - 1);
+
+  const { data, error, count } = await query;
+
+  if (error) {
+    console.error('Error fetching activity logs:', error);
+    return { success: false, error: 'فشل جلب سجلات النشاطات.', logs: [], totalCount: 0 };
+  }
+
+  return {
+    success: true,
+    logs: data || [],
+    totalCount: count || 0,
+    currentPage: page,
+    totalPages: Math.ceil((count || 0) / limit),
+  };
+}
+
+export async function purgeOldActivityLogs() {
+  const supabase = await getSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: 'يجب تسجيل الدخول.' };
+  }
+
+  const canPurge = await hasPermission('users.manage');
+  if (!canPurge) {
+    return { success: false, error: 'صلاحياتك لا توفر إمكانية تفريغ وتطهير سجلات النظام.' };
+  }
+
+  const { error } = await supabase
+    .from('activity_logs')
+    .delete()
+    .lt('created_at', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString());
+
+  if (error) {
+    return { success: false, error: 'فشل تفريغ السجلات القديمة.' };
+  }
+
+  await logActivity({
+    userId: user.id,
+    userEmail: user.email || 'system',
+    actionType: 'PURGE_LOGS',
+    targetTable: 'activity_logs',
+    description: `System administrator ${user.email || 'system'} cleaned up system archives and old logs (older than 90 days)`,
+    fieldName: 'created_at',
+    oldValue: 'older_than_90_days',
+    newValue: 'deleted',
+  });
+
+  revalidatePath('/admin/activity-logs');
+  return { success: true };
+}
+
+export async function createNewRoleAction(formData: { name: string; display_name: string }) {
+  if (!(await verifyAdminAccess())) {
+    return { success: false, error: 'عذراً، لا تمتلك الصلاحية الكافية لإنشاء أدوار جديدة.' };
+  }
+
+  const supabase = await getSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const currentAdminEmail = user?.email || 'System Admin';
+
+  const supabaseAdmin = getSupabaseAdminClient();
+
+  const { data: existingRole } = await supabaseAdmin
+    .from('roles')
+    .select('id')
+    .eq('name', formData.name.trim())
+    .maybeSingle();
+
+  if (existingRole) {
+    return { success: false, error: 'اسم الدور البرمجي موجود مسبقاً في النظام.' };
+  }
+
+  const { error } = await supabaseAdmin.from('roles').insert([
+    {
+      name: formData.name.trim(),
+      display_name: formData.display_name.trim(),
+    }
+  ]);
+
+  if (error) {
+    return { success: false, error: 'حدث خطأ أثناء إضافة الدور الجديد.' };
+  }
+
+  await logActivity({
+    userId: user?.id || null,
+    userEmail: currentAdminEmail,
+    actionType: 'CREATE',
+    targetTable: 'roles',
+    targetId: null,
+    description: `User ${currentAdminEmail} created a new role: ${formData.display_name.trim()} (${formData.name.trim()})`,
+    fieldName: 'name',
+    oldValue: undefined,
+    newValue: formData.name.trim(),
+  });
+
+  revalidatePath('/admin/users');
+  return { success: true };
+}
+
+async function verifyAdminAccess() {
+  const supabase = await getSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const { data: userRoles } = await supabase
+    .from('user_roles')
+    .select('roles(name)')
+    .eq('user_id', user.id);
+
+  const hasSuperAdminRole = userRoles?.some((ur: any) => 
+    ur.roles?.name === 'super_admin' || ur.roles?.name === 'admin'
+  );
+
+  if (hasSuperAdminRole) {
+    return true; 
+  }
+
+  const canViewDashboard = await hasPermission('dashboard.view');
+  const allowedManage = await hasPermission('users.manage');
+  return canViewDashboard && allowedManage;
 }
 
 export async function createUserAction(formData: {
@@ -30,9 +186,8 @@ export async function createUserAction(formData: {
   password: string;
   roleId: string;
 }) {
-  // 🔒 التحقق من الصلاحية
-  const allowedManage = await hasPermission('users.manage');
-  if (!allowedManage) {
+  const isAuthorized = await verifyAdminAccess();
+  if (!isAuthorized) {
     return { success: false, error: 'عذراً، لا تمتلك الصلاحية الكافية لإنشاء مستخدم جديد.' };
   }
 
@@ -47,7 +202,7 @@ export async function createUserAction(formData: {
 
   const userSupabase = await getSupabaseServerClient();
   const { data: { user: currentUser } } = await userSupabase.auth.getUser();
-  const currentAdminEmail = currentUser?.email || 'مشرف النظام';
+  const currentAdminEmail = currentUser?.email || 'System Admin';
 
   const supabaseAdmin = getSupabaseAdminClient();
 
@@ -99,27 +254,30 @@ export async function createUserAction(formData: {
     return { success: false, error: roleAssignmentError.message };
   }
 
-  await logActivity(
-    userSupabase,
-    'CREATE',
-    'profiles',
-    userId,
-    `قام المستخدم ${currentAdminEmail} بإنشاء مستخدم جديد بريد: ${email}`
-  );
+  await logActivity({
+    userId: currentUser?.id || null,
+    userEmail: currentAdminEmail,
+    actionType: 'CREATE',
+    targetTable: 'profiles',
+    targetId: userId,
+    description: `User ${currentAdminEmail} created a new user with email: ${email}`,
+    fieldName: 'email',
+    oldValue: undefined,
+    newValue: email,
+  });
 
   revalidatePath('/admin/users');
   return { success: true };
 }
 
 export async function updateUserRoleAction(userId: string, roleId: string) {
-  const allowedManage = await hasPermission('users.manage');
-  if (!allowedManage) {
+  if (!(await verifyAdminAccess())) {
     return { success: false, error: 'عذراً، لا تمتلك الصلاحية الكافية لتعديل صلاحيات المستخدمين.' };
   }
 
   const userSupabase = await getSupabaseServerClient();
   const { data: { user } } = await userSupabase.auth.getUser();
-  const currentAdminEmail = user?.email || 'مشرف النظام';
+  const currentAdminEmail = user?.email || 'System Admin';
 
   if (user?.id === userId) {
     return { success: false, error: 'لا يمكنك تغيير صلاحية حسابك الحالي بنفسك.' };
@@ -134,6 +292,14 @@ export async function updateUserRoleAction(userId: string, roleId: string) {
     .single();
   const targetEmail = targetProfile?.email || userId;
 
+  const { data: oldUserRole } = await supabaseAdmin
+    .from('user_roles')
+    .select('role_id, roles(name)')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  const oldRoleId = oldUserRole?.role_id || null;
+
   await supabaseAdmin.from('user_roles').delete().eq('user_id', userId);
   const { error } = await supabaseAdmin.from('user_roles').insert({
     user_id: userId,
@@ -142,27 +308,30 @@ export async function updateUserRoleAction(userId: string, roleId: string) {
 
   if (error) return { success: false, error: error.message };
 
-  await logActivity(
-    userSupabase,
-    'UPDATE_ROLE',
-    'user_roles',
-    userId,
-    `قام المستخدم ${currentAdminEmail} بتعديل دور وصلاحيات المستخدم ${targetEmail}`
-  );
+  await logActivity({
+    userId: user?.id || null,
+    userEmail: currentAdminEmail,
+    actionType: 'UPDATE_ROLE',
+    targetTable: 'user_roles',
+    targetId: userId,
+    description: `User ${currentAdminEmail} updated role and permissions for user ${targetEmail}`,
+    fieldName: 'role_id',
+    oldValue: oldRoleId !== null ? String(oldRoleId) : undefined,
+    newValue: roleId,
+  });
 
   revalidatePath('/admin/users');
   return { success: true };
 }
 
 export async function toggleUserStatusAction(id: string, currentStatus: boolean) {
-  const allowedManage = await hasPermission('users.manage');
-  if (!allowedManage) {
+  if (!(await verifyAdminAccess())) {
     return { success: false, error: 'عذراً، لا تمتلك الصلاحية الكافية لتغيير حالة المستخدم.' };
   }
 
   const userSupabase = await getSupabaseServerClient();
   const { data: { user } } = await userSupabase.auth.getUser();
-  const currentAdminEmail = user?.email || 'مشرف النظام';
+  const currentAdminEmail = user?.email || 'System Admin';
 
   if (user?.id === id) {
     return { success: false, error: 'لا يمكنك تعطيل حسابك الحالي.' };
@@ -185,29 +354,32 @@ export async function toggleUserStatusAction(id: string, currentStatus: boolean)
 
   if (error) return { success: false, error: error.message };
 
-  const statusText = newStatus ? 'نشط' : 'غير نشط';
+  const statusText = newStatus ? 'active' : 'inactive';
 
-  await logActivity(
-    userSupabase,
-    'TOGGLE_STATUS',
-    'profiles',
-    id,
-    `قام المستخدم ${currentAdminEmail} بتغيير حالة ${targetEmail} إلى مستخدم ${statusText}`
-  );
+  await logActivity({
+    userId: user?.id || null,
+    userEmail: currentAdminEmail,
+    actionType: 'TOGGLE_STATUS',
+    targetTable: 'profiles',
+    targetId: id,
+    description: `User ${currentAdminEmail} changed status of ${targetEmail} to ${statusText}`,
+    fieldName: 'is_active',
+    oldValue: String(currentStatus),
+    newValue: String(newStatus),
+  });
 
   revalidatePath('/admin/users');
   return { success: true };
 }
 
 export async function unblockUserAction(userId: string) {
-  const allowedManage = await hasPermission('users.manage');
-  if (!allowedManage) {
+  if (!(await verifyAdminAccess())) {
     return { success: false, error: 'عذراً، لا تمتلك الصلاحية الكافية لإلغاء حظر المستخدمين.' };
   }
 
   const userSupabase = await getSupabaseServerClient();
   const { data: { user } } = await userSupabase.auth.getUser();
-  const currentAdminEmail = user?.email || 'مشرف النظام';
+  const currentAdminEmail = user?.email || 'System Admin';
 
   const supabaseAdmin = getSupabaseAdminClient();
 
@@ -230,27 +402,30 @@ export async function unblockUserAction(userId: string) {
     return { success: false, error: error.message };
   }
 
-  await logActivity(
-    userSupabase,
-    'UNBLOCK_USER',
-    'profiles',
-    userId,
-    `قام المستخدم ${currentAdminEmail} بإلغاء حظر وإعادة تفعيل حساب المستخدم ${targetEmail}`
-  );
+  await logActivity({
+    userId: user?.id || null,
+    userEmail: currentAdminEmail,
+    actionType: 'UNBLOCK_USER',
+    targetTable: 'profiles',
+    targetId: userId,
+    description: `User ${currentAdminEmail} unblocked and reactivated user account ${targetEmail}`,
+    fieldName: 'is_blocked',
+    oldValue: 'true',
+    newValue: 'false',
+  });
 
   revalidatePath('/admin/users');
   return { success: true };
 }
 
 export async function deleteUserAction(id: string) {
-  const allowedManage = await hasPermission('users.manage');
-  if (!allowedManage) {
+  if (!(await verifyAdminAccess())) {
     return { success: false, error: 'عذراً، لا تمتلك الصلاحية الكافية لحذف المستخدمين.' };
   }
 
   const userSupabase = await getSupabaseServerClient();
   const { data: { user } } = await userSupabase.auth.getUser();
-  const currentAdminEmail = user?.email || 'مشرف النظام';
+  const currentAdminEmail = user?.email || 'System Admin';
 
   if (user?.id === id) {
     return { success: false, error: 'لا يمكنك حذف حسابك الحالي.' };
@@ -271,27 +446,30 @@ export async function deleteUserAction(id: string) {
   const { error: deleteProfileError } = await supabaseAdmin.from('profiles').delete().eq('id', id);
   if (deleteProfileError) return { success: false, error: deleteProfileError.message };
 
-  await logActivity(
-    userSupabase,
-    'DELETE',
-    'profiles',
-    id,
-    `قام المستخدم ${currentAdminEmail} بحذف المستخدم ${targetEmail}`
-  );
+  await logActivity({
+    userId: user?.id || null,
+    userEmail: currentAdminEmail,
+    actionType: 'DELETE',
+    targetTable: 'profiles',
+    targetId: id,
+    description: `User ${currentAdminEmail} deleted user ${targetEmail}`,
+    fieldName: 'id',
+    oldValue: id,
+    newValue: undefined,
+  });
 
   revalidatePath('/admin/users');
   return { success: true };
 }
 
 export async function createNewPermissionAction(formData: { name: string; module: string; description: string }) {
-  const allowedManage = await hasPermission('users.manage');
-  if (!allowedManage) {
+  if (!(await verifyAdminAccess())) {
     return { success: false, error: 'عذراً، لا تمتلك الصلاحية الكافية لإنشاء صلاحيات جديدة.' };
   }
 
   const supabase = await getSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-  const currentAdminEmail = user?.email || 'مشرف النظام';
+  const currentAdminEmail = user?.email || 'System Admin';
 
   const supabaseAdmin = getSupabaseAdminClient();
   const { error } = await supabaseAdmin.from('permissions').insert([
@@ -306,28 +484,30 @@ export async function createNewPermissionAction(formData: { name: string; module
     return { success: false, error: 'هذه الصلاحية موجودة مسبقاً أو حدث خطأ في الإضافة.' };
   }
 
-  await logActivity(
-    supabase,
-    'CREATE',
-    'permissions',
-    null,
-    `قام المستخدم ${currentAdminEmail} بإنشاء صلاحية جديدة باسم: ${formData.name.trim()}`
-  );
+  await logActivity({
+    userId: user?.id || null,
+    userEmail: currentAdminEmail,
+    actionType: 'CREATE',
+    targetTable: 'permissions',
+    targetId: null,
+    description: `User ${currentAdminEmail} created a new permission named: ${formData.name.trim()}`,
+    fieldName: 'name',
+    oldValue: undefined,
+    newValue: formData.name.trim(),
+  });
 
   revalidatePath('/admin/users');
   return { success: true };
 }
 
-
 export async function updateRolePermissionsAction(roleId: string, permissionIds: string[]) {
-  const allowedManage = await hasPermission('users.manage');
-  if (!allowedManage) {
+  if (!(await verifyAdminAccess())) {
     return { success: false, error: 'عذراً، لا تمتلك الصلاحية الكافية لتعديل صلاحيات الأدوار.' };
   }
 
   const supabase = await getSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-  const currentAdminEmail = user?.email || 'مشرف النظام';
+  const currentAdminEmail = user?.email || 'System Admin';
 
   const supabaseAdmin = getSupabaseAdminClient();
 
@@ -343,25 +523,30 @@ export async function updateRolePermissionsAction(roleId: string, permissionIds:
     if (error) return { success: false, error: error.message };
   }
 
-  await logActivity(
-    supabase,
-    'UPDATE_PERMISSIONS',
-    'role_permissions',
-    roleId,
-    `قام المستخدم ${currentAdminEmail} بتحديث صلاحيات الدور برقم المعرف: ${roleId}`
-  );
+  await logActivity({
+    userId: user?.id || null,
+    userEmail: currentAdminEmail,
+    actionType: 'UPDATE_PERMISSIONS',
+    targetTable: 'role_permissions',
+    targetId: roleId,
+    description: `User ${currentAdminEmail} updated permissions for role ID: ${roleId}`,
+    fieldName: 'permissions',
+    oldValue: 'previous_set',
+    newValue: `${permissionIds.length} permissions`,
+  });
 
   revalidatePath('/admin/users');
   return { success: true };
-
 }
+
 export async function generateSecureResetTokenAction(targetUserId: string, targetUserEmail: string) {
-  const canManage = await hasPermission('users.manage');
-  if (!canManage) {
+  if (!(await verifyAdminAccess())) {
     return { success: false, error: 'غير مصرح لك بتنفيذ هذا الإجراء.' };
   }
 
   const supabaseAdmin = getSupabaseAdminClient();
+  const supabase = await getSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
   const resetToken = crypto.randomBytes(32).toString('hex');
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
@@ -378,6 +563,18 @@ export async function generateSecureResetTokenAction(targetUserId: string, targe
     return { success: false, error: 'فشل إنشاء رابط إعادة التعيين الآمن.' };
   }
 
+  await logActivity({
+    userId: user?.id || null,
+    userEmail: user?.email || 'system',
+    actionType: 'GENERATE_RESET_TOKEN',
+    targetTable: 'profiles',
+    targetId: targetUserId,
+    description: `Admin generated a password reset token for user: ${targetUserEmail}`,
+    fieldName: 'reset_token',
+    oldValue: undefined,
+    newValue: 'generated_token',
+  });
+
   const resetLink = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/admin/reset-password?token=${resetToken}&email=${encodeURIComponent(targetUserEmail)}`;
 
   return {
@@ -390,10 +587,9 @@ export async function generateSecureResetTokenAction(targetUserId: string, targe
 export async function executePasswordResetAction(token: string, newPassword: string) {
   const supabaseAdmin = getSupabaseAdminClient();
 
-  // 1. البحث عن المستخدم بالتوكن
   const { data: profile, error: fetchError } = await supabaseAdmin
     .from('profiles')
-    .select('id, reset_token_expires_at')
+    .select('id, email, reset_token_expires_at')
     .eq('reset_token', token)
     .single();
 
@@ -425,6 +621,18 @@ export async function executePasswordResetAction(token: string, newPassword: str
       failed_login_attempts: 0
     })
     .eq('id', profile.id);
+
+  await logActivity({
+    userId: profile.id,
+    userEmail: profile.email || 'unknown',
+    actionType: 'RESET_PASSWORD',
+    targetTable: 'profiles',
+    targetId: profile.id,
+    description: `Password successfully reset for user: ${profile.email}`,
+    fieldName: 'password',
+    oldValue: 'encrypted_old',
+    newValue: 'encrypted_new',
+  });
 
   return { success: true };
 }

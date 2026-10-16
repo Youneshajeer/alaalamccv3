@@ -1,38 +1,23 @@
-import { getSupabaseServerClient } from '@/lib/supabase/supabase-server';
+import { getSupabaseAdminClient } from '@/lib/supabase/supabase-server';
 import { redirect } from 'next/navigation';
 import DashboardClient from './DashboardClient';
 import { hasPermission } from '@/lib/supabase/permissions';
+import { getCurrentUserRole } from '@/lib/supabase/auth';
+
+export const revalidate = 0;
 
 export default async function AdminDashboardPage() {
-  const supabase = await getSupabaseServerClient();
-  
-  const { data: { user } } = await supabase.auth.getUser();
+  const supabase = await getSupabaseAdminClient();
+  const authData = await getCurrentUserRole();
 
-  if (!user) {
-    redirect('/admin/login');
+  if (!authData || !authData.user || !authData.isAuthorized) {
+    redirect('/admin/login?error=unauthorized');
   }
-  
+  const { user, role, roleDisplayName } = authData;
   const userEmail = user.email || '';
+  const userRole = role || 'supervisor';
 
-  const { data: userRoleRecord } = await supabase
-    .from('user_roles')
-    .select(`
-      roles (
-        name
-      )
-    `)
-    .eq('user_id', user.id)
-    .maybeSingle();
-
-  const dbRoleName = (userRoleRecord?.roles as any)?.name;
-
-  const { data: currentProfile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .maybeSingle();
-
-  const userRole = dbRoleName || currentProfile?.role || 'supervisor';
+  const canViewDashboard = await hasPermission('dashboard.view');
   const canViewMessages = await hasPermission('messages.view');     
   const canViewRequests = await hasPermission('requests.view');     
   const canViewJobs = await hasPermission('jobs.view');             
@@ -41,7 +26,6 @@ export default async function AdminDashboardPage() {
   const { data: messagesData, count: totalMessages } = await supabase
     .from('customer_service')
     .select('*', { count: 'exact' });
-
   const messagesList = messagesData || [];
   const unreadMessages = messagesList.filter((m: any) => m.status === 'unread').length;
   const readMessages = messagesList.filter((m: any) => m.status === 'read').length;
@@ -56,20 +40,16 @@ export default async function AdminDashboardPage() {
   const actionTakenRequests = requestsList.filter((r: any) => r.action_taken === true).length;
   const pendingRequests = requestsList.filter((r: any) => r.action_taken === false || !r.action_taken).length;
 
-  // استعلام الوظائف وتصنيفها بشكل مرن
   const { data: jobsData, count: totalJobs } = await supabase
     .from('jobs')
     .select('*', { count: 'exact' });
 
   const jobsList = jobsData || [];
-  // فحص مرن للحالة (يقبل الحروف الكبيرة والصغيرة أو القيم المنطقية)
   const activeJobs = jobsList.filter((j: any) => 
     j.status === 'active' || j.status === 'Active' || j.is_active === true
   ).length;
-  
   const inactiveJobs = (totalJobs || jobsList.length) - activeJobs;
 
-  // استعلام المتقدمين وتصنيفهم بشكل مرن
   const { data: careersData, count: totalCareers } = await supabase
     .from('careers')
     .select('*', { count: 'exact' });
@@ -78,7 +58,6 @@ export default async function AdminDashboardPage() {
   const advertisedApplicants = careersList.filter((c: any) => 
     c.job_id !== null && c.job_id !== '' && c.job_id !== undefined
   ).length;
-  
   const directApplicants = (totalCareers || careersList.length) - advertisedApplicants;
 
   const { data: rolesData } = await supabase.from('roles').select('id, name, display_name');
@@ -87,17 +66,18 @@ export default async function AdminDashboardPage() {
   const { data: profilesWithRolesData } = await supabase
     .from('profiles')
     .select(`
-      id,
-      is_active,
+      *,
       user_roles (
+        role_id,
         roles (
           id,
           name,
           display_name
         )
       )
-    `);
-
+    `)
+    .order('created_at', { ascending: false })
+    .limit(4);
   const profiles = profilesWithRolesData || [];
 
   let totalAdmins = 0;
@@ -179,11 +159,13 @@ export default async function AdminDashboardPage() {
         recentRequests={recentRequests}
         userEmail={userEmail}
         userRole={userRole}
+        roleDisplayName={roleDisplayName}
         permissions={{
           canViewMessages,
           canViewRequests,
           canViewJobs,
           canViewUsers,
+          isAuthorized: authData.isAuthorized,
         }}
       />
     </div>

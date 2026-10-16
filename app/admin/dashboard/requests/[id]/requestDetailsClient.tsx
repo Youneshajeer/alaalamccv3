@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/utils/useTranslation';
 import { updateRequestStatus, takeActionOnRequests, resetActionOnRequests, deleteRequest } from '../actions';
@@ -24,12 +24,20 @@ interface RequestItem {
 interface RequestDetailsClientProps {
   requestItem: RequestItem;
   userEmail: string;
-  userRole: 'admin' | 'supervisor';
+  userRole: string;
+  roleDisplayName: string;
 }
 
-export default function RequestDetailsClient({ requestItem, userEmail, userRole }: RequestDetailsClientProps) {
+export default function RequestDetailsClient({ 
+  requestItem, 
+  userEmail, 
+  userRole, 
+  roleDisplayName 
+}: RequestDetailsClientProps) {
   const router = useRouter();
   const { lang } = useTranslation();
+
+  const isAdmin = userRole === 'admin' || userRole === 'super_admin';
 
   const handleToggleStatus = async () => {
     const newStatus = requestItem.status === 'unread' ? 'read' : 'unread';
@@ -50,11 +58,11 @@ export default function RequestDetailsClient({ requestItem, userEmail, userRole 
   };
 
   const handleResetAction = async () => {
-    if (userRole !== 'admin') {
+    if (!isAdmin) {
       alert(lang === 'ar' ? 'عذراً، إلغاء الإجراء مخصص للأدمن فقط' : 'Admin only action');
       return;
     }
-    if (confirm(lang === 'ar' ? 'هل أنت متأكد من إلغاء الإجراء وإعادة الطلب لقيد الانتظار؟' : 'Reset action?')) {
+    if (confirm(lang === 'ar' ? 'هل أنت متأكد من إلغاء الإجراء وإعادة الطلب قيد الانتظار؟' : 'Reset action?')) {
       try {
         await resetActionOnRequests([requestItem.id]);
         router.refresh();
@@ -65,7 +73,7 @@ export default function RequestDetailsClient({ requestItem, userEmail, userRole 
   };
 
   const handleDelete = async () => {
-    if (userRole !== 'admin') {
+    if (!isAdmin) {
       alert(lang === 'ar' ? 'الحذف مخصص للأدمن فقط' : 'Admin only');
       return;
     }
@@ -89,6 +97,10 @@ export default function RequestDetailsClient({ requestItem, userEmail, userRole 
           {lang === 'ar' ? '← عودة لطلبات الخدمات' : '← Back to Requests'}
         </button>
 
+        <div className="text-xs text-slate-500 bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800">
+          <span>{userEmail}</span> — <strong className="text-emerald-600">{roleDisplayName}</strong>
+        </div>
+
         <div className="flex flex-wrap gap-2">
           <button
             onClick={handleToggleStatus}
@@ -111,7 +123,7 @@ export default function RequestDetailsClient({ requestItem, userEmail, userRole 
               {lang === 'ar' ? 'اتخاذ إجراء' : 'Take Action'}
             </button>
           ) : (
-            userRole === 'admin' && (
+            isAdmin && (
               <button
                 onClick={handleResetAction}
                 className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-2xl transition-all shadow-sm"
@@ -121,7 +133,7 @@ export default function RequestDetailsClient({ requestItem, userEmail, userRole 
             )
           )}
 
-          {userRole === 'admin' && (
+          {isAdmin && (
             <button
               onClick={handleDelete}
               className="px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold rounded-2xl transition-all shadow-sm"

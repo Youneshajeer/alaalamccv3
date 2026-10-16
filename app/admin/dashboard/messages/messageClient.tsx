@@ -221,7 +221,6 @@ export default function MessageClient({
                 <th className="p-4">{lang === 'ar' ? 'المرسل والشركة' : 'Sender & Company'}</th>
                 <th className="p-4">{lang === 'ar' ? 'البريد والهاتف' : 'Email & Phone'}</th>
                 <th className="p-4">{lang === 'ar' ? 'مضمون الرسالة' : 'Message'}</th>
-                {/* --- إضافة عمود الحالة --- */}
                 <th className="p-4">{lang === 'ar' ? 'الحالة' : 'Status'}</th>
                 <th className="p-4">{lang === 'ar' ? 'تغيير الحالة' : 'Status Action'}</th>
                 <th className="p-4">{lang === 'ar' ? 'التاريخ' : 'Date'}</th>

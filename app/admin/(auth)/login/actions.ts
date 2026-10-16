@@ -1,57 +1,33 @@
 'use server';
 
-import { cookies } from 'next/headers';
 import { z } from 'zod';
 import { getSupabaseAdminClient, getSupabaseServerClient } from '@/lib/supabase/supabase-server';
+import { logActivity } from '@/lib/supabase/logger'; // 🟢 استيراد الدالة المركزية الموحدة
 
 const loginSchema = z.object({
   email: z.string().email('البريد الإلكتروني غير صالح'),
   password: z.string().min(6, 'كلمة المرور يجب أن لا تقل عن 6 أحرف'),
 });
 
-async function logActivity(
-  supabaseAdmin: any,
-  userId: string | null,
-  userEmail: string,
-  actionType: string,
-  targetTable: string,
-  targetId: string | null,
-  description: string
-) {
-  try {
-    await supabaseAdmin.from('activity_logs').insert({
-      user_id: userId,
-      user_email: userEmail,
-      action_type: actionType,
-      target_table: targetTable,
-      target_id: targetId,
-      description: description,
-    });
-  } catch (err) {
-    console.error('Failed to log login activity:', err);
-  }
-}
-
 export async function loginAction(formData: { email: string; password: string }) {
   const parseResult = loginSchema.safeParse(formData);
   const supabaseAdmin = getSupabaseAdminClient();
 
   if (!parseResult.success) {
-    const errorMsg = parseResult.error.issues[0]?.message || 'بيانات الإدخال غير صالحة.';
+    const errorMsg = parseResult.error.issues[0]?.message || 'Invalid input data.';
     
-    await logActivity(
-      supabaseAdmin,
-      null,
-      formData.email || 'unknown',
-      'LOGIN_FAILED',
-      'profiles',
-      null,
-      `محاولة دخول فاشلة (بيانات غير صالحة): ${errorMsg}`
-    );
+    await logActivity({
+      userId: null,
+      userEmail: formData.email || 'unknown',
+      actionType: 'LOGIN_FAILED',
+      targetTable: 'profiles',
+      targetId: null,
+      description: `Failed login attempt (invalid data): ${errorMsg}`,
+    });
 
     return {
       success: false,
-      error: errorMsg,
+      error: parseResult.error.issues[0]?.message || 'بيانات الإدخال غير صالحة.',
     };
   }
 
@@ -65,15 +41,17 @@ export async function loginAction(formData: { email: string; password: string })
     .single();
 
   if (profile?.is_blocked) {
-    await logActivity(
-      supabaseAdmin,
-      profile.id,
-      cleanEmail,
-      'LOGIN_BLOCKED_ATTEMPT',
-      'profiles',
-      profile.id,
-      `محاولة دخول لحساب محظور بالفعل: ${cleanEmail}`
-    );
+    await logActivity({
+      userId: profile.id,
+      userEmail: cleanEmail,
+      actionType: 'LOGIN_BLOCKED_ATTEMPT',
+      targetTable: 'profiles',
+      targetId: profile.id,
+      description: `Attempt to log into an already blocked account: ${cleanEmail}`,
+      fieldName: 'is_blocked',
+      oldValue: 'false',
+      newValue: 'true',
+    });
 
     return {
       success: false,
@@ -89,7 +67,8 @@ export async function loginAction(formData: { email: string; password: string })
 
   if (error || !data.user) {
     if (profile) {
-      const newAttempts = (profile.failed_login_attempts || 0) + 1;
+      const prevAttempts = profile.failed_login_attempts || 0;
+      const newAttempts = prevAttempts + 1;
       const shouldBlock = newAttempts >= 3;
 
       await supabaseAdmin
@@ -101,15 +80,17 @@ export async function loginAction(formData: { email: string; password: string })
         .eq('id', profile.id);
 
       if (shouldBlock) {
-        await logActivity(
-          supabaseAdmin,
-          profile.id,
-          cleanEmail,
-          'ACCOUNT_BLOCKED',
-          'profiles',
-          profile.id,
-          `تم حظر الحساب تلقائياً لتجاوزه 3 محاولات دخول خاطئة للبريد: ${cleanEmail}`
-        );
+        await logActivity({
+          userId: profile.id,
+          userEmail: cleanEmail,
+          actionType: 'ACCOUNT_BLOCKED',
+          targetTable: 'profiles',
+          targetId: profile.id,
+          description: `Account automatically blocked after exceeding 3 failed login attempts for email: ${cleanEmail}`,
+          fieldName: 'is_blocked',
+          oldValue: 'false',
+          newValue: 'true',
+        });
 
         return {
           success: false,
@@ -117,15 +98,17 @@ export async function loginAction(formData: { email: string; password: string })
         };
       }
 
-      await logActivity(
-        supabaseAdmin,
-        profile.id,
-        cleanEmail,
-        'LOGIN_FAILED',
-        'profiles',
-        profile.id,
-        `محاولة دخول فاشلة (${newAttempts}/3) للبريد: ${cleanEmail}`
-      );
+      await logActivity({
+        userId: profile.id,
+        userEmail: cleanEmail,
+        actionType: 'LOGIN_FAILED',
+        targetTable: 'profiles',
+        targetId: profile.id,
+        description: `Failed login attempt (${newAttempts}/3) for email: ${cleanEmail}`,
+        fieldName: 'failed_login_attempts',
+        oldValue: String(prevAttempts),
+        newValue: String(newAttempts),
+      });
 
       return {
         success: false,
@@ -133,15 +116,14 @@ export async function loginAction(formData: { email: string; password: string })
       };
     }
 
-    await logActivity(
-      supabaseAdmin,
-      null,
-      cleanEmail,
-      'LOGIN_FAILED',
-      'profiles',
-      null,
-      `محاولة دخول بريد غير مسجل: ${cleanEmail}`
-    );
+    await logActivity({
+      userId: null,
+      userEmail: cleanEmail,
+      actionType: 'LOGIN_FAILED',
+      targetTable: 'profiles',
+      targetId: null,
+      description: `Failed login attempt with unregistered email: ${cleanEmail}`,
+    });
 
     return {
       success: false,
@@ -159,15 +141,14 @@ export async function loginAction(formData: { email: string; password: string })
       .eq('id', profile.id);
   }
 
-  await logActivity(
-    supabaseAdmin,
-    data.user.id,
-    data.user.email || cleanEmail,
-    'LOGIN_SUCCESS',
-    'profiles',
-    data.user.id,
-    `تم تسجيل الدخول بنجاح إلى النظام للبريد: ${cleanEmail}`
-  );
+  await logActivity({
+    userId: data.user.id,
+    userEmail: data.user.email || cleanEmail,
+    actionType: 'LOGIN_SUCCESS',
+    targetTable: 'profiles',
+    targetId: data.user.id,
+    description: `User successfully logged into the system with email: ${cleanEmail}`,
+  });
 
   return { success: true };
 }

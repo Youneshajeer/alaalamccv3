@@ -10,19 +10,17 @@ export default function Hero() {
   const [lang, setLang] = useState<'ar' | 'en'>('ar');
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  // ⚡ حل مشكلة البطء: استبدال الـ setInterval المزعج بقراءة آمنة مرة واحدة وعند حدوث تغيير بالمتصفح
   useEffect(() => {
-    const savedLang = (localStorage.getItem('lang') as 'ar' | 'en') || 'ar';
-    setLang(savedLang);
+    const updateLang = () => {
+      const savedLang = (localStorage.getItem('lang') as 'ar' | 'en') || 'ar';
+      setLang(savedLang);
+    };
 
-    const checkLangInterval = setInterval(() => {
-      const currentLang = (localStorage.getItem('lang') as 'ar' | 'en') || 'ar';
-      if (currentLang !== lang) {
-        setLang(currentLang);
-      }
-    }, 100);
-
-    return () => clearInterval(checkLangInterval);
-  }, [lang]);
+    updateLang();
+    window.addEventListener('storage', updateLang);
+    return () => window.removeEventListener('storage', updateLang);
+  }, []);
 
   const t: any = dictionaries[lang]?.home?.hero || {};
   const translatedSlides = t?.slides || [];

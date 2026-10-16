@@ -62,7 +62,6 @@ export default function JobDetailsClient({
   const [applications, setApplications] = useState<Applicant[]>(initialApplications || []);
   const [loadingCvId, setLoadingCvId] = useState<string | null>(null);
   
-  // حالات البحث، الفلترة النصية، والصفحات
   const [searchQuery, setSearchQuery] = useState('');
   const [departmentQuery, setDepartmentQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -126,7 +125,6 @@ export default function JobDetailsClient({
     }
   };
 
-  // زر إلغاء وتصفية الفلاتر
   const handleResetFilters = () => {
     setSearchQuery('');
     setDepartmentQuery('');
@@ -138,7 +136,6 @@ export default function JobDetailsClient({
   const jobTitle = lang === 'ar' ? (job.title_ar || job.title) : (job.title_en || job.title);
   const jobDescription = lang === 'ar' ? (job.description_ar || job.description) : (job.description_en || job.description);
 
-  // تصفية البيانات المتقدمة (بحث شامل، بحث التخصص النصي، الحالة، والخبرة)
   const filteredApplications = useMemo(() => {
     return applications.filter((app) => {
       const name = app.full_name || app.name || '';
@@ -160,7 +157,6 @@ export default function JobDetailsClient({
     });
   }, [applications, searchQuery, departmentQuery, statusFilter, experienceFilter, jobTitle, job.department]);
 
-  // تقسيم الصفحات (Pagination)
   const totalPages = Math.ceil(filteredApplications.length / itemsPerPage);
   const paginatedApplications = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
@@ -189,7 +185,6 @@ export default function JobDetailsClient({
           </button>
         </div>
 
-        {/* تفاصيل الوظيفة */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -213,11 +208,9 @@ export default function JobDetailsClient({
           )}
         </div>
 
-        {/* أدوات البحث والفلترة المتقدمة */}
         <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             
-            {/* بحث شامل */}
             <div className="relative">
               <Search className="absolute right-3 top-3 w-4 h-4 text-slate-400" />
               <input
@@ -229,7 +222,6 @@ export default function JobDetailsClient({
               />
             </div>
 
-            {/* مربع بحث التخصص */}
             <div className="relative">
               <Building2 className="absolute right-3 top-3 w-4 h-4 text-slate-400" />
               <input
@@ -241,7 +233,6 @@ export default function JobDetailsClient({
               />
             </div>
 
-            {/* فلترة حسب الحالة */}
             <div>
               <select
                 value={statusFilter}
@@ -256,7 +247,6 @@ export default function JobDetailsClient({
               </select>
             </div>
 
-            {/* فلترة حسب سنوات الخبرة */}
             <div>
               <select
                 value={experienceFilter}
@@ -272,7 +262,6 @@ export default function JobDetailsClient({
 
           </div>
 
-          {/* زر إلغاء الفلترة */}
           <div className="flex justify-end pt-2 border-t border-slate-100 dark:border-slate-800">
             <button
               onClick={handleResetFilters}
@@ -284,7 +273,6 @@ export default function JobDetailsClient({
           </div>
         </div>
 
-        {/* جدول عرض المتقدمين الاحترافي */}
         <div className="space-y-4">
           <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 px-1">
             {lang === 'ar' ? 'سجل المتقدمين' : 'Applicants List'}
@@ -311,7 +299,6 @@ export default function JobDetailsClient({
                     {paginatedApplications.map((app) => (
                       <tr key={app.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition">
                         
-                        {/* معلومات المتقدم (تفاعلية للاستدعاء والإيميل) */}
                         <td className="p-4">
                           <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                             <User className="w-3.5 h-3.5 text-emerald-500" />
@@ -329,7 +316,6 @@ export default function JobDetailsClient({
                           </div>
                         </td>
 
-                        {/* التخصص والقسم */}
                         <td className="p-4">
                           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px]">
                             <Building2 className="w-3.5 h-3.5" />
@@ -337,7 +323,6 @@ export default function JobDetailsClient({
                           </span>
                         </td>
 
-                        {/* الخبرة وتاريخ التقديم */}
                         <td className="p-4 space-y-1">
                           <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400">
                             <Clock className="w-3.5 h-3.5" />
@@ -349,7 +334,6 @@ export default function JobDetailsClient({
                           </div>
                         </td>
 
-                        {/* الحالة الحالية */}
                         <td className="p-4">
                           <span className={`inline-block px-3 py-1 rounded-full font-bold text-[11px] ${
                             app.status === 'accepted' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' :
@@ -364,7 +348,6 @@ export default function JobDetailsClient({
                           </span>
                         </td>
 
-                        {/* تغيير الحالة والإجراءات (مع زر المعاينة وزر التحميل) */}
                         <td className="p-4">
                           <div className="flex flex-wrap items-center gap-2">
                             <div className="flex flex-col gap-0.5">
@@ -426,7 +409,6 @@ export default function JobDetailsClient({
             </div>
           )}
 
-          {/* نظام الصفحات (Pagination Controls) */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between pt-4">
               <span className="text-xs text-slate-500">

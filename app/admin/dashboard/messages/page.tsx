@@ -13,7 +13,7 @@ interface PageProps {
 }
 
 export default async function MessagesPage({ searchParams }: PageProps) {
-    const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
@@ -22,6 +22,7 @@ export default async function MessagesPage({ searchParams }: PageProps) {
 
   const userEmail = user.email || '';
 
+  // 🔒 جلب الدور حصرياً من النظام الحديث user_roles فقط
   const { data: userRoleRecord } = await supabase
     .from('user_roles')
     .select(`
@@ -33,21 +34,20 @@ export default async function MessagesPage({ searchParams }: PageProps) {
     .maybeSingle();
 
   const dbRoleName = (userRoleRecord?.roles as any)?.name;
-  const { data: currentProfile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .maybeSingle();
+  
+  // ✅ الاعتماد حصرياً على الدور الحديث وإلغاء الاستعلام القديم من profiles تماماً
+  const userRole = dbRoleName || 'supervisor';
 
-  const userRole = dbRoleName || currentProfile?.role || 'supervisor';
-const allowed = await hasPermission('messages.view');
+  const allowed = await hasPermission('messages.view');
 
   if (!allowed) {
     redirect('/admin/dashboard?error=unauthorized');
   }
-  const allowdView=await hasPermission('messages.view')
-  const allowdManage=await hasPermission('messages.manage')
-  const allowdDelete=await hasPermission('messages.delete')
+
+  const allowdView = await hasPermission('messages.view');
+  const allowdManage = await hasPermission('messages.manage');
+  const allowdDelete = await hasPermission('messages.delete');
+  
   const cookieStore = await cookies();
   const lang = (cookieStore.get('lang')?.value as 'ar' | 'en') || 'ar';
 

@@ -1,6 +1,8 @@
 'use server';
-import { getSupabaseServerClient } from '@/lib/supabase/supabase-server';
+
+import { getSupabaseServerClient, getSupabaseAdminClient } from '@/lib/supabase/supabase-server';
 import { redirect } from 'next/navigation';
+import { logActivity } from '@/lib/supabase/logger';
 
 async function verifyAdminAccess(supabase: any) {
   const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -84,7 +86,12 @@ export async function updateApplicationStatus(
     return { success: false, error: authCheck.error };
   }
 
-  const { error } = await supabase
+  const adminClient = getSupabaseAdminClient();
+  const { data: appData } = await adminClient.from('careers').select('email, status').eq('id', id).single();
+  const applicantEmail = appData?.email || id;
+  const oldStatus = appData?.status || 'unknown';
+
+  const { error } = await adminClient
     .from('careers')
     .update({ status })
     .eq('id', id);
@@ -93,6 +100,21 @@ export async function updateApplicationStatus(
     console.error('Error updating status:', error);
     return { success: false, error: 'فشل تحديث حالة الطلب.' };
   }
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const currentAdminEmail = user?.email || 'System Admin';
+
+  await logActivity({
+    userId: user?.id || null,
+    userEmail: currentAdminEmail,
+    actionType: 'UPDATE_STATUS',
+    targetTable: 'careers',
+    targetId: id,
+    description: `User ${currentAdminEmail} updated job application status for (${applicantEmail}) to (${status})`,
+    fieldName: 'status',
+    oldValue: oldStatus,
+    newValue: status,
+  });
 
   return { success: true };
 }
@@ -106,16 +128,20 @@ export async function deleteApplication(id: string, cvUrl?: string | null) {
     return { success: false, error: authCheck.error };
   }
 
+  const adminClient = getSupabaseAdminClient();
+  const { data: appData } = await adminClient.from('careers').select('email').eq('id', id).single();
+  const applicantEmail = appData?.email || id;
+
   if (cvUrl) {
     let cleanPath = cvUrl.trim().split('?')[0];
     if (cleanPath.startsWith('resumes/')) {
       cleanPath = cleanPath.replace(/^resumes\//, '');
     }
 
-    await supabase.storage.from('resumes').remove([cleanPath, cvUrl.trim()]);
+    await adminClient.storage.from('resumes').remove([cleanPath, cvUrl.trim()]);
   }
 
-  const { error } = await supabase
+  const { error } = await adminClient
     .from('careers')
     .delete()
     .eq('id', id);
@@ -124,6 +150,21 @@ export async function deleteApplication(id: string, cvUrl?: string | null) {
     console.error('Error deleting application:', error);
     return { success: false, error: 'فشل حذف الطلب.' };
   }
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const currentAdminEmail = user?.email || 'System Admin';
+
+  await logActivity({
+    userId: user?.id || null,
+    userEmail: currentAdminEmail,
+    actionType: 'DELETE',
+    targetTable: 'careers',
+    targetId: id,
+    description: `User ${currentAdminEmail} deleted job application for (${applicantEmail})`,
+    fieldName: 'id',
+    oldValue: id,
+    newValue: undefined,
+  });
 
   return { success: true };
 }

@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import  Link  from 'next/navigation';
+import Link from 'next/link';
 import AdminHeader from '@/components/admin/AdminHeader';
 import { purgeOldActivityLogs } from './actions';
 
@@ -13,6 +13,7 @@ interface ActivityLogsClientProps {
   totalPages: number;
   userEmail: string;
   userRole: string;
+  roleDisplayName?: string;
 }
 
 export default function ActivityLogsClient({
@@ -22,6 +23,7 @@ export default function ActivityLogsClient({
   totalPages,
   userEmail,
   userRole,
+  roleDisplayName,
 }: ActivityLogsClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -34,12 +36,10 @@ export default function ActivityLogsClient({
   const [startDate, setStartDate] = useState(searchParams.get('startDate') || '');
   const [endDate, setEndDate] = useState(searchParams.get('endDate') || '');
 
-  // 2. حالات التصفية الفورية للنتائج المعروضة حالياً بالصفحة (In-Memory Client Filters)
   const [clientSearchText, setClientSearchText] = useState('');
   const [clientActionFilter, setClientActionFilter] = useState('ALL');
   const [clientTableFilter, setClientTableFilter] = useState('ALL');
 
-  // معالجة الفلترة السيرفرية
   const handleServerSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams();
@@ -90,11 +90,11 @@ export default function ActivityLogsClient({
   };
 
   const filteredLogs = useMemo(() => {
-    return initialLogs.filter((log) => {
+    return initialLogs.filter((log: any) => {
       const matchesText =
         clientSearchText.trim() === '' ||
-        log.user_email.toLowerCase().includes(clientSearchText.toLowerCase()) ||
-        log.description.toLowerCase().includes(clientSearchText.toLowerCase());
+        log.user_email?.toLowerCase().includes(clientSearchText.toLowerCase()) ||
+        log.description?.toLowerCase().includes(clientSearchText.toLowerCase());
 
       const matchesAction =
         clientActionFilter === 'ALL' || log.action_type === clientActionFilter;
@@ -107,28 +107,35 @@ export default function ActivityLogsClient({
   }, [initialLogs, clientSearchText, clientActionFilter, clientTableFilter]);
 
   const uniqueCurrentActions = useMemo(() => {
-    return Array.from(new Set(initialLogs.map((l) => l.action_type)));
+    return Array.from(new Set(initialLogs.map((l: any) => l.action_type)));
   }, [initialLogs]);
 
   const uniqueCurrentTables = useMemo(() => {
-    return Array.from(new Set(initialLogs.map((l) => l.target_table)));
+    return Array.from(new Set(initialLogs.map((l: any) => l.target_table)));
   }, [initialLogs]);
 
   return (
     <div dir="rtl" className="space-y-8 p-6 sm:p-10 min-h-screen bg-slate-50 dark:bg-slate-950">
       <AdminHeader
-        titleAr="سجل نشاطات النظام والأمان"
-        titleEn="Activity & Audit Logs"
+        titleAr="سجل نشاط المستخدمين"
+        titleEn="Activity & Logs"
         lang="ar"
         userEmail={userEmail}
-        userRole={userRole}
+        userRole={(userRole === 'admin' || userRole === 'supervisor') ? userRole : 'admin'}
       />
+
+      {roleDisplayName && (
+        <div className="text-xs text-slate-500 bg-white dark:bg-slate-900 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-sm">
+          <span>{userEmail}</span>
+          <span className="font-bold text-emerald-600">{roleDisplayName}</span>
+        </div>
+      )}
 
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
         <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
           <h2 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
             <span>🔍</span>
-            <span>استعلام قاعدة البيانات </span>
+            <span>استعلام قاعدة البيانات</span>
           </h2>
           <button
             onClick={handlePurge}
@@ -259,7 +266,7 @@ export default function ActivityLogsClient({
             >
               <option value="ALL">جميع إجراءات الصفحة الحالية</option>
               {uniqueCurrentActions.map((act) => (
-                <option key={act} value={act}>{act}</option>
+                <option key={String(act)} value={String(act)}>{String(act)}</option>
               ))}
             </select>
 
@@ -270,13 +277,12 @@ export default function ActivityLogsClient({
             >
               <option value="ALL">جميع جداول الصفحة الحالية</option>
               {uniqueCurrentTables.map((tbl) => (
-                <option key={tbl} value={tbl}>{tbl}</option>
+                <option key={String(tbl)} value={String(tbl)}>{String(tbl)}</option>
               ))}
             </select>
           </div>
         </div>
 
-        {/* الجدول الرئيسي */}
         <div className="overflow-x-auto">
           <table className="w-full text-right border-collapse">
             <thead>
@@ -290,9 +296,14 @@ export default function ActivityLogsClient({
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
               {filteredLogs.length > 0 ? (
-                filteredLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                    <td className="p-3 font-bold text-slate-900 dark:text-white">
+                filteredLogs.map((log: any) => (
+                  <tr 
+                    key={log.id} 
+                    onClick={() => router.push(`/admin/activity-logs/${log.id}`)}
+                    className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
+                    title="انقر لعرض تفاصيل التعديل الكاملة"
+                  >
+                    <td className="p-3 font-bold text-slate-900 dark:text-white" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => setClientSearchText(log.user_email)}
                         className="hover:text-emerald-600 underline decoration-dotted cursor-pointer text-right"
@@ -301,7 +312,7 @@ export default function ActivityLogsClient({
                         {log.user_email}
                       </button>
                     </td>
-                    <td className="p-3">
+                    <td className="p-3" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => setClientActionFilter(log.action_type)}
                         className="px-2.5 py-1 rounded-full font-bold bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 hover:bg-blue-100 transition-colors cursor-pointer"
@@ -310,7 +321,7 @@ export default function ActivityLogsClient({
                         {log.action_type}
                       </button>
                     </td>
-                    <td className="p-3 font-medium text-purple-600 dark:text-purple-400">
+                    <td className="p-3 font-medium text-purple-600 dark:text-purple-400" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => setClientTableFilter(log.target_table)}
                         className="hover:underline cursor-pointer"
@@ -319,8 +330,15 @@ export default function ActivityLogsClient({
                         {log.target_table}
                       </button>
                     </td>
-                    <td className="p-3 text-slate-600 dark:text-slate-300 max-w-xs truncate" title={log.description}>
-                      {log.description}
+                    <td className="p-3 text-slate-600 dark:text-slate-300 max-w-xs">
+                      <div className="max-h-20 overflow-y-auto pr-1 whitespace-pre-wrap text-[11px] leading-relaxed custom-scrollbar">
+                        {log.description}
+                        {log.field_name && (
+                          <span className="block mt-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
+                            الحقل: {log.field_name} (من: {log.old_value || 'فارغ'} إلى: {log.new_value || 'فارغ'})
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="p-3 text-slate-400 whitespace-nowrap">
                       {new Date(log.created_at).toLocaleString('ar-SA')}

@@ -11,7 +11,8 @@ import {
   createNewPermissionAction, 
   updateRolePermissionsAction, 
   unblockUserAction,
-  generateSecureResetTokenAction
+  generateSecureResetTokenAction,
+  createNewRoleAction
 } from './actions';
 
 interface Role {
@@ -48,7 +49,8 @@ interface UsersManagerProps {
   currentUserId: string;
   currentUserEmail?: string;
   currentUserRole?: string;
-  canViewActivityLogs?: boolean,
+  roleDisplayName?: string;
+  canViewActivityLogs?: boolean;
 }
 
 export default function UsersManagerClient({
@@ -58,6 +60,7 @@ export default function UsersManagerClient({
   currentUserId,
   currentUserEmail = '',
   currentUserRole = 'supervisor',
+  roleDisplayName,
   canViewActivityLogs,
 }: UsersManagerProps) {
   const [users, setUsers] = useState<UserProfile[]>(initialUsers);
@@ -70,37 +73,79 @@ export default function UsersManagerClient({
   const [password, setPassword] = useState('');
   const [selectedAddRoleId, setSelectedAddRoleId] = useState(roles[0]?.id || '');
 
-  const [selectedRoleId, setSelectedRoleId] = useState<string>(roles[0]?.id || '');
-  const currentRole = roles.find((r) => r.id === selectedRoleId) || roles[0];
+  const [selectedRoleId, setSelectedRoleId] = useState<string>('');
+  const currentRole = roles.find((r) => r.id === selectedRoleId);
   
-  const [assignedPermissions, setAssignedPermissions] = useState<string[]>(
-    currentRole?.role_permissions?.map((rp) => rp.permission_id) || []
-  );
+  const [assignedPermissions, setAssignedPermissions] = useState<string[]>([]);
 
   const [newPermName, setNewPermName] = useState('');
   const [newPermModule, setNewPermModule] = useState('jobs');
   const [newPermDesc, setNewPermDesc] = useState('');
 
+  const [newRoleName, setNewRoleName] = useState('');
+  const [newRoleDisplayName, setNewRoleDisplayName] = useState('');
+  const [isSavingRole, setIsSavingRole] = useState(false);
+
+  const [savingPermissionId, setSavingPermissionId] = useState<string | null>(null);
+
   const handleRoleSelectChange = (roleId: string) => {
     setSelectedRoleId(roleId);
+    if (!roleId) {
+      setAssignedPermissions([]);
+      return;
+    }
     const found = roles.find((r) => r.id === roleId);
     setAssignedPermissions(found?.role_permissions?.map((rp) => rp.permission_id) || []);
   };
 
   const handleCheckboxToggle = (permId: string) => {
-    setAssignedPermissions((prev) =>
-      prev.includes(permId) ? prev.filter((id) => id !== permId) : [...prev, permId]
-    );
+    if (!selectedRoleId) {
+      alert('الرجاء اختيار الدور المستهدف أولاً لتعديل الصلاحيات.');
+      return;
+    }
+
+    const updatedPermissions = assignedPermissions.includes(permId)
+      ? assignedPermissions.filter((id) => id !== permId)
+      : [...assignedPermissions, permId];
+
+    setAssignedPermissions(updatedPermissions);
+    setSavingPermissionId(permId);
+
+    startTransition(async () => {
+      try {
+        const res = await updateRolePermissionsAction(selectedRoleId, updatedPermissions);
+        if (res.success) {
+          setMessage({ text: 'تم تحديث الحفظ الفوري للصلاحيات بنجاح', type: 'success' });
+        } else {
+          setMessage({ text: res.error || 'حدث خطأ أثناء الحفظ الفوري.', type: 'error' });
+        }
+      } catch (err) {
+        setMessage({ text: 'حدث خطأ غير متوقع.', type: 'error' });
+      } finally {
+        setSavingPermissionId(null);
+      }
+    });
   };
 
-  const handleSavePermissions = () => {
-    if (!selectedRoleId) return;
+  const handleCreateRole = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newRoleName.trim() || !newRoleDisplayName.trim()) return;
+
+    setIsSavingRole(true);
     startTransition(async () => {
-      const res = await updateRolePermissionsAction(selectedRoleId, assignedPermissions);
-      if (res.success) {
-        setMessage({ text: 'تم تحديث صلاحيات الدور بنجاح!', type: 'success' });
-      } else {
-        setMessage({ text: res.error || 'حدث خطأ أثناء التحديث.', type: 'error' });
+      try {
+        const res = await createNewRoleAction({ name: newRoleName, display_name: newRoleDisplayName });
+        if (res.success) {
+          setMessage({ text: 'تمت إضافة الدور الجديد بنجاح!', type: 'success' });
+          setNewRoleName('');
+          setNewRoleDisplayName('');
+        } else {
+          setMessage({ text: res.error || 'فشل إضافة الدور الجديد.', type: 'error' });
+        }
+      } catch (err) {
+        setMessage({ text: 'حدث خطأ غير متوقع أثناء إضافة الدور.', type: 'error' });
+      } finally {
+        setIsSavingRole(false);
       }
     });
   };
@@ -183,8 +228,9 @@ export default function UsersManagerClient({
         titleEn="Manage Users & Permissions"
         lang="ar"
         userEmail={currentUserEmail}
-        userRole={currentUserRole === 'supervisor' ? 'supervisor' : 'admin'}
+        userRole={currentUserRole}
       />
+
       {message && (
         <div className={`p-4 rounded-2xl text-xs sm:text-sm font-bold ${message.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}`}>
           {message.text}
@@ -344,7 +390,7 @@ export default function UsersManagerClient({
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
           <div>
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">إدارة صلاحيات الأقسام والأدوار</h2>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">تحديد الصلاحيات مرتبة حسب صفحات النظام لكل دور وظيفي.</p>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">تحديد الصلاحيات الحفظ التلقائي والفوري عند الضغط.</p>
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -354,6 +400,7 @@ export default function UsersManagerClient({
               onChange={(e) => handleRoleSelectChange(e.target.value)}
               className="w-full sm:w-auto bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-xs sm:text-sm font-bold text-slate-800 dark:text-white outline-none cursor-pointer"
             >
+              <option value="">-- اختر الدور --</option>
               {roles.map((r) => (
                 <option key={r.id} value={r.id}>
                   {r.display_name} ({r.name})
@@ -365,19 +412,21 @@ export default function UsersManagerClient({
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+            <div className={`bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 transition-all ${!selectedRoleId ? 'opacity-60' : ''}`}>
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
                 <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                  صلاحيات الدور: <span className="text-emerald-600">{currentRole?.display_name}</span>
+                  صلاحيات الدور: <span className="text-emerald-600">{currentRole?.display_name || 'الرجاء اختيار الدور أولاً'}</span>
                 </h3>
-                <button
-                  onClick={handleSavePermissions}
-                  disabled={isPending || !selectedRoleId}
-                  className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow-sm transition-all cursor-pointer disabled:opacity-50"
-                >
-                  {isPending ? 'جاري الحفظ...' : 'حفظ التغييرات'}
-                </button>
+                <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1.5 rounded-xl">
+                  ⚡ حفظ تلقائي عند التعديل
+                </span>
               </div>
+
+              {!selectedRoleId && (
+                <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 text-amber-800 dark:text-amber-200 p-4 rounded-2xl text-xs font-bold text-center">
+                  ⚠️ يرجى اختيار الدور المستهدف من القائمة المنسدلة بالأعلى لتفعيل إعدادات وصلاحيات الأقسام.
+                </div>
+              )}
 
               <div className="space-y-6">
                 {Object.entries(permissionsByModule).map(([modKey, perms]) => (
@@ -390,26 +439,41 @@ export default function UsersManagerClient({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                       {perms.map((perm) => {
                         const isChecked = assignedPermissions.includes(perm.id);
+                        const isSavingThis = savingPermissionId === perm.id;
                         return (
-                          <label
+                          <div
                             key={perm.id}
-                            className={`flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
-                              isChecked 
-                                ? 'bg-emerald-50/60 dark:bg-emerald-950/30 border-emerald-300 text-emerald-900 dark:text-emerald-200' 
-                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
-                            }`}
+                            onClick={() => {
+                              if (!selectedRoleId) {
+                                alert('اختر الدور أولاً');
+                              }
+                            }}
                           >
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() => handleCheckboxToggle(perm.id)}
-                              className="mt-1 w-4 h-4 text-emerald-600 rounded border-slate-300 cursor-pointer"
-                            />
-                            <div className="space-y-0.5">
-                              <span className="text-xs font-bold block">{perm.name}</span>
-                              <span className="text-[11px] text-slate-400 block leading-tight">{perm.description}</span>
-                            </div>
-                          </label>
+                            <label
+                              className={`flex items-start gap-3 p-3 rounded-xl border transition-all ${
+                                !selectedRoleId ? 'cursor-not-allowed opacity-50 bg-slate-100 dark:bg-slate-800' : 'cursor-pointer'
+                              } ${
+                                isChecked 
+                                  ? 'bg-emerald-50/60 dark:bg-emerald-950/30 border-emerald-300 text-emerald-900 dark:text-emerald-200' 
+                                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
+                              } ${isSavingThis ? 'animate-pulse opacity-75' : ''}`}
+                            >
+                              <input
+                                type="checkbox"
+                                disabled={!selectedRoleId}
+                                checked={isChecked}
+                                onChange={() => handleCheckboxToggle(perm.id)}
+                                className="mt-1 w-4 h-4 text-emerald-600 rounded border-slate-300 cursor-pointer disabled:cursor-not-allowed"
+                              />
+                              <div className="space-y-0.5 flex-1">
+                                <span className="text-xs font-bold block justify-between items-center">
+                                  <span>{perm.name}</span>
+                                  {isSavingThis && <span className="text-[9px] text-emerald-600">جاري الحفظ...</span>}
+                                </span>
+                                <span className="text-[11px] text-slate-400 block leading-tight">{perm.description}</span>
+                              </div>
+                            </label>
+                          </div>
                         );
                       })}
                     </div>
@@ -420,6 +484,43 @@ export default function UsersManagerClient({
           </div>
 
           <div className="space-y-6">
+            <div className="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+              <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">إضافة دور وظيفي جديد</h3>
+              <form onSubmit={handleCreateRole} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">اسم الدور البرمجي (بالإنجليزية):</label>
+                  <input
+                    type="text"
+                    required
+                    value={newRoleName}
+                    onChange={(e) => setNewRoleName(e.target.value)}
+                    placeholder="purchasing_committee"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-mono text-slate-800 dark:text-white outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">اسم العرض (بالعربية):</label>
+                  <input
+                    type="text"
+                    required
+                    value={newRoleDisplayName}
+                    onChange={(e) => setNewRoleDisplayName(e.target.value)}
+                    placeholder="مدير لجنة المشتريات"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-800 dark:text-white outline-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSavingRole}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSavingRole ? 'جاري الإضافة...' : 'إضافة الدور الجديد'}
+                </button>
+              </form>
+            </div>
+
             <div className="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
               <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">إضافة صلاحية جديدة</h3>
               <form onSubmit={handleAddPermission} className="space-y-4">
@@ -527,6 +628,11 @@ export default function UsersManagerClient({
                   ))}
                 </select>
               </div>
+              {message && message.type === 'error' && (
+                <div className="p-3 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold text-center">
+                  {message.text}
+                </div>
+              )}
 
               <div className="flex justify-end gap-3 pt-4">
                 <button

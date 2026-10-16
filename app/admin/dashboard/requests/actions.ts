@@ -3,28 +3,10 @@
 import { getSupabaseServerClient, getSupabaseAdminClient } from '@/lib/supabase/supabase-server';
 import { revalidatePath } from 'next/cache';
 import { hasPermission } from '@/lib/supabase/permissions';
+import { logActivity } from '@/lib/supabase/logger';  
 import { z } from 'zod';
 
 const requestIdSchema = z.string().uuid('معرف الطلب غير صالح');
-
-async function logActivity(supabase: any, actionType: string, targetTable: string, targetId: string | null, description: string) {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const adminClient = getSupabaseAdminClient();
-      await adminClient.from('activity_logs').insert({
-        user_id: user.id,
-        user_email: user.email || 'unknown',
-        action_type: actionType,
-        target_table: targetTable,
-        target_id: targetId,
-        description: description,
-      });
-    }
-  } catch (err) {
-    console.error('Failed to log activity:', err);
-  }
-}
 
 export async function getRequests(page: number = 1, limit: number = 10, search: string = '', statusFilter: string = 'all') {
   const supabase = await getSupabaseServerClient();
@@ -73,7 +55,7 @@ export async function getRequestDetailsAction(id: string) {
 
   const supabaseServer = await getSupabaseServerClient();
   const { data: { user } } = await supabaseServer.auth.getUser();
-  const currentAdminEmail = user?.email || 'مشرف النظام';
+  const currentAdminEmail = user?.email || 'System Admin';
 
   const supabaseAdmin = getSupabaseAdminClient();
 
@@ -98,13 +80,17 @@ export async function getRequestDetailsAction(id: string) {
     reqData.status = 'read';
   }
 
-  await logActivity(
-    supabaseServer,
-    'READ_REQUEST',
-    'request-service',
-    validatedId,
-    `قام المستخدم ${currentAdminEmail} بقراءة والاطلاع على طلب الخدمة الخاص بـ (${requesterEmail})`
-  );
+  await logActivity({
+    userId: user?.id || null,
+    userEmail: currentAdminEmail,
+    actionType: 'READ_REQUEST',
+    targetTable: 'request-service',
+    targetId: validatedId,
+    description: `User ${currentAdminEmail} read and viewed service request from (${requesterEmail})`,
+    fieldName: 'status',
+    oldValue: 'unread',
+    newValue: 'read',
+  });
 
   return { success: true, request: reqData };
 }
@@ -119,12 +105,13 @@ export async function updateRequestStatus(id: string, status: 'unread' | 'read')
 
   const supabaseServer = await getSupabaseServerClient();
   const { data: { user } } = await supabaseServer.auth.getUser();
-  const currentAdminEmail = user?.email || 'مشرف النظام';
+  const currentAdminEmail = user?.email || 'System Admin';
 
   const supabaseAdmin = getSupabaseAdminClient();
 
-  const { data: reqData } = await supabaseAdmin.from('request-service').select('email').eq('id', validatedId).single();
+  const { data: reqData } = await supabaseAdmin.from('request-service').select('email, status').eq('id', validatedId).single();
   const requesterEmail = reqData?.email || validatedId;
+  const oldStatus = reqData?.status || 'unknown';
   
   const { error } = await supabaseAdmin
     .from('request-service')
@@ -133,13 +120,17 @@ export async function updateRequestStatus(id: string, status: 'unread' | 'read')
 
   if (error) throw new Error('فشل في تحديث الحالة');
 
-  await logActivity(
-    supabaseServer,
-    'UPDATE_STATUS',
-    'request-service',
-    validatedId,
-    `قام المستخدم ${currentAdminEmail} بتحديث حالة طلب الخدمة الخاص بـ (${requesterEmail}) إلى (${status})`
-  );
+  await logActivity({
+    userId: user?.id || null,
+    userEmail: currentAdminEmail,
+    actionType: 'UPDATE_STATUS',
+    targetTable: 'request-service',
+    targetId: validatedId,
+    description: `User ${currentAdminEmail} updated service request status for (${requesterEmail}) to (${status})`,
+    fieldName: 'status',
+    oldValue: oldStatus,
+    newValue: status,
+  });
 
   revalidatePath('/admin/dashboard/requests');
   return { success: true };
@@ -153,7 +144,7 @@ export async function takeActionOnRequests(ids: string[], note: string, userEmai
 
   const supabaseServer = await getSupabaseServerClient();
   const { data: { user } } = await supabaseServer.auth.getUser();
-  const currentAdminEmail = user?.email || 'مشرف النظام';
+  const currentAdminEmail = user?.email || 'System Admin';
   
   const validatedIds = z.array(requestIdSchema).parse(ids);
   if (validatedIds.length === 0) return { success: true };
@@ -175,13 +166,17 @@ export async function takeActionOnRequests(ids: string[], note: string, userEmai
     throw new Error('فشل في حفظ الإجراء المتخذ');
   }
 
-  await logActivity(
-    supabaseServer,
-    'TAKE_ACTION',
-    'request-service',
-    null,
-    `قام المستخدم ${currentAdminEmail} باتخاذ إجراء على عدد (${validatedIds.length}) من طلبات الخدمات`
-  );
+  await logActivity({
+    userId: user?.id || null,
+    userEmail: currentAdminEmail,
+    actionType: 'TAKE_ACTION',
+    targetTable: 'request-service',
+    targetId: null,
+    description: `User ${currentAdminEmail} took action on (${validatedIds.length}) service requests`,
+    fieldName: 'action_taken',
+    oldValue: 'false',  
+    newValue: 'true',  
+  });
 
   revalidatePath('/admin/dashboard/requests');
   return { success: true };
@@ -195,7 +190,7 @@ export async function resetActionOnRequests(ids: string[]) {
 
   const supabaseServer = await getSupabaseServerClient();
   const { data: { user } } = await supabaseServer.auth.getUser();
-  const currentAdminEmail = user?.email || 'مشرف النظام';
+  const currentAdminEmail = user?.email || 'System Admin';
 
   const validatedIds = z.array(requestIdSchema).parse(ids);
   if (validatedIds.length === 0) return { success: true };
@@ -216,13 +211,17 @@ export async function resetActionOnRequests(ids: string[]) {
     throw new Error('فشل في إلغاء الإجراء وإعادة الطلب لقيد الانتظار');
   }
 
-  await logActivity(
-    supabaseServer,
-    'RESET_ACTION',
-    'request-service',
-    null,
-    `قام المستخدم ${currentAdminEmail} بإلغاء الإجراء وإعادة تعيين عدد (${validatedIds.length}) من طلبات الخدمات`
-  );
+  await logActivity({
+    userId: user?.id || null,
+    userEmail: currentAdminEmail,
+    actionType: 'RESET_ACTION',
+    targetTable: 'request-service',
+    targetId: null,
+    description: `User ${currentAdminEmail} reset actions for (${validatedIds.length}) service requests`,
+    fieldName: 'action_taken',
+    oldValue: 'true',  
+    newValue: 'false', 
+  });
 
   revalidatePath('/admin/dashboard/requests');
   return { success: true };
@@ -238,7 +237,7 @@ export async function deleteRequest(id: string, userRole?: string) {
 
   const supabaseServer = await getSupabaseServerClient();
   const { data: { user } } = await supabaseServer.auth.getUser();
-  const currentAdminEmail = user?.email || 'مشرف النظام';
+  const currentAdminEmail = user?.email || 'System Admin';
 
   const supabaseAdmin = getSupabaseAdminClient();
 
@@ -252,13 +251,17 @@ export async function deleteRequest(id: string, userRole?: string) {
 
   if (error) throw new Error('فشل في الحذف');
 
-  await logActivity(
-    supabaseServer,
-    'DELETE',
-    'request-service',
-    validatedId,
-    `قام المستخدم ${currentAdminEmail} بحذف طلب الخدمة الخاص بـ (${requesterEmail})`
-  );
+  await logActivity({
+    userId: user?.id || null,
+    userEmail: currentAdminEmail,
+    actionType: 'DELETE',
+    targetTable: 'request-service',
+    targetId: validatedId,
+    description: `User ${currentAdminEmail} deleted service request from (${requesterEmail})`,
+    fieldName: 'id',
+    oldValue: validatedId,
+    newValue: undefined,
+  });
 
   revalidatePath('/admin/dashboard/requests');
   return { success: true };

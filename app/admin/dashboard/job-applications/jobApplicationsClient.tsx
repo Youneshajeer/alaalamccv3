@@ -17,8 +17,8 @@ export interface Job {
   department?: string;
   location?: string;
   created_at: string;
-  deadline?: string;     // تاريخ انتهاء التقديم (إن وجد في جدول jobs)
-  expires_at?: string;   // أو expires_at حسب تسمية قاعدة البيانات لديك
+  deadline?: string;    
+  expires_at?: string;  
   applicants_count?: number;
 }
 
@@ -30,6 +30,8 @@ interface JobsClientProps {
     allowdView: boolean,
     allowdManage: boolean,
     allowdDelete: boolean,
+    isAuthorized: boolean,
+
 
   }
 }

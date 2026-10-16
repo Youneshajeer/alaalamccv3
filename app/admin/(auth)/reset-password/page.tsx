@@ -3,6 +3,8 @@
 import { useState, useTransition } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { executePasswordResetAction } from '../users/actions';
+export const revalidate = 0;
+
 
 export default function ResetPasswordPage() {
   const searchParams = useSearchParams();

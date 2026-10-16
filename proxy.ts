@@ -27,17 +27,14 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  // جلب المستخدم الحالي
   const { data: { user } } = await supabase.auth.getUser();
 
-  // إذا حاول الدخول للداشبورد ولم يكن مسجل الدخول، يتم تحويله للوج إن فوراً
   if (request.nextUrl.pathname.startsWith('/admin/dashboard') && !user) {
     const url = request.nextUrl.clone();
     url.pathname = '/admin/login';
     return NextResponse.redirect(url);
   }
 
-  // إذا كان مسجلاً لديه جلسة وحاول الدخول لصفحة اللوج إن، يمكن توجيهه للداشبورد (اختياري)
   if (request.nextUrl.pathname === '/admin/login' && user) {
     const url = request.nextUrl.clone();
     url.pathname = '/admin/dashboard';

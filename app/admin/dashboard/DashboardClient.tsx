@@ -39,11 +39,14 @@ interface DashboardClientProps {
   recentRequests: RecentRequest[];
   userEmail: string;
   userRole: 'admin' | 'supervisor' | string;
+  roleDisplayName:string;
   permissions: {
     canViewMessages: boolean;
     canViewRequests: boolean;
     canViewJobs: boolean;
     canViewUsers: boolean;
+    isAuthorized:boolean;
+    
   };
 }
 
@@ -241,7 +244,7 @@ export default function DashboardClient({
               )}
             </div>
 
-            <div className="space-y-2 text-xs pt-3">
+           <div className="space-y-2 text-xs pt-3 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
               {stats.rolesBreakdown?.map((roleStat: any) => (
                 <div key={roleStat.name} className="flex items-center justify-between p-2.5 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30">
                   <div>

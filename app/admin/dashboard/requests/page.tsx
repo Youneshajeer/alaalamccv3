@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { getRequests } from './actions';
 import RequestClient from './requestClient';
 import { hasPermission } from '@/lib/supabase/permissions';
+import {getCurrentUserRole} from '@/lib/supabase/auth'
 
 interface PageProps {
   searchParams: Promise<{
@@ -14,38 +15,18 @@ interface PageProps {
 
 export default async function AdminRequestsPage({ searchParams }: PageProps) {
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect('/admin/login');
+  const authData = await getCurrentUserRole();
+  
+  if (!authData || !authData.user || !authData.isAuthorized) {
+    redirect('/admin/login?error=unauthorized');
   }
 
+  const { user, role, roleDisplayName } = authData;
   const userEmail = user.email || '';
+  const userRole = role || 'supervisor';
 
-  const { data: userRoleRecord } = await supabase
-    .from('user_roles')
-    .select(`
-      roles (
-        name
-      )
-    `)
-    .eq('user_id', user.id)
-    .maybeSingle();
-
-  const dbRoleName = (userRoleRecord?.roles as any)?.name;
-  const { data: currentProfile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .maybeSingle();
-
-  const userRole = dbRoleName || currentProfile?.role || 'supervisor';
-
-  const allowed = await hasPermission('requests.view');
-
-  if (!allowed) {
-    redirect('/admin/dashboard?error=unauthorized');
-  }
+  const canViewDashboard = await hasPermission('dashboard.view');
   const allowdView = await hasPermission('requests.view')
   const allowdUpdate = await hasPermission('requests.update')
   const allowdManage = await hasPermission('requests.manage')
@@ -69,11 +50,14 @@ export default async function AdminRequestsPage({ searchParams }: PageProps) {
         currentStatus={status}
         userEmail={userEmail}
         userRole={userRole}
+        
         permission={{
           allowdView,
           allowdUpdate,
           allowdManage,
           allowdDelete,
+          isAuthorized: authData.isAuthorized,
+
         }}
       />
     </div>

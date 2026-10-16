@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { getSupabaseAdminClient, getSupabaseServerClient } from '@/lib/supabase/supabase-server';
 import { redirect } from 'next/navigation';
 import { hasPermission } from '@/lib/supabase/permissions';
+import { logActivity } from '@/lib/supabase/logger'; 
 
 export interface JobData {
   title: string;
@@ -12,25 +13,6 @@ export interface JobData {
   experience_years: number;
   deadline?: string | null;
   status?: 'active' | 'closed' | 'draft';
-}
-
-async function logActivity(supabase: any, actionType: string, targetTable: string, targetId: string | null, description: string) {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const adminClient = getSupabaseAdminClient();
-      await adminClient.from('activity_logs').insert({
-        user_id: user.id,
-        user_email: user.email || 'unknown',
-        action_type: actionType,
-        target_table: targetTable,
-        target_id: targetId,
-        description: description,
-      });
-    }
-  } catch (err) {
-    console.error('Failed to log activity:', err);
-  }
 }
 
 export async function getJobsAction() {
@@ -86,13 +68,17 @@ export async function createJobAction(data: JobData) {
     if (error) throw error;
 
     const jobId = newJob?.[0]?.id || null;
-    await logActivity(
-      supabase,
-      'CREATE',
-      'jobs',
-      jobId,
-      `قام المستخدم ${currentAdminEmail} بإضافة وظيفة جديدة: ${validationResult.data.title}`
-    );
+    await logActivity({
+      userId: user?.id || null,
+      userEmail: currentAdminEmail,
+      actionType: 'CREATE',
+      targetTable: 'jobs',
+      targetId: jobId,
+      description: `قام المستخدم ${currentAdminEmail} بإضافة وظيفة جديدة: ${validationResult.data.title}`,
+      fieldName: 'title',
+      oldValue: undefined,
+      newValue: validationResult.data.title,
+    });
 
     revalidatePath('/admin/dashboard/available-jobs');
     return { success: true, data: newJob };
@@ -120,7 +106,7 @@ export async function updateJobAction(id: string, data: Partial<JobData>) {
   const adminClient = getSupabaseAdminClient();
 
   try {
-    const { data: jobData } = await adminClient.from('jobs').select('title').eq('id', id).single();
+    const { data: jobData } = await adminClient.from('jobs').select('*').eq('id', id).single();
     const jobTitle = jobData?.title || id;
 
     const updatePayload: any = {};
@@ -136,13 +122,17 @@ export async function updateJobAction(id: string, data: Partial<JobData>) {
 
     if (error) throw error;
 
-    await logActivity(
-      supabase,
-      'UPDATE',
-      'jobs',
-      id,
-      `قام المستخدم ${currentAdminEmail} بتعديل بيانات الوظيفة: ${jobTitle}`
-    );
+    await logActivity({
+      userId: user?.id || null,
+      userEmail: currentAdminEmail,
+      actionType: 'UPDATE',
+      targetTable: 'jobs',
+      targetId: id,
+      description: `قام المستخدم ${currentAdminEmail} بتعديل بيانات الوظيفة: ${jobTitle}`,
+      fieldName: 'job_details',
+      oldValue: jobData?.title,
+      newValue: validationResult.data.title || jobTitle,
+    });
 
     revalidatePath('/admin/dashboard/available-jobs');
     return { success: true };
@@ -167,8 +157,9 @@ export async function updateJobStatusAction(
   const adminClient = getSupabaseAdminClient();
 
   try {
-    const { data: jobData } = await adminClient.from('jobs').select('title').eq('id', id).single();
+    const { data: jobData } = await adminClient.from('jobs').select('title, status').eq('id', id).single();
     const jobTitle = jobData?.title || id;
+    const oldStatus = jobData?.status || 'unknown';
 
     const { error } = await adminClient
       .from('jobs')
@@ -177,13 +168,17 @@ export async function updateJobStatusAction(
 
     if (error) throw error;
 
-    await logActivity(
-      supabase,
-      'UPDATE_STATUS',
-      'jobs',
-      id,
-      `قام المستخدم ${currentAdminEmail} بتغيير حالة الوظيفة (${jobTitle}) إلى (${status})`
-    );
+    await logActivity({
+      userId: user?.id || null,
+      userEmail: currentAdminEmail,
+      actionType: 'UPDATE_STATUS',
+      targetTable: 'jobs',
+      targetId: id,
+      description: `قام المستخدم ${currentAdminEmail} بتغيير حالة الوظيفة (${jobTitle}) إلى (${status})`,
+      fieldName: 'status',
+      oldValue: oldStatus,
+      newValue: status,
+    });
 
     revalidatePath('/admin/dashboard/available-jobs');
     return { success: true };
@@ -205,8 +200,9 @@ export async function reactivateJobAction(id: string, deadline: string) {
   const adminClient = getSupabaseAdminClient();
 
   try {
-    const { data: jobData } = await adminClient.from('jobs').select('title').eq('id', id).single();
+    const { data: jobData } = await adminClient.from('jobs').select('title, status, deadline').eq('id', id).single();
     const jobTitle = jobData?.title || id;
+    const oldStatus = jobData?.status || 'closed';
 
     const { error } = await adminClient
       .from('jobs')
@@ -218,13 +214,17 @@ export async function reactivateJobAction(id: string, deadline: string) {
 
     if (error) throw error;
 
-    await logActivity(
-      supabase,
-      'REACTIVATE',
-      'jobs',
-      id,
-      `قام المستخدم ${currentAdminEmail} بإعادة تفعيل الوظيفة وتمديد الموعد النهائي: ${jobTitle}`
-    );
+    await logActivity({
+      userId: user?.id || null,
+      userEmail: currentAdminEmail,
+      actionType: 'REACTIVATE',
+      targetTable: 'jobs',
+      targetId: id,
+      description: `قام المستخدم ${currentAdminEmail} بإعادة تفعيل الوظيفة وتمديد الموعد النهائي: ${jobTitle}`,
+      fieldName: 'status',
+      oldValue: oldStatus,
+      newValue: 'active',
+    });
 
     revalidatePath('/admin/dashboard/available-jobs');
     return { success: true };
@@ -256,13 +256,17 @@ export async function deleteJobAction(id: string) {
 
     if (error) throw error;
 
-    await logActivity(
-      supabase,
-      'DELETE',
-      'jobs',
-      id,
-      `قام المستخدم ${currentAdminEmail} بحذف الوظيفة: ${jobTitle}`
-    );
+    await logActivity({
+      userId: user?.id || null,
+      userEmail: currentAdminEmail,
+      actionType: 'DELETE',
+      targetTable: 'jobs',
+      targetId: id,
+      description: `قام المستخدم ${currentAdminEmail} بحذف الوظيفة: ${jobTitle}`,
+      fieldName: 'id',
+      oldValue: id,
+      newValue: undefined,
+    });
 
     revalidatePath('/admin/dashboard/available-jobs');
     return { success: true };

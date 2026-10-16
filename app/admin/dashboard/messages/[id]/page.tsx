@@ -3,7 +3,7 @@ import { redirect, notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
 import MessageDetailsClient from './messageDetailsClient';
 import { hasPermission } from '@/lib/supabase/permissions';
-import { getMessageDetailsAction } from '../actions'; // تأكد من مطابقة مسار ملف الـ actions لديك
+import { getMessageDetailsAction } from '../actions'; 
 
 interface PageProps {
   params: Promise<{

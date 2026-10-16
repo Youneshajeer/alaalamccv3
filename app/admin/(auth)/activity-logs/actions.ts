@@ -3,6 +3,7 @@
 import { getSupabaseServerClient } from '@/lib/supabase/supabase-server';
 import { hasPermission } from '@/lib/supabase/permissions';
 import { revalidatePath } from 'next/cache';
+import { logActivity } from '@/lib/supabase/logger'; 
 
 export interface ActivityLogFilterOptions {
   page?: number;
@@ -14,6 +15,63 @@ export interface ActivityLogFilterOptions {
   endDate?: string;
 }
 
+// 📌 1. ترجمة أنواع الإجراءات (Action Types) إلى نصوص عربية مفهومة
+function formatActionType(actionType: string): string {
+  const map: Record<string, string> = {
+    'CREATE': 'إضافة وتنشيط جديد',
+    'UPDATE': 'تعديل وتحديث بيانات',
+    'DELETE': 'حذف نهائي',
+    'UPDATE_STATUS': 'تعديل وتغيير الحالة',
+    'PURGE_LOGS': 'تطهير وحذف السجلات القديمة',
+    'LOGIN': 'تسجيل دخول المشرف',
+    'LOGOUT': 'تسجيل خروج',
+  };
+  return map[actionType] || actionType;
+}
+
+// 📌 2. ترجمة أسماء الجداول التقنية (Target Tables) إلى مسميات واضحة ومفهومة
+function formatTargetTable(tableName: string): string {
+  const map: Record<string, string> = {
+    'customer_service': 'رسائل خدمة العملاء',
+    'careers': 'طلبات التوظيف والسير الذاتية',
+    'jobs': 'إدارة الوظائف الشاغرة',
+    'request-service': 'طلبات الخدمات المقدمة',
+    'profiles': 'إدارة المشرفين والأدوار',
+    'activity_logs': 'سجل النشاطات والأمان',
+  };
+  return map[tableName] || tableName;
+}
+
+// 📌 دالة مساعدة لتحويل القيم التقنية و true/false إلى نصوص عربية مفهومة
+function formatLogValue(val: any): string {
+  if (val === null || val === undefined) return '---';
+  if (val === true || val === 'true') return 'نعم (مفعل)';
+  if (val === false || val === 'false') return 'لا (معطل)';
+  
+  const stringVal = String(val);
+  if (stringVal === 'active') return 'نشط';
+  if (stringVal === 'closed') return 'مغلق';
+  if (stringVal === 'pending') return 'قيد الانتظار';
+  if (stringVal === 'accepted') return 'مقبول';
+  if (stringVal === 'rejected') return 'مرفوض';
+  if (stringVal === 'unread') return 'غير مقروء';
+  if (stringVal === 'read') return 'مقروء';
+  
+  return stringVal;
+}
+
+// 📌 دالة لتنسيق تفاصيل السجل ليصبح مقروءاً بالكامل بالعربية
+function formatLogItem(log: any) {
+  return {
+    ...log,
+    // استخدام الدوال المعربة بدلاً من النصوص التقنية الصماء
+    action_type_readable: formatActionType(log.action_type),
+    target_table_readable: formatTargetTable(log.target_table),
+    
+    old_value_formatted: formatLogValue(log.old_value),
+    new_value_formatted: formatLogValue(log.new_value),
+  };
+}
 
 export async function getActivityLogs(options: ActivityLogFilterOptions = {}) {
   const supabase = await getSupabaseServerClient();
@@ -61,44 +119,34 @@ export async function getActivityLogs(options: ActivityLogFilterOptions = {}) {
     return { success: false, error: 'فشل جلب سجلات النشاطات.', logs: [], totalCount: 0 };
   }
 
+  const formattedLogs = (data || []).map(formatLogItem);
+
   return {
     success: true,
-    logs: data || [],
+    logs: formattedLogs,
     totalCount: count || 0,
     currentPage: page,
     totalPages: Math.ceil((count || 0) / limit),
   };
 }
 
-
-export async function logActivity({
-  userId,
-  userEmail,
-  actionType,
-  targetTable,
-  targetId,
-  description,
-}: {
-  userId?: string | null;
-  userEmail: string;
-  actionType: string;
-  targetTable: string;
-  targetId?: string | null;
-  description: string;
-}) {
+export async function getActivityLogDetails(logId: string) {
   const supabase = await getSupabaseServerClient();
-  await supabase.from('activity_logs').insert([
-    {
-      user_id: userId || null,
-      user_email: userEmail,
-      action_type: actionType,
-      target_table: targetTable,
-      target_id: targetId || null,
-      description,
-    },
-  ]);
-}
+  
+  const { data, error } = await supabase
+    .from('activity_logs')
+    .select('*')
+    .eq('id', logId)
+    .single();
 
+  if (error || !data) {
+    return { success: false, error: 'سجل النشاط غير موجود.' };
+  }
+
+  const formattedLog = formatLogItem(data);
+
+  return { success: true, log: formattedLog };
+}
 
 export async function purgeOldActivityLogs() {
   const supabase = await getSupabaseServerClient();
@@ -113,7 +161,6 @@ export async function purgeOldActivityLogs() {
     return { success: false, error: 'صلاحياتك لا توفر إمكانية تفريغ وتطهير سجلات النظام.' };
   }
 
- 
   const { error } = await supabase
     .from('activity_logs')
     .delete()
@@ -128,7 +175,10 @@ export async function purgeOldActivityLogs() {
     userEmail: user.email || 'system',
     actionType: 'PURGE_LOGS',
     targetTable: 'activity_logs',
-    description: 'قام مدير النظام بتنظيف الأرشيف والسجلات القديمة (أقدم من 90 يوم)',
+    description: `System administrator ${user.email || 'system'} cleaned up system archives and old logs (older than 90 days)`,
+    fieldName: 'created_at',
+    oldValue: 'older_than_90_days',
+    newValue: 'deleted',
   });
 
   revalidatePath('/admin/activity-logs');

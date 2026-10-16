@@ -3,25 +3,7 @@
 import { getSupabaseServerClient, getSupabaseAdminClient } from '@/lib/supabase/supabase-server';
 import { redirect } from 'next/navigation';
 import { hasPermission } from '@/lib/supabase/permissions';
-
-async function logActivity(supabase: any, actionType: string, targetTable: string, targetId: string | null, description: string) {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const adminClient = getSupabaseAdminClient();
-      await adminClient.from('activity_logs').insert({
-        user_id: user.id,
-        user_email: user.email || 'unknown',
-        action_type: actionType,
-        target_table: targetTable,
-        target_id: targetId,
-        description: description,
-      });
-    }
-  } catch (err) {
-    console.error('Failed to log activity:', err);
-  }
-}
+import { logActivity } from '@/lib/supabase/logger';
 
 export async function logoutAction() {
   const supabase = await getSupabaseServerClient();
@@ -78,7 +60,7 @@ export async function deleteJobAction(id: string) {
 
   const supabase = await getSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-  const currentAdminEmail = user?.email || 'مشرف النظام';
+  const currentAdminEmail = user?.email || 'System Admin';
 
   const adminClient = getSupabaseAdminClient();
 
@@ -108,13 +90,17 @@ export async function deleteJobAction(id: string) {
     return { success: false, error: 'فشل حذف الوظيفة.' };
   }
 
-  await logActivity(
-    supabase,
-    'DELETE',
-    'jobs',
-    id,
-    `قام المستخدم ${currentAdminEmail} بحذف الوظيفة: ${jobTitle}`
-  );
+  await logActivity({
+    userId: user?.id || null,
+    userEmail: currentAdminEmail,
+    actionType: 'DELETE',
+    targetTable: 'jobs',
+    targetId: id,
+    description: `User ${currentAdminEmail} deleted job: ${jobTitle}`,
+    fieldName: 'id',
+    oldValue: id,
+    newValue: undefined,
+  });
 
   return { success: true };
 }
@@ -159,7 +145,6 @@ export async function getSignedCvUrl(cvUrl?: string | null) {
   return { success: true, url: data.signedUrl };
 }
 
-// تحديث حالة طلب التوظيف[cite: 8]
 export async function updateApplicationStatus(
   id: string,
   status: 'pending' | 'under_review' | 'accepted' | 'rejected'
@@ -173,12 +158,13 @@ export async function updateApplicationStatus(
 
   const supabase = await getSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-  const currentAdminEmail = user?.email || 'مشرف النظام';
+  const currentAdminEmail = user?.email || 'System Admin';
 
   const adminClient = getSupabaseAdminClient();
 
-  const { data: applicationData } = await adminClient.from('careers').select('email').eq('id', id).single();
+  const { data: applicationData } = await adminClient.from('careers').select('email, status').eq('id', id).single();
   const applicantEmail = applicationData?.email || id;
+  const oldStatus = applicationData?.status || 'unknown';
 
   const { error } = await adminClient
     .from('careers')
@@ -190,13 +176,17 @@ export async function updateApplicationStatus(
     return { success: false, error: 'فشل تحديث حالة الطلب.' };
   }
 
-  await logActivity(
-    supabase,
-    'UPDATE_STATUS',
-    'careers',
-    id,
-    `قام المستخدم ${currentAdminEmail} بتحديث حالة طلب التوظيف الخاص بـ (${applicantEmail}) إلى (${status})`
-  );
+  await logActivity({
+    userId: user?.id || null,
+    userEmail: currentAdminEmail,
+    actionType: 'UPDATE_STATUS',
+    targetTable: 'careers',
+    targetId: id,
+    description: `User ${currentAdminEmail} updated job application status for (${applicantEmail}) to (${status})`,
+    fieldName: 'status',
+    oldValue: oldStatus,
+    newValue: status,
+  });
 
   return { success: true };
 }
@@ -211,7 +201,7 @@ export async function deleteApplication(id: string, cvUrl?: string | null) {
 
   const supabase = await getSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-  const currentAdminEmail = user?.email || 'مشرف النظام';
+  const currentAdminEmail = user?.email || 'System Admin';
 
   const adminClient = getSupabaseAdminClient();
 
@@ -237,13 +227,17 @@ export async function deleteApplication(id: string, cvUrl?: string | null) {
     return { success: false, error: 'فشل حذف الطلب.' };
   }
 
-  await logActivity(
-    supabase,
-    'DELETE',
-    'careers',
-    id,
-    `قام المستخدم ${currentAdminEmail} بحذف طلب التوظيف الخاص بـ (${applicantEmail})`
-  );
+  await logActivity({
+    userId: user?.id || null,
+    userEmail: currentAdminEmail,
+    actionType: 'DELETE',
+    targetTable: 'careers',
+    targetId: id,
+    description: `User ${currentAdminEmail} deleted job application for (${applicantEmail})`,
+    fieldName: 'id',
+    oldValue: id,
+    newValue: undefined,
+  });
 
   return { success: true };
 }
@@ -267,7 +261,6 @@ export async function downloadCvAction(rawCvPath?: string | null) {
     cleanPath = cleanPath.replace(/^https?:\/\/[^\/]+\/storage\/v1\/object\/(public|sign)\/resumes\//, '');
   }
   
-
   while (cleanPath.startsWith('resumes/')) {
     cleanPath = cleanPath.replace(/^resumes\//, '');
   }

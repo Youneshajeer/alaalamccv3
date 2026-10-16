@@ -38,6 +38,8 @@ interface RequestClientProps {
           allowdUpdate :boolean,
           allowdManage:boolean,
           allowdDelete:boolean,
+          isAuthorized:boolean,
+          
         }
 }
 

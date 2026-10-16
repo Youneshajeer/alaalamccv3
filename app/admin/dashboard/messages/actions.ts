@@ -3,29 +3,11 @@
 import { getSupabaseServerClient, getSupabaseAdminClient } from '@/lib/supabase/supabase-server';
 import { revalidatePath } from 'next/cache';
 import { hasPermission } from '@/lib/supabase/permissions';
+import { logActivity } from '@/lib/supabase/logger';
 import { z } from 'zod';
 
 const messageIdSchema = z.string().uuid('معرف الرسالة غير صالح');
 const messageStatusSchema = z.enum(['unread', 'read']);
-
-async function logActivity(supabase: any, actionType: string, targetTable: string, targetId: string | null, description: string) {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const adminClient = getSupabaseAdminClient();
-      await adminClient.from('activity_logs').insert({
-        user_id: user.id,
-        user_email: user.email || 'unknown',
-        action_type: actionType,
-        target_table: targetTable,
-        target_id: targetId,
-        description: description,
-      });
-    }
-  } catch (err) {
-    console.error('Failed to log activity:', err);
-  }
-}
 
 export async function getMessages(page: number = 1, limit: number = 10, search: string = '', statusFilter: string = 'all') {
   console.log('--- [SERVER ACTION] getMessages called ---', { page, limit, search, statusFilter });
@@ -78,11 +60,10 @@ export async function viewAndLogMessageAction(id: string) {
 
   const supabaseServer = await getSupabaseServerClient();
   const { data: { user } } = await supabaseServer.auth.getUser();
-  const currentAdminEmail = user?.email || 'مشرف النظام';
+  const currentAdminEmail = user?.email || 'System Admin';
 
   const supabaseAdmin = getSupabaseAdminClient();
 
-  // جلب إيميل مرسل الرسالة وحالتها الحالية
   const { data: msgData, error: fetchError } = await supabaseAdmin
     .from('customer_service')
     .select('email, status')
@@ -101,13 +82,17 @@ export async function viewAndLogMessageAction(id: string) {
       .update({ status: 'read' })
       .eq('id', validatedId);
 
-    await logActivity(
-      supabaseServer,
-      'READ_MESSAGE',
-      'customer_service',
-      validatedId,
-      `قام المستخدم ${currentAdminEmail} بقراءة والاطلاع على الرسالة الواردة من (${senderEmail})`
-    );
+    await logActivity({
+      userId: user?.id || null,
+      userEmail: currentAdminEmail,
+      actionType: 'READ_MESSAGE',
+      targetTable: 'customer_service',
+      targetId: validatedId,
+      description: `User ${currentAdminEmail} read and viewed message from (${senderEmail})`,
+      fieldName: 'status',
+      oldValue: 'unread',
+      newValue: 'read',
+    });
 
     revalidatePath('/admin/dashboard/messages');
   }
@@ -127,12 +112,13 @@ export async function updateMessageStatus(id: string, status: 'unread' | 'read')
 
   const supabaseServer = await getSupabaseServerClient();
   const { data: { user } } = await supabaseServer.auth.getUser();
-  const currentAdminEmail = user?.email || 'مشرف النظام';
+  const currentAdminEmail = user?.email || 'System Admin';
 
   const supabaseAdmin = getSupabaseAdminClient();
 
-  const { data: msgData } = await supabaseAdmin.from('customer_service').select('email').eq('id', validatedId).single();
+  const { data: msgData } = await supabaseAdmin.from('customer_service').select('email, status').eq('id', validatedId).single();
   const senderEmail = msgData?.email || validatedId;
+  const oldStatus = msgData?.status || 'unknown';
 
   const { data, error } = await supabaseAdmin
     .from('customer_service')
@@ -145,13 +131,17 @@ export async function updateMessageStatus(id: string, status: 'unread' | 'read')
     throw new Error('فشل في تحديث حالة الرسالة في قاعدة البيانات: ' + error.message);
   }
 
-  await logActivity(
-    supabaseServer,
-    'UPDATE_STATUS',
-    'customer_service',
-    validatedId,
-    `قام المستخدم ${currentAdminEmail} بتحديث حالة الرسالة الواردة من (${senderEmail}) إلى (${validatedStatus})`
-  );
+  await logActivity({
+    userId: user?.id || null,
+    userEmail: currentAdminEmail,
+    actionType: 'UPDATE_STATUS',
+    targetTable: 'customer_service',
+    targetId: validatedId,
+    description: `User ${currentAdminEmail} updated message status from (${senderEmail}) to (${validatedStatus})`,
+    fieldName: 'status',
+    oldValue: oldStatus,
+    newValue: validatedStatus,
+  });
 
   revalidatePath('/admin/dashboard/messages');
   return { success: true, data };
@@ -165,7 +155,7 @@ export async function markAllAsRead() {
 
   const supabaseServer = await getSupabaseServerClient();
   const { data: { user } } = await supabaseServer.auth.getUser();
-  const currentAdminEmail = user?.email || 'مشرف النظام';
+  const currentAdminEmail = user?.email || 'System Admin';
 
   const supabaseAdmin = getSupabaseAdminClient();
   const { data, error } = await supabaseAdmin
@@ -178,13 +168,17 @@ export async function markAllAsRead() {
     throw new Error('فشل في تحديث كافة الرسائل في قاعدة البيانات: ' + error.message);
   }
 
-  await logActivity(
-    supabaseServer,
-    'MARK_ALL_READ',
-    'customer_service',
-    null,
-    `قام المستخدم ${currentAdminEmail} بتعيين كافة الرسائل غير المقروءة كمقروءة (${data?.length || 0} رسالة)`
-  );
+  await logActivity({
+    userId: user?.id || null,
+    userEmail: currentAdminEmail,
+    actionType: 'MARK_ALL_READ',
+    targetTable: 'customer_service',
+    targetId: null,
+    description: `User ${currentAdminEmail} marked all unread messages as read (${data?.length || 0} messages)`,
+    fieldName: 'status',
+    oldValue: 'unread',
+    newValue: 'read',
+  });
 
   revalidatePath('/admin/dashboard/messages');
   return { success: true };
@@ -200,7 +194,7 @@ export async function deleteMessage(id: string) {
 
   const supabaseServer = await getSupabaseServerClient();
   const { data: { user } } = await supabaseServer.auth.getUser();
-  const currentAdminEmail = user?.email || 'مشرف النظام';
+  const currentAdminEmail = user?.email || 'System Admin';
 
   const supabaseAdmin = getSupabaseAdminClient();
 
@@ -217,13 +211,17 @@ export async function deleteMessage(id: string) {
     throw new Error('فشل في حذف الرسالة من قاعدة البيانات: ' + error.message);
   }
 
-  await logActivity(
-    supabaseServer,
-    'DELETE',
-    'customer_service',
-    validatedId,
-    `قام المستخدم ${currentAdminEmail} بحذف الرسالة الواردة من (${senderEmail})`
-  );
+  await logActivity({
+    userId: user?.id || null,
+    userEmail: currentAdminEmail,
+    actionType: 'DELETE',
+    targetTable: 'customer_service',
+    targetId: validatedId,
+    description: `User ${currentAdminEmail} deleted message from (${senderEmail})`,
+    fieldName: 'id',
+    oldValue: validatedId,
+    newValue: undefined,
+  });
 
   revalidatePath('/admin/dashboard/messages');
   return { success: true };
@@ -240,7 +238,7 @@ export async function bulkDeleteMessages(ids: string[]) {
 
   const supabaseServer = await getSupabaseServerClient();
   const { data: { user } } = await supabaseServer.auth.getUser();
-  const currentAdminEmail = user?.email || 'مشرف النظام';
+  const currentAdminEmail = user?.email || 'System Admin';
 
   const supabaseAdmin = getSupabaseAdminClient();
   const { data, error } = await supabaseAdmin
@@ -253,17 +251,22 @@ export async function bulkDeleteMessages(ids: string[]) {
     throw new Error('فشل في تنفيذ الحذف الجماعي من قاعدة البيانات: ' + error.message);
   }
 
-  await logActivity(
-    supabaseServer,
-    'BULK_DELETE',
-    'customer_service',
-    null,
-    `قام المستخدم ${currentAdminEmail} بحذف جماعي لعدد (${validatedIds.length}) من الرسائل`
-  );
+  await logActivity({
+    userId: user?.id || null,
+    userEmail: currentAdminEmail,
+    actionType: 'BULK_DELETE',
+    targetTable: 'customer_service',
+    targetId: null,
+    description: `User ${currentAdminEmail} performed bulk deletion of (${validatedIds.length}) messages`,
+    fieldName: 'id',
+    oldValue: 'multiple_ids',
+    newValue: undefined,
+  });
 
   revalidatePath('/admin/dashboard/messages');
   return { success: true };
 }
+
 export async function getMessageDetailsAction(id: string) {
   const validatedId = messageIdSchema.parse(id);
 
@@ -274,7 +277,7 @@ export async function getMessageDetailsAction(id: string) {
 
   const supabaseServer = await getSupabaseServerClient();
   const { data: { user } } = await supabaseServer.auth.getUser();
-  const currentAdminEmail = user?.email || 'مشرف النظام';
+  const currentAdminEmail = user?.email || 'System Admin';
 
   const supabaseAdmin = getSupabaseAdminClient();
 
@@ -296,15 +299,17 @@ export async function getMessageDetailsAction(id: string) {
       .update({ status: 'read' })
       .eq('id', validatedId);
 
-    await logActivity(
-      supabaseServer,
-      'READ_MESSAGE',
-      'customer_service',
-      validatedId,
-      `قام المستخدم ${currentAdminEmail} بقراءة والاطلاع على الرسالة الواردة من (${senderEmail})`
-    );
-
-    revalidatePath('/admin/dashboard/messages');
+    await logActivity({
+      userId: user?.id || null,
+      userEmail: currentAdminEmail,
+      actionType: 'READ_MESSAGE',
+      targetTable: 'customer_service',
+      targetId: validatedId,
+      description: `User ${currentAdminEmail} read and viewed message from (${senderEmail})`,
+      fieldName: 'status',
+      oldValue: 'unread',
+      newValue: 'read',
+    });
   }
 
   return { success: true, message: msgData };

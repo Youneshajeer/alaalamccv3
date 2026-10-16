@@ -2,48 +2,32 @@ import { redirect } from 'next/navigation';
 import { getSupabaseServerClient } from '@/lib/supabase/supabase-server';
 import JobApplicationsClient from './jobApplicationsClient';
 import { hasPermission } from '@/lib/supabase/permissions';
+import { getCurrentUserRole } from '@/lib/supabase/auth';
+export const revalidate = 0;
+
 
 export default async function JobsManagementPage() {
-    const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/admin/login');
+  const supabase = await getSupabaseServerClient();
+  
+  const authData = await getCurrentUserRole();
+  
+  if (!authData || !authData.user || !authData.isAuthorized) {
+    redirect('/admin/login?error=unauthorized');
   }
 
+  const { user, role } = authData;
   const userEmail = user.email || '';
+  const userRole = role || 'supervisor';
 
-  const { data: userRoleRecord } = await supabase
-    .from('user_roles')
-    .select(`
-      roles (
-        name
-      )
-    `)
-    .eq('user_id', user.id)
-    .maybeSingle();
+  const canViewDashboard = await hasPermission('dashboard.view');
+  const allowdView = await hasPermission('careers.view');
+  const allowdManage = await hasPermission('careers.manage');
+  const allowdDelete = await hasPermission('careers.delete');
 
-  const dbRoleName = (userRoleRecord?.roles as any)?.name;
-  const { data: currentProfile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .maybeSingle();
-
-  const userRole = dbRoleName || currentProfile?.role || 'supervisor';
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-const allowed = await hasPermission('career.view');
-
-  if (!allowed) {
-    redirect('/admin/dashboard?error=unauthorized');
+  if (!canViewDashboard) {
+    redirect('/admin/login?error=unauthorized');
   }
-  const allowdView=await hasPermission('careers.view')
-  const allowdManage=await hasPermission('careers.manage')
-  const allowdDelete=await hasPermission('careers.delete')
+
   const { data: jobs, error: jobsError } = await supabase
     .from('jobs')
     .select('*')
@@ -69,20 +53,19 @@ const allowed = await hasPermission('career.view');
     };
   });
 
-  console.log('Fetched Jobs Count:', initialJobs.length); // للتأكد عبر الـ Terminal
+  console.log('Fetched Jobs Count:', initialJobs.length);
 
   return (
     <JobApplicationsClient
       initialJobs={initialJobs}
-      userEmail={user.email || ''}
-      userRole={profile?.role || 'admin'}
+      userEmail={userEmail}
+      userRole={userRole} 
       permission={{
-      allowdView,
-      allowdManage,
-      allowdDelete,
-
+        allowdView,
+        allowdManage,
+        allowdDelete,
+        isAuthorized: authData.isAuthorized,
       }}
-      
     />
   );
 }

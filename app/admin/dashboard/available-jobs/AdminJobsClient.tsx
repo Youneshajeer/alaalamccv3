@@ -25,22 +25,30 @@ interface JobsClientProps {
   initialJobs: Job[];
   userEmail?: string;
   userRole?: string;
+  roleDisplayName?: string;
   permission: {
-    allowdView: boolean,
-    allowdCreate: boolean,
-    allowdUpdate: boolean,
-    allowdManage: boolean,
-    allowdDelete: boolean,
-  }
+    allowdView: boolean;
+    allowdCreate: boolean;
+    allowdUpdate: boolean;
+    allowdManage: boolean;
+    allowdDelete: boolean;
+    isAuthorized?: boolean;
+  };
 }
 
-export default function AdminJobsClient({ initialJobs, userEmail = '', userRole = '', permission }: JobsClientProps) {
+export default function AdminJobsClient({
+  initialJobs,
+  userEmail = '',
+  userRole = '',
+  roleDisplayName,
+  permission,
+}: JobsClientProps) {
   const [jobs, setJobs] = useState<Job[]>(initialJobs || []);
   const [searchTitle, setSearchTitle] = useState('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'closed'>('all');
-  const { lang, t } = useTranslation();
+  const { lang } = useTranslation();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -51,12 +59,20 @@ export default function AdminJobsClient({ initialJobs, userEmail = '', userRole 
   const [formDescription, setFormDescription] = useState('');
   const [formDeadline, setFormDeadline] = useState('');
   const [dateError, setDateError] = useState('');
+  
+  // 🔴 متغير حالة جديد لرسائل الخطأ داخل الموديل
+  const [modalError, setModalError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
   const router = useRouter();
+
+  const getTodayString = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
 
   useEffect(() => {
     const today = getTodayString();
@@ -73,11 +89,6 @@ export default function AdminJobsClient({ initialJobs, userEmail = '', userRole 
   const totalJobsCount = jobs.length;
   const activeJobsCount = jobs.filter(job => job.status === 'active').length;
   const closedJobsCount = jobs.filter(job => job.status === 'closed').length;
-
-  const getTodayString = () => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
-  };
 
   const handleDeadlineChange = (val: string) => {
     setFormDeadline(val);
@@ -126,6 +137,7 @@ export default function AdminJobsClient({ initialJobs, userEmail = '', userRole 
     setFormDescription(job.description || '');
     setFormDeadline(job.deadline ? job.deadline.split('T')[0] : '');
     setDateError('');
+    setModalError('');
     setIsEditModalOpen(true);
   };
 
@@ -134,11 +146,21 @@ export default function AdminJobsClient({ initialJobs, userEmail = '', userRole 
     setIsViewModalOpen(true);
   };
 
+  const resetForm = () => {
+    setFormTitle('');
+    setFormDescription('');
+    setFormDeadline('');
+    setDateError('');
+    setModalError('');
+    setSelectedJob(null);
+  };
+
   const handleCreateJob = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formTitle || dateError) return;
 
     setLoading(true);
+    setModalError('');
     try {
       const res = await createJobAction({
         title: formTitle,
@@ -154,10 +176,10 @@ export default function AdminJobsClient({ initialJobs, userEmail = '', userRole 
         resetForm();
         router.refresh();
       } else {
-        alert(res.error || 'حدث خطأ أثناء إنشاء الوظيفة');
+        setModalError(res.error || 'حدث خطأ أثناء إنشاء الوظيفة');
       }
     } catch (err) {
-      alert(lang === 'ar' ? 'حدث خطأ غير متوقع' : 'An unexpected error occurred');
+      setModalError(lang === 'ar' ? 'حدث خطأ غير متوقع' : 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
@@ -168,6 +190,7 @@ export default function AdminJobsClient({ initialJobs, userEmail = '', userRole 
     if (!selectedJob || !formTitle || dateError) return;
 
     setLoading(true);
+    setModalError('');
     try {
       const res = await updateJobAction(selectedJob.id, {
         title: formTitle,
@@ -187,21 +210,13 @@ export default function AdminJobsClient({ initialJobs, userEmail = '', userRole 
         resetForm();
         router.refresh();
       } else {
-        alert(res.error || 'حدث خطأ أثناء تعديل الوظيفة');
+        setModalError(res.error || 'حدث خطأ أثناء تعديل الوظيفة');
       }
     } catch (err) {
-      alert(lang === 'ar' ? 'حدث خطأ أثناء تعديل الوظيفة' : 'An error occurred while updating the job');
+      setModalError(lang === 'ar' ? 'حدث خطأ أثناء تعديل الوظيفة' : 'An error occurred while updating the job');
     } finally {
       setLoading(false);
     }
-  };
-
-  const resetForm = () => {
-    setFormTitle('');
-    setFormDescription('');
-    setFormDeadline('');
-    setDateError('');
-    setSelectedJob(null);
   };
 
   const handleStatusChange = async (job: Job) => {
@@ -275,14 +290,11 @@ export default function AdminJobsClient({ initialJobs, userEmail = '', userRole 
               <span>{lang === 'ar' ? 'مرحباً بعودتك،' : 'Welcome back,'}</span>
               <span className="font-mono text-emerald-600 font-bold">{userEmail || '---'}</span>
 
-              <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border ${userRole === 'admin'
-                  ? 'bg-purple-100 border-purple-300 text-purple-700'
-                  : 'bg-blue-100 border-blue-300 text-blue-700'
-                }`}>
-                {userRole === 'admin'
-                  ? (lang === 'ar' ? '👑 أدمن' : '👑 Admin')
-                  : (lang === 'ar' ? '🛡️ مشرف' : '🛡️ Supervisor')}
-              </span>
+              {roleDisplayName && (
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border bg-emerald-100 border-emerald-300 text-emerald-700">
+                  {roleDisplayName}
+                </span>
+              )}
             </div>
 
             <p className="text-xs text-slate-500">
@@ -323,6 +335,7 @@ export default function AdminJobsClient({ initialJobs, userEmail = '', userRole 
             </p>
           </div>
         </div>
+
         {permission?.allowdCreate ? (
           <button
             onClick={() => { resetForm(); setIsAddModalOpen(true); }}
@@ -333,10 +346,7 @@ export default function AdminJobsClient({ initialJobs, userEmail = '', userRole 
             </svg>
             <span>{lang === 'ar' ? 'إضافة وظيفة جديدة' : 'Add New Job'}</span>
           </button>
-        ) : (
-          <div></div>
-        )
-        }
+        ) : null}
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="p-4 bg-white border border-emerald-500/20 rounded-2xl shadow-sm hover:border-emerald-500/40 transition-all">
@@ -465,8 +475,11 @@ export default function AdminJobsClient({ initialJobs, userEmail = '', userRole 
                       </td>
 
                       <td className="p-4 text-center whitespace-nowrap">
-                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold ${job.status === 'active' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
-                          }`}>
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold ${
+                          job.status === 'active' 
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                            : 'bg-rose-50 text-rose-700 border border-rose-200'
+                        }`}>
                           {job.status === 'active'
                             ? (lang === 'ar' ? '✓ نشط' : '✓ Active')
                             : (lang === 'ar' ? '✕ مغلق' : '✕ Closed')}
@@ -475,62 +488,68 @@ export default function AdminJobsClient({ initialJobs, userEmail = '', userRole 
 
                       <td className="p-4 text-center whitespace-nowrap">
                         <div className="flex items-center justify-center gap-2">
-{
-  permission?.allowdManage?(  <button
-                            onClick={() => handleStatusChange(job)}
-                            className={`p-2 rounded-xl border transition-all cursor-pointer ${job.status === 'active'
-                                ? 'bg-amber-50 hover:bg-amber-100 text-amber-600 border-amber-200'
-                                : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border-emerald-200'
+                          {permission?.allowdManage && (
+                            <button
+                              onClick={() => handleStatusChange(job)}
+                              className={`p-2 rounded-xl border transition-all cursor-pointer ${
+                                job.status === 'active'
+                                  ? 'bg-amber-50 hover:bg-amber-100 text-amber-600 border-amber-200'
+                                  : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border-emerald-200'
                               }`}
-                            title={
-                              job.status === 'active'
-                                ? (lang === 'ar' ? 'إغلاق الوظيفة' : 'Close Job')
-                                : (lang === 'ar' ? 'تنشيط الوظيفة' : 'Activate Job')
-                            }
-                          >
-                            {job.status === 'active' ? (
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                              </svg>
-                            ) : (
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                            )}
-                          </button>):(<div></div>)
-}
+                              title={
+                                job.status === 'active'
+                                  ? (lang === 'ar' ? 'إغلاق الوظيفة' : 'Close Job')
+                                  : (lang === 'ar' ? 'تنشيط الوظيفة' : 'Activate Job')
+                              }
+                            >
+                              {job.status === 'active' ? (
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                              ) : (
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              )}
+                            </button>
+                          )}
                         
-{permission?.allowdView?( <button
-                            onClick={() => openViewModal(job)}
-                            className="p-2 rounded-xl bg-slate-100 hover:bg-sky-50 text-slate-600 hover:text-sky-600 border border-slate-200 transition-all cursor-pointer"
-                            title={lang === 'ar' ? 'عرض كافة التفاصيل' : 'View Full Details'}
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                          </button>
-):(<div></div>)}
-  {permission?.allowdUpdate?( <button
-                            onClick={() => openEditModal(job)}
-                            className="p-2 rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 border border-slate-200 transition-all cursor-pointer"
-                            title={lang === 'ar' ? 'تعديل الوظيفة' : 'Edit Job'}
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                          </button>):(<div></div>)}                       
+                          {permission?.allowdView && (
+                            <button
+                              onClick={() => openViewModal(job)}
+                              className="p-2 rounded-xl bg-slate-100 hover:bg-sky-50 text-slate-600 hover:text-sky-600 border border-slate-200 transition-all cursor-pointer"
+                              title={lang === 'ar' ? 'عرض كافة التفاصيل' : 'View Full Details'}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                              </svg>
+                            </button>
+                          )}
+
+                          {permission?.allowdUpdate && (
+                            <button
+                              onClick={() => openEditModal(job)}
+                              className="p-2 rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 border border-slate-200 transition-all cursor-pointer"
+                              title={lang === 'ar' ? 'تعديل الوظيفة' : 'Edit Job'}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                          )}
                          
-{permission?.allowdDelete?(<button
-                            onClick={() => handleDelete(job.id)}
-                            className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-all cursor-pointer"
-                            title={lang === 'ar' ? 'حذف الوظيفة' : 'Delete Job'}
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>):(<div></div>)}
-                          
+                          {permission?.allowdDelete && (
+                            <button
+                              onClick={() => handleDelete(job.id)}
+                              className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-all cursor-pointer"
+                              title={lang === 'ar' ? 'حذف الوظيفة' : 'Delete Job'}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -588,8 +607,9 @@ export default function AdminJobsClient({ initialJobs, userEmail = '', userRole 
               <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-1">
                 <span className="text-slate-400 font-bold">{lang === 'ar' ? 'الحالة الحالية' : 'Current Status'}</span>
                 <div>
-                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold ${selectedJob.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
-                    }`}>
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold ${
+                    selectedJob.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
+                  }`}>
                     {selectedJob.status === 'active'
                       ? (lang === 'ar' ? '✓ نشط' : '✓ Active')
                       : (lang === 'ar' ? '✕ مغلق' : '✕ Closed')}
@@ -606,21 +626,20 @@ export default function AdminJobsClient({ initialJobs, userEmail = '', userRole 
             </div>
 
             <div className="flex justify-end pt-3 border-t border-slate-100 shrink-0">
-                <button
+              <button
                 type="button"
                 onClick={() => setIsViewModalOpen(false)}
                 className="px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 cursor-pointer transition-all shadow-md"
               >
                 {lang === 'ar' ? 'إغلاق' : 'Close'}
-              </button>           
-
-             
+              </button>
             </div>
 
           </div>
         </div>
       )}
 
+      {/* موديل إضافة وظيفة جديدة */}
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl w-full max-w-lg max-h-[95vh] flex flex-col p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-200 border border-slate-100 my-auto">
@@ -629,14 +648,12 @@ export default function AdminJobsClient({ initialJobs, userEmail = '', userRole 
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                 {lang === 'ar' ? 'إضافة فرصة وظيفية جديدة' : 'Add New Job Opportunity'}
               </h3>
-           
               <button
                 onClick={() => setIsAddModalOpen(false)}
                 className="text-slate-400 hover:text-slate-600 font-bold text-sm cursor-pointer w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"
               >
                 ✕
               </button>
-            
             </div>
 
             <form onSubmit={handleCreateJob} className="space-y-4 overflow-y-auto pr-1">
@@ -678,7 +695,15 @@ export default function AdminJobsClient({ initialJobs, userEmail = '', userRole 
                   </p>
                 )}
               </div>
-   <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 shrink-0">
+
+              {/* 🔴 رسالة الخطأ داخل الموديل */}
+              {modalError && (
+                <div className="p-3 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold text-center">
+                  {modalError}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
@@ -695,14 +720,13 @@ export default function AdminJobsClient({ initialJobs, userEmail = '', userRole 
                     ? (lang === 'ar' ? 'جاري الحفظ...' : 'Saving...')
                     : (lang === 'ar' ? 'حفظ ونشر الوظيفة' : 'Save & Publish Job')}
                 </button>
-              </div>         
-
-              
+              </div>
             </form>
           </div>
         </div>
       )}
 
+      {/* موديل تعديل وظيفة */}
       {isEditModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl w-full max-w-lg max-h-[95vh] flex flex-col p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-200 border border-slate-100 my-auto">
@@ -718,7 +742,8 @@ export default function AdminJobsClient({ initialJobs, userEmail = '', userRole 
                 ✕
               </button>
             </div>
-<form onSubmit={handleUpdateJob} className="space-y-4 overflow-y-auto pr-1">
+
+            <form onSubmit={handleUpdateJob} className="space-y-4 overflow-y-auto pr-1">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1.5">{lang === 'ar' ? 'المسمى الوظيفي' : 'Job Title'}</label>
                 <input
@@ -756,6 +781,13 @@ export default function AdminJobsClient({ initialJobs, userEmail = '', userRole 
                 )}
               </div>
 
+              {/* 🔴 رسالة الخطأ داخل الموديل */}
+              {modalError && (
+                <div className="p-3 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold text-center">
+                  {modalError}
+                </div>
+              )}
+
               <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 shrink-0">
                 <button
                   type="button"
@@ -775,7 +807,6 @@ export default function AdminJobsClient({ initialJobs, userEmail = '', userRole 
                 </button>
               </div>
             </form>
-            
           </div>
         </div>
       )}

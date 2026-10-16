@@ -1,8 +1,11 @@
+'use client';
 
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { supabase } from '@/lib/supabase/supabase';
 import { careerFormSchema } from '@/lib/validations/validations';
 import { submitCareerApplication } from './actions';
+import FormErrorBox from '@/components/FormErrorBox';
 
 interface Position {
   id: string;
@@ -50,19 +53,17 @@ interface CareersFormProps {
   jobDetails?: any;
 }
 
-export default  function CareersForm({ lang, t, jobId, jobDetails }: CareersFormProps) {
+export default function CareersForm({ lang, t, jobId, jobDetails }: CareersFormProps) {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState('');
-  
 
   const departments = t?.departments || [];
 
   const [selectedDeptId, setSelectedDeptId] = useState(
     jobDetails?.department || (departments[0]?.id ?? '')
   );
-  
 
   const [formData, setFormData] = useState({
     name: '',
@@ -86,16 +87,19 @@ export default  function CareersForm({ lang, t, jobId, jobDetails }: CareersForm
   const [selectedPosition, setSelectedPosition] = useState(
     jobDetails?.title || (availablePositions[0]?.id ?? '')
   );
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
 
     if (!formData.cvFile) {
-      setErrors((prev) => ({ ...prev, cvFile: lang === 'ar' ? 'يرجى إرفاق السيرة الذاتية (PDF)' : 'Please attach your CV (PDF)' }));
+      const errMsg = lang === 'ar' ? 'يرجى إرفاق السيرة الذاتية (PDF)' : 'Please attach your CV (PDF)';
+      setErrors((prev) => ({ ...prev, cvFile: errMsg }));
+      toast.error(errMsg);
       return;
     }
 
-   const payload = {
+    const payload = {
       name: formData.name,
       email: formData.email,
       phone: formData.phone,
@@ -115,7 +119,9 @@ export default  function CareersForm({ lang, t, jobId, jobDetails }: CareersForm
         experience: fieldErrors.experience?._errors[0] || '',
         cvFile: fieldErrors.cvFile?._errors[0] || '',
       });
-      setFormError(lang === 'ar' ? 'يرجى تصحيح الأخطاء في الحقول أدناه.' : 'Please fix the errors below.');
+      const validationMsg = lang === 'ar' ? 'يرجى تصحيح الأخطاء في الحقول أدناه.' : 'Please fix the errors below.';
+      setFormError(validationMsg);
+      toast.error(validationMsg);
       return;
     }
 
@@ -141,9 +147,13 @@ export default  function CareersForm({ lang, t, jobId, jobDetails }: CareersForm
       });
 
       if (!res.success) throw new Error(res.message);
+      
       setSubmitted(true);
+      toast.success(lang === 'ar' ? 'تم إرسال طلبك بنجاح!' : 'Application submitted successfully!');
     } catch (err: any) {
-      setFormError(err.message || 'حدث خطأ غير متوقع أثناء إرسال الطلب.');
+      const errMsg = err.message || (lang === 'ar' ? 'حدث خطأ غير متوقع أثناء إرسال الطلب.' : 'An unexpected error occurred.');
+      setFormError(errMsg);
+      toast.error(errMsg);
     } finally {
       setLoading(false);
     }
@@ -152,8 +162,6 @@ export default  function CareersForm({ lang, t, jobId, jobDetails }: CareersForm
   if (submitted) {
     return (
       <div className="py-12 text-center space-y-4" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-
-      <div>helllooo</div>
         <div className="w-16 h-16 bg-emerald-500 text-white rounded-full flex items-center justify-center text-3xl mx-auto shadow-lg">✓</div>
         <h3 className="text-xl font-bold text-slate-900 dark:text-white">
           {lang === 'ar' ? 'تم إرسال طلبك بنجاح' : 'Application Submitted Successfully'}
@@ -162,14 +170,13 @@ export default  function CareersForm({ lang, t, jobId, jobDetails }: CareersForm
           {t.form.success}
         </p>
         <div className="pt-2">
-      <a
-        href="/"
-        className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition-colors shadow-sm"
-      >
-        {lang === 'ar' ? 'العودة إلى الصفحة الرئيسية' : 'Back to Home'}
-      </a>
-    </div>
-        
+          <a
+            href="/"
+            className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition-colors shadow-sm"
+          >
+            {lang === 'ar' ? 'العودة إلى الصفحة الرئيسية' : 'Back to Home'}
+          </a>
+        </div>
       </div>
     );
   }
@@ -207,11 +214,8 @@ export default  function CareersForm({ lang, t, jobId, jobDetails }: CareersForm
         </div>
       )}
 
-      {formError && (
-        <div className="p-4 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 text-xs font-bold">
-          {formError}
-        </div>
-      )}
+      {/* صندوق رسالة الخطأ الموحد فوق النموذج */}
+      <FormErrorBox message={formError} success={false} />
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
         <div className="space-y-2">
@@ -258,31 +262,30 @@ export default  function CareersForm({ lang, t, jobId, jobDetails }: CareersForm
           </div>
         </div>
 
-<div className="space-y-2">
-  <label className="block text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
-    {t.form.experience}
-  </label>
-  <select
-    value={formData.experience}
-    onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
-    className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
-  >
-    <option value="Fresh Graduate (No Experience)">{t.form.experienceOptions.fresh}</option>
-    <option value="Less than 1 year">{t.form.experienceOptions.lessThan1}</option>
-    <option value="1-2 years">{t.form.experienceOptions.oneToTwo}</option>
-    <option value="3-5 years">{t.form.experienceOptions.threeToFive}</option>
-    <option value="More than 5 years">{t.form.experienceOptions.moreThan5}</option>
-  </select>
-</div>
+        <div className="space-y-2">
+          <label className="block text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
+            {t.form.experience}
+          </label>
+          <select
+            value={formData.experience}
+            onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
+            className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+          >
+            <option value="Fresh Graduate (No Experience)">{t.form.experienceOptions.fresh}</option>
+            <option value="Less than 1 year">{t.form.experienceOptions.lessThan1}</option>
+            <option value="1-2 years">{t.form.experienceOptions.oneToTwo}</option>
+            <option value="3-5 years">{t.form.experienceOptions.threeToFive}</option>
+            <option value="More than 5 years">{t.form.experienceOptions.moreThan5}</option>
+          </select>
+        </div>
 
         <div className="space-y-2">
           <label className="block text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
             {t.form.selectDepartment}
           </label>
           <select
-           // disabled={Boolean(jobId)}
             value={selectedDeptId}
-           onChange={(e) => {
+            onChange={(e) => {
               setSelectedDeptId(e.target.value);
               const dept = departments.find((d) => d.id === e.target.value);
               if (dept && dept.positions.length > 0) {
@@ -299,7 +302,7 @@ export default  function CareersForm({ lang, t, jobId, jobDetails }: CareersForm
           </select>
         </div>
 
-       {!jobId && (
+        {!jobId && (
           <div className="space-y-2">
             <label className="block text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
               {t.form.selectPosition}
@@ -335,9 +338,11 @@ export default  function CareersForm({ lang, t, jobId, jobDetails }: CareersForm
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm sm:text-base shadow-lg shadow-emerald-600/20 transition-all cursor-pointer disabled:opacity-50"
+          className="w-full py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm sm:text-base shadow-lg shadow-emerald-600/20 transition-all cursor-pointer disabled:opacity-50 mt-2"
         >
-          {loading ? (lang === 'ar' ? 'جاري إرسال الطلب...' : 'Submitting Application...') : t.form.submit}
+          {loading 
+            ? (lang === 'ar' ? 'جاري إرسال الطلب...' : 'Submitting Application...') 
+            : (lang === 'ar' ? 'إرسال الطلب' : t.form.submit)}
         </button>
       </form>
 
