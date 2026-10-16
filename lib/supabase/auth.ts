@@ -39,7 +39,6 @@ export async function getCurrentUserRole() {
     return { user, role: userRole, roleDisplayName, isAuthorized: false };
   }
 
-  // الاحتفاظ بالمنطق الأصلي الكامل لفحص جدول الصلاحيات للأدوار الأخرى المخصصة
   const { count, error: permError } = await supabase
     .from('role_permissions')
     .select('*', { count: 'exact', head: true })

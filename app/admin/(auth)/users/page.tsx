@@ -23,16 +23,24 @@ export default async function AdminUsersPage() {
   const canViewDashboard = await hasPermission('dashboard.view');
   const canManageUsers = await hasPermission('users.manage');
   const canViewActivityLogs = await hasPermission('activity_logs.view') || canManageUsers;
-
   // الشرط الموحد والآمن للسماح للمدراء والمشرفين بالدخول فوراً بناءً على جدول الأدوار فقط
   const isSuperAdminOrAdmin = userRoleName === 'super_admin' || userRoleName === 'admin' || userRoleName === 'supervisor';
 
   if (!isSuperAdminOrAdmin && (!canViewDashboard || !canManageUsers)) {
+    console.error("Auth Failure Debug:", {
+      userEmail,
+      userRoleName,
+      authDataAuthorized: authData?.isAuthorized,
+      canViewDashboard,
+      canManageUsers
+    });
+
     return (
       <div className="p-8 bg-red-50 text-red-700 rounded-3xl m-8 border border-red-200" dir="rtl">
-        <h2 className="text-xl font-black">🚫 تم رفض الدخول بواسطة شرط الحماية في النظام</h2>
+        <h2 className="text-xl font-black">🚫 تم رفض الدخول بواسطة شرط الحماية في page.tsx</h2>
         <p className="mt-2 text-sm">البريد الإلكتروني الحالي: <b>{userEmail}</b></p>
         <p className="mt-1 text-sm">الدور المستخرج (من جدول الأدوار): <b className="underline">{userRoleName}</b></p>
+        <p className="mt-2 text-xs text-gray-500">حالة التصريح الكلية: {String(authData?.isAuthorized)}</p>
       </div>
     );
   }
