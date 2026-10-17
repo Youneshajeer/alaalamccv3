@@ -333,10 +333,10 @@ export default function UsersManagerClient({
 
                       <td className="p-4 whitespace-nowrap">
                         <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${u.is_blocked
-                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                            : u.is_active
-                              ? 'bg-emerald-50 text-emerald-700'
-                              : 'bg-rose-50 text-rose-700'
+                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                          : u.is_active
+                            ? 'bg-emerald-50 text-emerald-700'
+                            : 'bg-rose-50 text-rose-700'
                           }`}>
                           {u.is_blocked ? 'محظور (خطأ دخول)' : u.is_active ? 'نشط' : 'معطل'}
                         </span>
@@ -655,6 +655,13 @@ export default function UsersManagerClient({
                   ))}
                 </select>
               </div>
+
+              {/* --- 🔴 رسالة الخطأ والتحذیر تظهر حصرياً هنا داخل الموديل وفوق الأزرار --- */}
+              {message && message.type === 'error' && (
+                <div className="p-3 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800 text-xs font-bold text-center">
+                  {message.text}
+                </div>
+              )}
 
               <div className="flex items-center gap-3 pt-2">
                 <button
