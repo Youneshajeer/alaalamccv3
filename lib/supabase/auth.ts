@@ -25,8 +25,7 @@ export async function getCurrentUserRole() {
   const roleDisplayName = roleData?.display_name || userRole;
   const roleId = userRoleRecord?.role_id;
 
-  // الحفاظ على شرط السماح المباشر للمدراء، وتمت إضافة المشرف (supervisor) لضمان عدم إغلاق الصلاحية أمامه
-  if (userRole === 'super_admin' || userRole === 'admin' || userRole === 'supervisor') {
+  if (userRole === 'super_admin' || userRole === 'admin' ) {
     return { 
       user, 
       role: userRole, 
