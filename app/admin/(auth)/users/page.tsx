@@ -9,7 +9,6 @@ export const revalidate = 0;
 export default async function AdminUsersPage() {
   const supabase = await getSupabaseServerClient();
 
-  // جلب دور المستخدم وبياناته حصرياً من جدول الأدوار الحديث عبر الدالة المحدثة
   const authData = await getCurrentUserRole();
   
   if (!authData || !authData.user || !authData.isAuthorized) {
@@ -22,11 +21,12 @@ export default async function AdminUsersPage() {
 
   const canViewDashboard = await hasPermission('dashboard.view');
   const canManageUsers = await hasPermission('users.manage');
+  const canViewUsers = await hasPermission('users.manage');
   const canViewActivityLogs = await hasPermission('activity_logs.view') || canManageUsers;
   // الشرط الموحد والآمن للسماح للمدراء والمشرفين بالدخول فوراً بناءً على جدول الأدوار فقط
-  const isSuperAdminOrAdmin = userRoleName === 'super_admin' || userRoleName === 'admin' || userRoleName === 'supervisor';
+  const isSuperAdminOrAdmin = userRoleName === 'super_admin' || userRoleName === 'admin' ;
 
-  if (!isSuperAdminOrAdmin && (!canViewDashboard || !canManageUsers)) {
+  if (!isSuperAdminOrAdmin && (!canViewDashboard || !canManageUsers || !canViewUsers)) {
     console.error("Auth Failure Debug:", {
       userEmail,
       userRoleName,
