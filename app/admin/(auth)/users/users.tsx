@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import AdminHeader from '@/components/admin/AdminHeader'; 
+import AdminHeader from '@/components/admin/AdminHeader';
 import Link from 'next/link';
-import { 
-  createUserAction, 
-  updateUserRoleAction, 
-  toggleUserStatusAction, 
+import {
+  createUserAction,
+  updateUserRoleAction,
+  toggleUserStatusAction,
   deleteUserAction,
-  createNewPermissionAction, 
-  updateRolePermissionsAction, 
+  createNewPermissionAction,
+  updateRolePermissionsAction,
   unblockUserAction,
   generateSecureResetTokenAction,
   createNewRoleAction,
@@ -76,7 +76,7 @@ export default function UsersManagerClient({
 
   const [selectedRoleId, setSelectedRoleId] = useState<string>('');
   const currentRole = roles.find((r) => r.id === selectedRoleId);
-  
+
   const [assignedPermissions, setAssignedPermissions] = useState<string[]>([]);
 
   const [newPermName, setNewPermName] = useState('');
@@ -129,7 +129,6 @@ export default function UsersManagerClient({
       }
     });
   };
-  
 
   const handleCreateRole = (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,6 +142,7 @@ export default function UsersManagerClient({
           setMessage({ text: 'تمت إضافة الدور الجديد بنجاح!', type: 'success' });
           setNewRoleName('');
           setNewRoleDisplayName('');
+          window.location.reload();
         } else {
           setMessage({ text: res.error || 'فشل إضافة الدور الجديد.', type: 'error' });
         }
@@ -154,27 +154,35 @@ export default function UsersManagerClient({
     });
   };
 
-const handleCreateUser = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (isSavingUser) return; // منع الضغط المتكرر
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSavingUser) return;
 
-  setIsSavingUser(true);
-  try {
-    const res = await createUserAction(formData);
-    if (res.success) {
-      setMessage({ text: 'تم إنشاء حساب المشرف بنجاح!', type: 'success' });
-      // تصفير الحقول أو إغلاق المودال
-      setFormData({ fullName: '', email: '', password: '', roleId: '' });
-      setIsModalOpen(false); // إغلاق المودال إن وجد
-    } else {
-      setMessage({ text: res.error || 'فشل إنشاء المستخدم.', type: 'error' });
+    setIsSavingUser(true);
+    try {
+      const res = await createUserAction({
+        fullName,
+        email,
+        password,
+        roleId: selectedAddRoleId,
+      });
+      if (res.success) {
+        setMessage({ text: 'تم إنشاء حساب المشرف بنجاح!', type: 'success' });
+        setFullName('');
+        setEmail('');
+        setPassword('');
+        setSelectedAddRoleId(roles[0]?.id || '');
+        setShowAddUserModal(false);
+        window.location.reload();
+      } else {
+        setMessage({ text: res.error || 'فشل إنشاء المستخدم.', type: 'error' });
+      }
+    } catch (err) {
+      setMessage({ text: 'حدث خطأ غير متوقع.', type: 'error' });
+    } finally {
+      setIsSavingUser(false);
     }
-  } catch (err) {
-    setMessage({ text: 'حدث خطأ غير متوقع.', type: 'error' });
-  } finally {
-    setIsSavingUser(false); // 👈 إعادة تفعيل الحقول والأزرار بغض النظر عن النتيجة
-  }
-};
+  };
 
   const handleUserRoleChange = (userId: string, newRoleId: string) => {
     startTransition(async () => {
@@ -217,7 +225,7 @@ const handleCreateUser = async (e: React.FormEvent) => {
   const moduleNamesArabic: Record<string, string> = {
     jobs: 'إدارة الوظائف الشاغرة (Jobs)',
     careers: 'طلبات التوظيف والسير الذاتية (Careers)',
-    customer_service: 'رسائل خدمة العملاء (Customer Service)',
+    customer_service: 'رسالة خدمة العملاء (Customer Service)',
     requests: 'طلبات الخدمات المقدمة (Request-Service)',
     messages: 'الرسائل (Messages)',
     users: 'إدارة المشرفين والصلاحيات (Users)',
@@ -306,7 +314,7 @@ const handleCreateUser = async (e: React.FormEvent) => {
                         )}
                       </td>
                       <td className="p-4 text-slate-800 dark:text-slate-200 font-medium whitespace-nowrap">{u.full_name || '---'}</td>
-                      
+
                       <td className="p-4 whitespace-nowrap">
                         <select
                           value={activeRoleId}
@@ -324,13 +332,12 @@ const handleCreateUser = async (e: React.FormEvent) => {
                       </td>
 
                       <td className="p-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
-                          u.is_blocked 
-                            ? 'bg-amber-50 text-amber-700 border border-amber-200' 
-                            : u.is_active 
-                              ? 'bg-emerald-50 text-emerald-700' 
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${u.is_blocked
+                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                            : u.is_active
+                              ? 'bg-emerald-50 text-emerald-700'
                               : 'bg-rose-50 text-rose-700'
-                        }`}>
+                          }`}>
                           {u.is_blocked ? 'محظور (خطأ دخول)' : u.is_active ? 'نشط' : 'معطل'}
                         </span>
                       </td>
@@ -453,13 +460,11 @@ const handleCreateUser = async (e: React.FormEvent) => {
                             }}
                           >
                             <label
-                              className={`flex items-start gap-3 p-3 rounded-xl border transition-all ${
-                                !selectedRoleId ? 'cursor-not-allowed opacity-50 bg-slate-100 dark:bg-slate-800' : 'cursor-pointer'
-                              } ${
-                                isChecked 
-                                  ? 'bg-emerald-50/60 dark:bg-emerald-950/30 border-emerald-300 text-emerald-900 dark:text-emerald-200' 
+                              className={`flex items-start gap-3 p-3 rounded-xl border transition-all ${!selectedRoleId ? 'cursor-not-allowed opacity-50 bg-slate-100 dark:bg-slate-800' : 'cursor-pointer'
+                                } ${isChecked
+                                  ? 'bg-emerald-50/60 dark:bg-emerald-950/30 border-emerald-300 text-emerald-900 dark:text-emerald-200'
                                   : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
-                              } ${isSavingThis ? 'animate-pulse opacity-75' : ''}`}
+                                } ${isSavingThis ? 'animate-pulse opacity-75' : ''}`}
                             >
                               <input
                                 type="checkbox"
@@ -583,77 +588,99 @@ const handleCreateUser = async (e: React.FormEvent) => {
       {showAddUserModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200 dark:border-slate-800 space-y-6">
-            <h3 className="text-xl font-black text-slate-900 dark:text-white">إضافة مشرف جديد</h3>
-            
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-black text-slate-900 dark:text-white">إضافة مشرف جديد</h3>
+              <button
+                type="button"
+                disabled={isSavingUser}
+                onClick={() => setShowAddUserModal(false)}
+                className="text-slate-400 hover:text-slate-600 text-sm font-bold cursor-pointer disabled:opacity-50"
+              >
+                ✕
+              </button>
+            </div>
+
             <form onSubmit={handleCreateUser} className="space-y-4">
-  {/* حقل الاسم الكامل */}
-  <div>
-    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">الاسم الكامل:</label>
-    <input
-      type="text"
-      required
-      disabled={isSavingUser} // 👈 تجميد الحقل أثناء الحفظ
-      value={formData.fullName}
-      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-800 dark:text-white outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-    />
-  </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">الاسم الكامل:</label>
+                <input
+                  type="text"
+                  required
+                  disabled={isSavingUser}
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="مثال: محمد علي"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-800 dark:text-white outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+              </div>
 
-  {/* حقل البريد الإلكتروني */}
-  <div>
-    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">البريد الإلكتروني:</label>
-    <input
-      type="email"
-      required
-      disabled={isSavingUser} // 👈 تجميد الحقل أثناء الحفظ
-      value={formData.email}
-      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-800 dark:text-white outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-    />
-  </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">البريد الإلكتروني:</label>
+                <input
+                  type="email"
+                  required
+                  disabled={isSavingUser}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@domain.com"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-800 dark:text-white outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+              </div>
 
-  {/* حقل كلمة المرور */}
-  <div>
-    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">كلمة المرور:</label>
-    <input
-      type="password"
-      required
-      disabled={isSavingUser} // 👈 تجميد الحقل أثناء الحفظ
-      value={formData.password}
-      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-800 dark:text-white outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-    />
-  </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">كلمة المرور:</label>
+                <input
+                  type="password"
+                  required
+                  disabled={isSavingUser}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-800 dark:text-white outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+              </div>
 
-  {/* اختيار الدور */}
-  <div>
-    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">الدور:</label>
-    <select
-      disabled={isSavingUser} // 👈 تجميد القائمة المنسدلة أثناء الحفظ
-      value={formData.roleId}
-      onChange={(e) => setFormData({ ...formData, roleId: e.target.value })}
-      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-800 dark:text-white outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      {/* خيارات الأدوار */}
-    </select>
-  </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">الدور:</label>
+                <select
+                  disabled={isSavingUser}
+                  value={selectedAddRoleId}
+                  onChange={(e) => setSelectedAddRoleId(e.target.value)}
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-800 dark:text-white outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {roles.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.display_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-  {/* زر الحفظ */}
-  <button
-    type="submit"
-    disabled={isSavingUser || !formData.email || !formData.password} // 👈 تجميد الزر تماماً
-    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-  >
-    {isSavingUser && (
-      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-    )}
-    {isSavingUser ? 'جاري حفظ المشرف وإنشاء الحساب...' : 'حفظ المشرف الجديد'}
-  </button>
-</form>
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="submit"
+                  disabled={isSavingUser || !email || !password}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isSavingUser && (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  )}
+                  {isSavingUser ? 'جاري حفظ المشرف وإنشاء الحساب...' : 'حفظ المشرف الجديد'}
+                </button>
+
+                <button
+                  type="button"
+                  disabled={isSavingUser}
+                  onClick={() => setShowAddUserModal(false)}
+                  className="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 font-bold py-3 rounded-xl text-xs transition-all cursor-pointer disabled:opacity-50"
+                >
+                  إلغاء
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
-
     </div>
   );
 }
