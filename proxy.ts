@@ -27,7 +27,8 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { session } } = await supabase.auth.getSession();
+  const user = session?.user;
 
   if (request.nextUrl.pathname.startsWith('/admin/dashboard') && !user) {
     const url = request.nextUrl.clone();
@@ -45,5 +46,11 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/dashboard/:path*', '/admin/login'],
+  matcher: [
+    /*
+     * تغطية جميع مسارات لوحة التحكم وصفحة تسجيل الدخول تلقائياً
+     * باستثناء الملفات الثابتة والصور لتفادي البطء
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 };

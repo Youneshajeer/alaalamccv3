@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { getSupabaseAdminClient, getSupabaseServerClient } from '@/lib/supabase/supabase-server';
-import { logActivity } from '@/lib/supabase/logger'; // 🟢 استيراد الدالة المركزية الموحدة
+import { logActivity } from '@/lib/supabase/logger'; 
 
 const loginSchema = z.object({
   email: z.string().email('البريد الإلكتروني غير صالح'),
@@ -11,11 +11,9 @@ const loginSchema = z.object({
 
 export async function loginAction(formData: { email: string; password: string }) {
   const parseResult = loginSchema.safeParse(formData);
-  const supabaseAdmin = getSupabaseAdminClient();
-
+  
   if (!parseResult.success) {
     const errorMsg = parseResult.error.issues[0]?.message || 'Invalid input data.';
-    
     await logActivity({
       userId: null,
       userEmail: formData.email || 'unknown',
@@ -33,13 +31,26 @@ export async function loginAction(formData: { email: string; password: string })
 
   const { email, password } = parseResult.data;
   const cleanEmail = email.trim().toLowerCase();
+  const supabaseAdmin = getSupabaseAdminClient();
+  const supabase = await getSupabaseServerClient();
 
-  const { data: profile } = await supabaseAdmin
-    .from('profiles')
-    .select('id, failed_login_attempts, is_blocked')
-    .eq('email', cleanEmail)
-    .single();
+  // 1. جلب بيانات البروفايل ومحاولة المصادقة بشكل متزامن (Parallel) لتوفير الوقت
+  const [profileResult, authResult] = await Promise.all([
+    supabaseAdmin
+      .from('profiles')
+      .select('id, failed_login_attempts, is_blocked')
+      .eq('email', cleanEmail)
+      .maybeSingle(),
+    supabase.auth.signInWithPassword({
+      email: cleanEmail,
+      password,
+    })
+  ]);
 
+  const profile = profileResult.data;
+  const { data, error } = authResult;
+
+  // 2. التحقق من حالة الحظر المسبق
   if (profile?.is_blocked) {
     await logActivity({
       userId: profile.id,
@@ -59,18 +70,14 @@ export async function loginAction(formData: { email: string; password: string })
     };
   }
 
-  const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: cleanEmail,
-    password,
-  });
-
+  // 3. في حال فشل تسجيل الدخول (كلمة مرور خطأ أو بريد غير موجود)
   if (error || !data.user) {
     if (profile) {
       const prevAttempts = profile.failed_login_attempts || 0;
       const newAttempts = prevAttempts + 1;
       const shouldBlock = newAttempts >= 3;
 
+      // تحديث محاولات الفشل في الخلفية
       await supabaseAdmin
         .from('profiles')
         .update({
@@ -131,6 +138,7 @@ export async function loginAction(formData: { email: string; password: string })
     };
   }
 
+  // 4. في حال نجاح تسجيل الدخول: تصفير محاولات الفشل وتسجيل النشاط
   if (profile) {
     await supabaseAdmin
       .from('profiles')

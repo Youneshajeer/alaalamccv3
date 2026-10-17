@@ -17,68 +17,71 @@ export default async function AdminDashboardPage() {
   const userEmail = user.email || '';
   const userRole = role || 'supervisor';
 
-  const canViewDashboard = await hasPermission('dashboard.view');
-  const canViewMessages = await hasPermission('messages.view');     
-  const canViewRequests = await hasPermission('requests.view');     
-  const canViewJobs = await hasPermission('jobs.view');             
-  const canViewUsers = await hasPermission('users.manage');         
+  const [
+    canViewDashboard,
+    canViewMessages,
+    canViewRequests,
+    canViewJobs,
+    canViewUsers,
+    messagesRes,
+    requestsRes,
+    jobsRes,
+    careersRes,
+    rolesRes,
+    profilesRes
+  ] = await Promise.all([
+    hasPermission('dashboard.view'),
+    hasPermission('messages.view'),
+    hasPermission('requests.view'),
+    hasPermission('jobs.view'),
+    hasPermission('users.manage'),
+    supabase.from('customer_service').select('*', { count: 'exact' }),
+    supabase.from('request-service').select('*', { count: 'exact' }),
+    supabase.from('jobs').select('*', { count: 'exact' }),
+    supabase.from('careers').select('*', { count: 'exact' }),
+    supabase.from('roles').select('id, name, display_name'),
+    supabase.from('profiles')
+      .select(`
+        *,
+        user_roles (
+          role_id,
+          roles (
+            id,
+            name,
+            display_name
+          )
+        )
+      `)
+      .order('created_at', { ascending: false })
+      .limit(4)
+  ]);
 
-  const { data: messagesData, count: totalMessages } = await supabase
-    .from('customer_service')
-    .select('*', { count: 'exact' });
-  const messagesList = messagesData || [];
+  const messagesList = messagesRes.data || [];
   const unreadMessages = messagesList.filter((m: any) => m.status === 'unread').length;
   const readMessages = messagesList.filter((m: any) => m.status === 'read').length;
 
-  const { data: requestsData, count: totalRequests } = await supabase
-    .from('request-service')
-    .select('*', { count: 'exact' });
-
-  const requestsList = requestsData || [];
+  const requestsList = requestsRes.data || [];
   const unreadRequests = requestsList.filter((r: any) => r.status === 'unread').length;
   const readRequests = requestsList.filter((r: any) => r.status === 'read').length;
   const actionTakenRequests = requestsList.filter((r: any) => r.action_taken === true).length;
   const pendingRequests = requestsList.filter((r: any) => r.action_taken === false || !r.action_taken).length;
 
-  const { data: jobsData, count: totalJobs } = await supabase
-    .from('jobs')
-    .select('*', { count: 'exact' });
-
-  const jobsList = jobsData || [];
+  const jobsList = jobsRes.data || [];
+  const totalJobs = jobsRes.count;
   const activeJobs = jobsList.filter((j: any) => 
     j.status === 'active' || j.status === 'Active' || j.is_active === true
   ).length;
   const inactiveJobs = (totalJobs || jobsList.length) - activeJobs;
 
-  const { data: careersData, count: totalCareers } = await supabase
-    .from('careers')
-    .select('*', { count: 'exact' });
-
-  const careersList = careersData || [];
+  const careersList = careersRes.data || [];
+  const totalCareers = careersRes.count;
   const advertisedApplicants = careersList.filter((c: any) => 
     c.job_id !== null && c.job_id !== '' && c.job_id !== undefined
   ).length;
   const directApplicants = (totalCareers || careersList.length) - advertisedApplicants;
 
-  const { data: rolesData } = await supabase.from('roles').select('id, name, display_name');
-  const allRoles = rolesData || [];
-
-  const { data: profilesWithRolesData } = await supabase
-    .from('profiles')
-    .select(`
-      *,
-      user_roles (
-        role_id,
-        roles (
-          id,
-          name,
-          display_name
-        )
-      )
-    `)
-    .order('created_at', { ascending: false })
-    .limit(4);
-  const profiles = profilesWithRolesData || [];
+  const allRoles = rolesRes.data || [];
+  const profiles = profilesRes.data || [];
 
   let totalAdmins = 0;
   let activeAdmins = 0;
@@ -128,12 +131,12 @@ export default async function AdminDashboardPage() {
       <DashboardClient
         stats={{
           messages: {
-            total: totalMessages || messagesList.length,
+            total: messagesRes.count || messagesList.length,
             unread: unreadMessages,
             read: readMessages,
           },
           requests: {
-            total: totalRequests || requestsList.length,
+            total: requestsRes.count || requestsList.length,
             read: readRequests,
             unread: unreadRequests,
             actionTaken: actionTakenRequests,
