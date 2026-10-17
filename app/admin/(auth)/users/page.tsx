@@ -3,6 +3,7 @@ import UsersManagerClient from './users';
 import { hasPermission } from '@/lib/supabase/permissions';
 import { getCurrentUserRole } from '@/lib/supabase/auth';
 import { redirect } from 'next/navigation';
+import AdminHeader from '@/components/admin/AdminHeader'; // 👈 استيراد الهيدر الموحد
 
 export const revalidate = 0;
 
@@ -21,12 +22,11 @@ export default async function AdminUsersPage() {
 
   const canViewDashboard = await hasPermission('dashboard.view');
   const canManageUsers = await hasPermission('users.manage');
-  const canViewUsers = await hasPermission('users.manage');
+  
   const canViewActivityLogs = await hasPermission('activity_logs.view') || canManageUsers;
-  // الشرط الموحد والآمن للسماح للمدراء والمشرفين بالدخول فوراً بناءً على جدول الأدوار فقط
-  const isSuperAdminOrAdmin = userRoleName === 'super_admin' || userRoleName === 'admin' ;
+  const isSuperAdminOrAdmin = userRoleName === 'super_admin' || userRoleName === 'admin';
 
-  if (!isSuperAdminOrAdmin && (!canViewDashboard || !canManageUsers || !canViewUsers)) {
+  if (!isSuperAdminOrAdmin && (!canViewDashboard || !canManageUsers)) {
     console.error("Auth Failure Debug:", {
       userEmail,
       userRoleName,
@@ -36,29 +36,43 @@ export default async function AdminUsersPage() {
     });
 
     return (
-      <div className="p-8 bg-red-50 text-red-700 rounded-3xl m-8 border border-red-200" dir="rtl">
-        <h2 className="text-xl font-black">🚫 تم رفض الدخول بواسطة شرط الحماية في page.tsx</h2>
-        <p className="mt-2 text-sm">البريد الإلكتروني الحالي: <b>{userEmail}</b></p>
-        <p className="mt-1 text-sm">الدور المستخرج (من جدول الأدوار): <b className="underline">{userRoleName}</b></p>
-        <p className="mt-2 text-xs text-gray-500">حالة التصريح الكلية: {String(authData?.isAuthorized)}</p>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-6 flex items-center justify-center" dir="rtl">
+        <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 rounded-3xl p-8 max-w-lg w-full space-y-4 shadow-lg text-center">
+          <div className="w-12 h-12 bg-rose-100 dark:bg-rose-900/60 rounded-full flex items-center justify-center mx-auto text-rose-600 dark:text-rose-400 text-xl font-bold">
+            🚫
+          </div>
+          <h2 className="text-xl font-black">تم رفض الوصول للحساب</h2>
+          <p className="text-xs text-rose-600/80 dark:text-rose-400/80 leading-relaxed">
+            حسابك الحالي لا يملك الصلاحيات الكافية لاستعراض أو إدارة ملفات المستخدمين والمشرفين.
+          </p>
+          <div className="bg-white/80 dark:bg-slate-900/80 p-4 rounded-2xl border border-rose-200/50 dark:border-rose-800/50 text-right space-y-1.5 text-xs font-mono">
+            <p>البريد الإلكتروني: <b className="text-slate-900 dark:text-white">{userEmail}</b></p>
+            <p>الدور المعين: <b className="text-emerald-600 underline">{userRoleName}</b></p>
+          </div>
+        </div>
       </div>
     );
   }
 
+  // جلب الأدوار والصلاحيات
   const { data: roles, error: rolesError } = await supabase.from('roles').select('*');
   if (rolesError) console.error('Roles Error:', rolesError.message);
 
-  const { data: permissions, error: permError } = await supabase.from('permissions').select('*').order('module', { ascending: true });
+  const { data: permissions, error: permError } = await supabase
+    .from('permissions')
+    .select('*')
+    .order('module', { ascending: true });
   if (permError) console.error('Permissions Error:', permError.message);
 
   const { data: rolePermissions, error: rpError } = await supabase.from('role_permissions').select('*');
   if (rpError) console.error('Role Permissions Error:', rpError.message);
 
-  const formattedRoles = (roles || []).map((role: any) => ({
-    ...role,
-    role_permissions: (rolePermissions || []).filter((rp: any) => rp.role_id === role.id),
+  const formattedRoles = (roles || []).map((r: any) => ({
+    ...r,
+    role_permissions: (rolePermissions || []).filter((rp: any) => rp.role_id === r.id),
   }));
 
+  // جلب الملفات الشخصية والأدوار المسندة
   const { data: profiles, error: profilesError } = await supabase
     .from('profiles')
     .select(`
@@ -86,17 +100,29 @@ export default async function AdminUsersPage() {
   });
 
   return (
-    <div>
-      <UsersManagerClient
-        roles={formattedRoles}
-        permissions={permissions || []}
-        initialUsers={formattedUsers}
-        currentUserId={user.id}
-        currentUserEmail={userEmail}
-        currentUserRole={userRoleName}
-        roleDisplayName={roleDisplayName}
-        canViewActivityLogs={canViewActivityLogs}
-      />
+    <div dir="rtl" className="min-h-screen bg-slate-50/50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 p-4 sm:p-6 lg:p-8 space-y-8 font-sans">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* 1. المكون الموحد AdminHeader */}
+        <AdminHeader
+          titleAr="إدارة المشرفين والصلاحيات"
+          titleEn="Manage Users & Permissions"
+          lang="ar"
+          userEmail={userEmail}
+          userRole={userRoleName}
+        />
+
+        {/* 2. مكون العميل الرئيسي */}
+        <UsersManagerClient
+          roles={formattedRoles}
+          permissions={permissions || []}
+          initialUsers={formattedUsers}
+          currentUserId={user.id}
+          currentUserEmail={userEmail}
+          currentUserRole={userRoleName}
+          roleDisplayName={roleDisplayName}
+          canViewActivityLogs={canViewActivityLogs}
+        />
+      </div>
     </div>
   );
 }
