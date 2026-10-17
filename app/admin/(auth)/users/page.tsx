@@ -1,9 +1,10 @@
-import { getSupabaseServerClient } from '@/lib/supabase/supabase-server';
+import { getSupabaseServerClient,logoutAction } from '@/lib/supabase/supabase-server';
 import UsersManagerClient from './users';
 import { hasPermission } from '@/lib/supabase/permissions';
 import { getCurrentUserRole } from '@/lib/supabase/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link'
+import { useTransition } from 'react';
 export const revalidate = 0;
 
 export default async function AdminUsersPage() {
@@ -33,6 +34,13 @@ export default async function AdminUsersPage() {
       canViewDashboard,
       canManageUsers
     });
+    const [isPending, startTransition] = useTransition();
+
+  const handleLogout = () => {
+    startTransition(async () => {
+      await logoutAction();
+    });
+  };
 
     return (
      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-6 flex items-center justify-center" dir="rtl">
@@ -67,6 +75,7 @@ export default async function AdminUsersPage() {
 
       {userEmail && (
         <Link
+        onSubmit={handleLogout}
           href="/admin/login"
           className="inline-flex items-center gap-2 text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-100/60 dark:bg-rose-900/40 hover:bg-rose-200/60 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-800 px-4 py-2.5 rounded-xl transition-all cursor-pointer"
         >
