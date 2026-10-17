@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation'; // 👈 استيراد الموجه للتحديث السلس
 import AdminHeader from '@/components/admin/AdminHeader';
 import Link from 'next/link';
 import {
@@ -64,6 +65,7 @@ export default function UsersManagerClient({
   roleDisplayName,
   canViewActivityLogs,
 }: UsersManagerProps) {
+  const router = useRouter(); // 👈 تفعيل الـ router لتحديث البيانات بدون إعادة تحميل الصفحة
   const [users, setUsers] = useState<UserProfile[]>(initialUsers);
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
@@ -119,6 +121,7 @@ export default function UsersManagerClient({
         const res = await updateRolePermissionsAction(selectedRoleId, updatedPermissions);
         if (res.success) {
           setMessage({ text: 'تم تحديث الحفظ الفوري للصلاحيات بنجاح', type: 'success' });
+          router.refresh();
         } else {
           setMessage({ text: res.error || 'حدث خطأ أثناء الحفظ الفوري.', type: 'error' });
         }
@@ -142,7 +145,7 @@ export default function UsersManagerClient({
           setMessage({ text: 'تمت إضافة الدور الجديد بنجاح!', type: 'success' });
           setNewRoleName('');
           setNewRoleDisplayName('');
-          window.location.reload();
+          router.refresh();
         } else {
           setMessage({ text: res.error || 'فشل إضافة الدور الجديد.', type: 'error' });
         }
@@ -154,11 +157,14 @@ export default function UsersManagerClient({
     });
   };
 
+  // ⚡ إضافة المشرف بدون إعادة تحميل الصفحة بالكامل وبدون أخطاء في الرئيسية
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSavingUser) return;
 
     setIsSavingUser(true);
+    setMessage(null); // مسح أي أخطاء سابقة
+
     try {
       const res = await createUserAction({
         fullName,
@@ -166,15 +172,21 @@ export default function UsersManagerClient({
         password,
         roleId: selectedAddRoleId,
       });
+
       if (res.success) {
-        setMessage({ text: 'تم إنشاء حساب المشرف بنجاح!', type: 'success' });
+        // تفريغ الحقول وإغلاق المودال فوراً
         setFullName('');
         setEmail('');
         setPassword('');
         setSelectedAddRoleId(roles[0]?.id || '');
         setShowAddUserModal(false);
-        window.location.reload();
+
+        // تحديث البيانات في الخلفية بسلاسة تامة دون وميض الصفحة
+        startTransition(() => {
+          router.refresh();
+        });
       } else {
+        // إظهار الخطأ حصرياً داخل المودال
         setMessage({ text: res.error || 'فشل إنشاء المستخدم.', type: 'error' });
       }
     } catch (err) {
@@ -188,7 +200,7 @@ export default function UsersManagerClient({
     startTransition(async () => {
       const res = await updateUserRoleAction(userId, newRoleId);
       if (res.success) {
-        window.location.reload();
+        router.refresh();
       } else {
         alert(res.error);
       }
@@ -208,7 +220,7 @@ export default function UsersManagerClient({
         setMessage({ text: 'تمت إضافة الصلاحية بنجاح!', type: 'success' });
         setNewPermName('');
         setNewPermDesc('');
-        window.location.reload();
+        router.refresh();
       } else {
         setMessage({ text: res.error || 'فشل إضافة الصلاحية.', type: 'error' });
       }
@@ -242,8 +254,9 @@ export default function UsersManagerClient({
         userRole={currentUserRole}
       />
 
-      {message && (
-        <div className={`p-4 rounded-2xl text-xs sm:text-sm font-bold ${message.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}`}>
+      {/* التنبيهات العامة للنجاح في الصفحة الرئيسية */}
+      {message && message.type === 'success' && (
+        <div className="p-4 rounded-2xl text-xs sm:text-sm font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
           {message.text}
         </div>
       )}
@@ -266,7 +279,10 @@ export default function UsersManagerClient({
             )}
 
             <button
-              onClick={() => setShowAddUserModal(true)}
+              onClick={() => {
+                setMessage(null);
+                setShowAddUserModal(true);
+              }}
               className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-2xl text-xs shadow-sm transition-all cursor-pointer text-center"
             >
               + إضافة مشرف جديد
@@ -333,10 +349,10 @@ export default function UsersManagerClient({
 
                       <td className="p-4 whitespace-nowrap">
                         <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${u.is_blocked
-                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                          : u.is_active
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : 'bg-rose-50 text-rose-700'
+                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                            : u.is_active
+                              ? 'bg-emerald-50 text-emerald-700'
+                              : 'bg-rose-50 text-rose-700'
                           }`}>
                           {u.is_blocked ? 'محظور (خطأ دخول)' : u.is_active ? 'نشط' : 'معطل'}
                         </span>
@@ -350,7 +366,7 @@ export default function UsersManagerClient({
                                 const res = await unblockUserAction(u.id);
                                 if (res.success) {
                                   setMessage({ text: 'تمت عملية فك الحظر بنجاح.', type: 'success' });
-                                  window.location.reload();
+                                  router.refresh();
                                 } else {
                                   alert(res.error);
                                 }
@@ -364,7 +380,7 @@ export default function UsersManagerClient({
                             <button
                               onClick={async () => {
                                 const res = await toggleUserStatusAction(u.id, u.is_active);
-                                if (res.success) window.location.reload();
+                                if (res.success) router.refresh();
                               }}
                               disabled={u.id === currentUserId}
                               className="text-xs font-bold px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer disabled:opacity-40"
@@ -377,7 +393,7 @@ export default function UsersManagerClient({
                             onClick={async () => {
                               if (confirm('هل أنت متأكد من حذف هذا المشرف؟')) {
                                 const res = await deleteUserAction(u.id);
-                                if (res.success) window.location.reload();
+                                if (res.success) router.refresh();
                               }
                             }}
                             disabled={u.id === currentUserId}
@@ -656,7 +672,7 @@ export default function UsersManagerClient({
                 </select>
               </div>
 
-              {/* --- 🔴 رسالة الخطأ والتحذیر تظهر حصرياً هنا داخل الموديل وفوق الأزرار --- */}
+              {/* 🔴 رسالة الخطأ حصرية داخل الموديل وفوق زر الحفظ فقط */}
               {message && message.type === 'error' && (
                 <div className="p-3 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800 text-xs font-bold text-center">
                   {message.text}
