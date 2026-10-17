@@ -41,7 +41,7 @@ export default function Home() {
             <div className="relative group">
               <div className="absolute -inset-4 rounded-full bg-emerald-500/20 blur-xl animate-pulse"></div>
               <img
-                src="/images/logo.png"
+                src="/images/logo.webp"
                 alt="حلول العالم"
                 className="h-20 sm:h-28 w-auto object-contain relative z-10 animate-bounce"
               />

@@ -93,7 +93,7 @@ export default async function RootLayout({
               "name": "حلول العالم للاتصالات وتقنية المعلومات",
               "alternateName": "World Business Solutions",
               "url": "https://alaalamcc.com",
-              "logo": "https://alaalamcc.com/images/logo.png",
+              "logo": "https://alaalamcc.com/images/logo.webp",
               "address": {
                 "@type": "PostalAddress",
                 "addressCountry": "SA",
