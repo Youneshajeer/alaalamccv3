@@ -10,16 +10,30 @@ export default function Hero() {
   const [lang, setLang] = useState<'ar' | 'en'>('ar');
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // ⚡ حل مشكلة البطء: استبدال الـ setInterval المزعج بقراءة آمنة مرة واحدة وعند حدوث تغيير بالمتصفح
+  // دالة لجلب اللغة الحالية وتحديث الـ State
   useEffect(() => {
-    const updateLang = () => {
-      const savedLang = (localStorage.getItem('lang') as 'ar' | 'en') || 'ar';
-      setLang(savedLang);
+    const checkLang = () => {
+      // التحقق من localStorage أو أي طريقة أخرى مستخدمة في موقعك (مثل الـ DOM / HTML lang attribute)
+      const htmlLang = document.documentElement.lang as 'ar' | 'en';
+      const savedLang = (localStorage.getItem('lang') as 'ar' | 'en') || htmlLang || 'ar';
+      setLang(savedLang === 'en' ? 'en' : 'ar');
     };
 
-    updateLang();
-    window.addEventListener('storage', updateLang);
-    return () => window.removeEventListener('storage', updateLang);
+    checkLang();
+
+    // الاستماع لأي تغيير في الـ localStorage أو حدث مخصص لتغيير اللغة
+    window.addEventListener('storage', checkLang);
+    window.addEventListener('languageChanged', checkLang as EventListener);
+    
+    // مراقبة التغييرات في الـ HTML lang attribute إذا كان زر التغيير يغيره مباشرة
+    const observer = new MutationObserver(checkLang);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['lang', 'dir'] });
+
+    return () => {
+      window.removeEventListener('storage', checkLang);
+      window.removeEventListener('languageChanged', checkLang as EventListener);
+      observer.disconnect();
+    };
   }, []);
 
   const t: any = dictionaries[lang]?.home?.hero || {};
@@ -168,7 +182,7 @@ export default function Hero() {
 
         </div>
 
-        <div key={currentSlide} className="space-y-4 animate-fade-in max-w-4xl mx-auto text-center my-auto">
+        <div key={`${currentSlide}-${lang}`} className="space-y-4 animate-fade-in max-w-4xl mx-auto text-center my-auto">
           
           <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-slate-900/80 border border-emerald-500/60 backdrop-blur-md shadow-xl mx-auto">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
