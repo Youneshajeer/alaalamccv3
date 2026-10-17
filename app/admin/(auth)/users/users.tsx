@@ -87,6 +87,8 @@ export default function UsersManagerClient({
   const [newRoleDisplayName, setNewRoleDisplayName] = useState('');
   const [isSavingRole, setIsSavingRole] = useState(false);
 
+  const [isSavingUser, setIsSavingUser] = useState(false);
+
   const [savingPermissionId, setSavingPermissionId] = useState<string | null>(null);
 
   const handleRoleSelectChange = (roleId: string) => {
@@ -152,28 +154,27 @@ export default function UsersManagerClient({
     });
   };
 
-  const handleCreateUser = (e: React.FormEvent) => {
-    e.preventDefault();
-    startTransition(async () => {
-      const res = await createUserAction({
-        fullName,
-        email,
-        password,
-        roleId: selectedAddRoleId || roles[0]?.id,
-      });
+const handleCreateUser = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (isSavingUser) return; // منع الضغط المتكرر
 
-      if (res.success) {
-        setMessage({ text: 'تم إضافة المشرف بنجاح.', type: 'success' });
-        setShowAddUserModal(false);
-        setFullName('');
-        setEmail('');
-        setPassword('');
-        window.location.reload();
-      } else {
-        setMessage({ text: res.error || 'فشل إضافة المشرف.', type: 'error' });
-      }
-    });
-  };
+  setIsSavingUser(true);
+  try {
+    const res = await createUserAction(formData);
+    if (res.success) {
+      setMessage({ text: 'تم إنشاء حساب المشرف بنجاح!', type: 'success' });
+      // تصفير الحقول أو إغلاق المودال
+      setFormData({ fullName: '', email: '', password: '', roleId: '' });
+      setIsModalOpen(false); // إغلاق المودال إن وجد
+    } else {
+      setMessage({ text: res.error || 'فشل إنشاء المستخدم.', type: 'error' });
+    }
+  } catch (err) {
+    setMessage({ text: 'حدث خطأ غير متوقع.', type: 'error' });
+  } finally {
+    setIsSavingUser(false); // 👈 إعادة تفعيل الحقول والأزرار بغض النظر عن النتيجة
+  }
+};
 
   const handleUserRoleChange = (userId: string, newRoleId: string) => {
     startTransition(async () => {
@@ -585,74 +586,70 @@ export default function UsersManagerClient({
             <h3 className="text-xl font-black text-slate-900 dark:text-white">إضافة مشرف جديد</h3>
             
             <form onSubmit={handleCreateUser} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold mb-1">الاسم الكامل</label>
-                <input
-                  type="text"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl px-4 py-2 text-sm outline-none"
-                />
-              </div>
+  {/* حقل الاسم الكامل */}
+  <div>
+    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">الاسم الكامل:</label>
+    <input
+      type="text"
+      required
+      disabled={isSavingUser} // 👈 تجميد الحقل أثناء الحفظ
+      value={formData.fullName}
+      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-800 dark:text-white outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+    />
+  </div>
 
-              <div>
-                <label className="block text-xs font-bold mb-1">البريد الإلكتروني</label>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl px-4 py-2 text-sm outline-none"
-                />
-              </div>
+  {/* حقل البريد الإلكتروني */}
+  <div>
+    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">البريد الإلكتروني:</label>
+    <input
+      type="email"
+      required
+      disabled={isSavingUser} // 👈 تجميد الحقل أثناء الحفظ
+      value={formData.email}
+      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-800 dark:text-white outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+    />
+  </div>
 
-              <div>
-                <label className="block text-xs font-bold mb-1">كلمة المرور</label>
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl px-4 py-2 text-sm outline-none"
-                />
-              </div>
+  {/* حقل كلمة المرور */}
+  <div>
+    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">كلمة المرور:</label>
+    <input
+      type="password"
+      required
+      disabled={isSavingUser} // 👈 تجميد الحقل أثناء الحفظ
+      value={formData.password}
+      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-800 dark:text-white outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+    />
+  </div>
 
-              <div>
-                <label className="block text-xs font-bold mb-1">الدور الوظيفي</label>
-                <select
-                  value={selectedAddRoleId}
-                  onChange={(e) => setSelectedAddRoleId(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl px-4 py-2 text-sm outline-none cursor-pointer"
-                >
-                  {roles.map((r) => (
-                    <option key={r.id} value={r.id}>{r.display_name}</option>
-                  ))}
-                </select>
-              </div>
-              {message && message.type === 'error' && (
-                <div className="p-3 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold text-center">
-                  {message.text}
-                </div>
-              )}
+  {/* اختيار الدور */}
+  <div>
+    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">الدور:</label>
+    <select
+      disabled={isSavingUser} // 👈 تجميد القائمة المنسدلة أثناء الحفظ
+      value={formData.roleId}
+      onChange={(e) => setFormData({ ...formData, roleId: e.target.value })}
+      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-800 dark:text-white outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      {/* خيارات الأدوار */}
+    </select>
+  </div>
 
-              <div className="flex justify-end gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowAddUserModal(false)}
-                  className="px-4 py-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer"
-                >
-                  إلغاء
-                </button>
-                <button
-                  type="submit"
-                  disabled={isPending}
-                  className="px-5 py-2 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl cursor-pointer"
-                >
-                  حفظ المشرف
-                </button>
-              </div>
-            </form>
+  {/* زر الحفظ */}
+  <button
+    type="submit"
+    disabled={isSavingUser || !formData.email || !formData.password} // 👈 تجميد الزر تماماً
+    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+  >
+    {isSavingUser && (
+      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+    )}
+    {isSavingUser ? 'جاري حفظ المشرف وإنشاء الحساب...' : 'حفظ المشرف الجديد'}
+  </button>
+</form>
           </div>
         </div>
       )}
