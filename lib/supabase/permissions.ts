@@ -14,7 +14,6 @@ export async function hasPermission(permissionName: string): Promise<boolean> {
 
   if (!profile || !profile.is_active) return false;
 
-  // 1. جلب الدور الخاص بالمستخدم من user_roles وجدول roles
   const { data: userRolesData, error: rolesError } = await supabase
     .from('user_roles')
     .select(`
@@ -45,13 +44,10 @@ export async function hasPermission(permissionName: string): Promise<boolean> {
     });
   });
 
-  // 🔴 2. صمام الأمان (Bypass) للسوبر أدمن والأدمن:
-  // إذا كان دور المستخدم 'super_admin' أو 'admin'، يتم السماح له فوراً ودون فحص جدول الصلاحيات
   if (roles.includes('super_admin') ) {
     return true;
   }
 
-  // 3. لباقي المستخدمين العاديين: التحقق من وجود الصلاحية المحددة في مصفوفة صلاحياتهم
   return permissions.includes(permissionName);
 }
 

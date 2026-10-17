@@ -12,7 +12,6 @@ export default function EnterpriseStats({ enterpriseStats, lang }: EnterpriseSta
   const [counts, setCounts] = useState<{ [key: number]: number }>({});
   const sectionRef = useRef<HTMLDivElement>(null);
 
-  // تفعيل مراقبة الوصول إلى القسم للبدء بالعد
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {

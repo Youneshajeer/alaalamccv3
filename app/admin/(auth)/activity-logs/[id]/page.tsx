@@ -69,7 +69,6 @@ async function getActivityLogDetails(logId: string) {
     return { success: false, error: 'سجل النشاط غير موجود أو تم حذفه.' };
   }
 
-  // 📌 دمج وتنسيق البيانات باللغة العربية
   const formattedLog = {
     ...data,
     action_type_readable: formatActionType(data.action_type),

@@ -15,7 +15,6 @@ export interface ActivityLogFilterOptions {
   endDate?: string;
 }
 
-// 📌 1. ترجمة أنواع الإجراءات (Action Types) إلى نصوص عربية مفهومة
 function formatActionType(actionType: string): string {
   const map: Record<string, string> = {
     'CREATE': 'إضافة وتنشيط جديد',
@@ -29,7 +28,6 @@ function formatActionType(actionType: string): string {
   return map[actionType] || actionType;
 }
 
-// 📌 2. ترجمة أسماء الجداول التقنية (Target Tables) إلى مسميات واضحة ومفهومة
 function formatTargetTable(tableName: string): string {
   const map: Record<string, string> = {
     'customer_service': 'رسائل خدمة العملاء',
@@ -42,7 +40,6 @@ function formatTargetTable(tableName: string): string {
   return map[tableName] || tableName;
 }
 
-// 📌 دالة مساعدة لتحويل القيم التقنية و true/false إلى نصوص عربية مفهومة
 function formatLogValue(val: any): string {
   if (val === null || val === undefined) return '---';
   if (val === true || val === 'true') return 'نعم (مفعل)';
@@ -60,11 +57,9 @@ function formatLogValue(val: any): string {
   return stringVal;
 }
 
-// 📌 دالة لتنسيق تفاصيل السجل ليصبح مقروءاً بالكامل بالعربية
 function formatLogItem(log: any) {
   return {
     ...log,
-    // استخدام الدوال المعربة بدلاً من النصوص التقنية الصماء
     action_type_readable: formatActionType(log.action_type),
     target_table_readable: formatTargetTable(log.target_table),
     

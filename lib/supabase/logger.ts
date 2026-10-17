@@ -1,3 +1,4 @@
+import 'server-only';
 import crypto from 'crypto';
 import { getSupabaseAdminClient } from '@/lib/supabase/supabase-server';
 
@@ -62,9 +63,7 @@ export async function logActivity(
 
     console.log(`[${requestId}] Event Hash:`, eventHash);
 
-    // ==========================
-    // فحص الذاكرة
-    // ==========================
+    
 
     const now = Date.now();
     const lastExecution = activeLogsCache.get(eventHash);
@@ -94,9 +93,7 @@ export async function logActivity(
       `[${requestId}] Memory cache updated`
     );
 
-    // ==========================
-    // تنظيف الكاش
-    // ==========================
+    
 
     if (activeLogsCache.size > 1000) {
       console.log(
@@ -115,9 +112,6 @@ export async function logActivity(
       );
     }
 
-    // ==========================
-    // فحص قاعدة البيانات
-    // ==========================
 
     console.log(
       `[${requestId}] Checking database for duplicates...`
@@ -152,9 +146,7 @@ export async function logActivity(
       `[${requestId}] No duplicate found`
     );
 
-    // ==========================
-    // إدراج السجل
-    // ==========================
+   
 
     const payload = {
       user_id: params.userId,

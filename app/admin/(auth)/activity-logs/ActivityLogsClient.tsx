@@ -29,7 +29,6 @@ export default function ActivityLogsClient({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  // 1. حالات الفلترة السيرفرية (Server Search Filters)
   const [emailQuery, setEmailQuery] = useState(searchParams.get('email') || '');
   const [actionType, setActionType] = useState(searchParams.get('actionType') || 'ALL');
   const [targetTable, setTargetTable] = useState(searchParams.get('targetTable') || 'ALL');
