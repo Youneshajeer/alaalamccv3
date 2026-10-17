@@ -3,7 +3,7 @@ import UsersManagerClient from './users';
 import { hasPermission } from '@/lib/supabase/permissions';
 import { getCurrentUserRole } from '@/lib/supabase/auth';
 import { redirect } from 'next/navigation';
-import AdminHeader from '@/components/admin/AdminHeader'; // 👈 استيراد الهيدر الموحد
+import AdminHeader from '@/components/admin/AdminHeader'; 
 
 export const revalidate = 0;
 
@@ -54,7 +54,6 @@ export default async function AdminUsersPage() {
     );
   }
 
-  // جلب الأدوار والصلاحيات
   const { data: roles, error: rolesError } = await supabase.from('roles').select('*');
   if (rolesError) console.error('Roles Error:', rolesError.message);
 
@@ -102,16 +101,8 @@ export default async function AdminUsersPage() {
   return (
     <div dir="rtl" className="min-h-screen bg-slate-50/50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 p-4 sm:p-6 lg:p-8 space-y-8 font-sans">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* 1. المكون الموحد AdminHeader */}
-        <AdminHeader
-          titleAr="إدارة المشرفين والصلاحيات"
-          titleEn="Manage Users & Permissions"
-          lang="ar"
-          userEmail={userEmail}
-          userRole={userRoleName}
-        />
+      
 
-        {/* 2. مكون العميل الرئيسي */}
         <UsersManagerClient
           roles={formattedRoles}
           permissions={permissions || []}
