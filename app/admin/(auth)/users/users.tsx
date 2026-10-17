@@ -12,7 +12,8 @@ import {
   updateRolePermissionsAction, 
   unblockUserAction,
   generateSecureResetTokenAction,
-  createNewRoleAction
+  createNewRoleAction,
+  logoutAction
 } from './actions';
 
 interface Role {
@@ -126,6 +127,7 @@ export default function UsersManagerClient({
       }
     });
   };
+  
 
   const handleCreateRole = (e: React.FormEvent) => {
     e.preventDefault();

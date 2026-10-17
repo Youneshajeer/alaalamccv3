@@ -7,6 +7,7 @@ import { hasPermission } from '@/lib/supabase/permissions';
 import { logActivity } from '@/lib/supabase/logger'; 
 import crypto from 'crypto';
 
+
 export interface ActivityLogFilterOptions {
   page?: number;
   limit?: number;
@@ -539,6 +540,7 @@ export async function updateRolePermissionsAction(roleId: string, permissionIds:
   return { success: true };
 }
 
+
 export async function generateSecureResetTokenAction(targetUserId: string, targetUserEmail: string) {
   if (!(await verifyAdminAccess())) {
     return { success: false, error: 'غير مصرح لك بتنفيذ هذا الإجراء.' };
@@ -635,4 +637,9 @@ export async function executePasswordResetAction(token: string, newPassword: str
   });
 
   return { success: true };
+}
+
+export async function logoutAction() {
+  const supabase = await getSupabaseServerClient();
+  await supabase.auth.signOut();
 }

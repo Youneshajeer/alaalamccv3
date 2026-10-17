@@ -1,10 +1,11 @@
-import { getSupabaseServerClient,logoutAction } from '@/lib/supabase/supabase-server';
+import { getSupabaseServerClient } from '@/lib/supabase/supabase-server';
 import UsersManagerClient from './users';
 import { hasPermission } from '@/lib/supabase/permissions';
 import { getCurrentUserRole } from '@/lib/supabase/auth';
 import { redirect } from 'next/navigation';
-import Link from 'next/link'
-import { useTransition } from 'react';
+import Link from 'next/link';
+import { logoutAction } from './actions';
+
 export const revalidate = 0;
 
 export default async function AdminUsersPage() {
@@ -17,77 +18,59 @@ export default async function AdminUsersPage() {
   }
 
   const { user, role, roleDisplayName } = authData;
-  const userEmail = user.email || '';
-  const userRoleName = role || 'supervisor';
+  const userEmail = user?.email || '';
+  const userRoleName = role || 'user';
 
-  const canViewDashboard = await hasPermission('dashboard.view');
   const canManageUsers = await hasPermission('users.manage');
-  
   const canViewActivityLogs = await hasPermission('activity_logs.view') || canManageUsers;
-  const isSuperAdminOrAdmin = userRoleName === 'super_admin' || userRoleName === 'admin';
 
-  if (!isSuperAdminOrAdmin && (!canViewDashboard || !canManageUsers)) {
-    console.error("Auth Failure Debug:", {
-      userEmail,
-      userRoleName,
-      authDataAuthorized: authData?.isAuthorized,
-      canViewDashboard,
-      canManageUsers
-    });
-    const [isPending, startTransition] = useTransition();
-
-  const handleLogout = () => {
-    startTransition(async () => {
-      await logoutAction();
-    });
-  };
-
+  if (!canManageUsers) {
     return (
-     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-6 flex items-center justify-center" dir="rtl">
-  <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 rounded-3xl p-8 max-w-lg w-full space-y-6 shadow-lg text-center">
-    <div className="w-12 h-12 bg-rose-100 dark:bg-rose-900/60 rounded-full flex items-center justify-center mx-auto text-rose-600 dark:text-rose-400 text-xl font-bold">
-      🚫
-    </div>
-    
-    <div className="space-y-2">
-      <h2 className="text-xl font-black">تم رفض الوصول للحساب</h2>
-      <p className="text-xs text-rose-600/80 dark:text-rose-400/80 leading-relaxed">
-        حسابك الحالي لا يملك الصلاحيات الكافية لاستعراض أو إدارة ملفات المستخدمين والمشرفين.
-      </p>
-    </div>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-6 flex items-center justify-center" dir="rtl">
+        <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 rounded-3xl p-8 max-w-lg w-full space-y-6 shadow-lg text-center">
+          <div className="w-12 h-12 bg-rose-100 dark:bg-rose-900/60 rounded-full flex items-center justify-center mx-auto text-rose-600 dark:text-rose-400 text-xl font-bold">
+            🚫
+          </div>
+          
+          <div className="space-y-2">
+            <h2 className="text-xl font-black">تم رفض الوصول للحساب</h2>
+            <p className="text-xs text-rose-600/80 dark:text-rose-400/80 leading-relaxed">
+              حسابك الحالي لا يمتلك الصلاحيات المطلوبةلاستعراض أو إدارة صفحة المستخدمين والمشرفين.
+            </p>
+          </div>
 
-    <div className="bg-white/80 dark:bg-slate-900/80 p-4 rounded-2xl border border-rose-200/50 dark:border-rose-800/50 text-right space-y-1.5 text-xs font-mono">
-      <p>البريد الإلكتروني: <b className="text-slate-900 dark:text-white">{userEmail || 'غير مسجل'}</b></p>
-      <p>الدور المعين: <b className="text-emerald-600 underline">{userRoleName || 'لا يوجد'}</b></p>
-    </div>
+          <div className="bg-white/80 dark:bg-slate-900/80 p-4 rounded-2xl border border-rose-200/50 dark:border-rose-800/50 text-right space-y-1.5 text-xs font-mono">
+            <p>البريد الإلكتروني: <b className="text-slate-900 dark:text-white">{userEmail || 'غير مسجل'}</b></p>
+            <p>الدور المعين: <b className="text-emerald-600 underline">{roleDisplayName || userRoleName}</b></p>
+          </div>
 
-    {/* أزرار العودة وتسجيل الخروج */}
-    <div className="flex items-center justify-center gap-3 pt-2">
-      <Link
-        href={userEmail ? '/admin/dashboard' : '/admin/login'}
-        className="inline-flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 transition-all shadow-sm"
-      >
-        <svg className="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        <span>{userEmail ? 'العودة للوحة التحكم' : 'الذهاب لصفحة الدخول'}</span>
-      </Link>
+          <div className="flex items-center justify-center gap-3 pt-2">
+            <Link
+              href={userEmail ? '/admin/dashboard' : '/admin/login'}
+              className="inline-flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 transition-all shadow-sm"
+            >
+              <svg className="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span>{userEmail ? 'العودة للوحة التحكم' : 'الذهاب لصفحة الدخول'}</span>
+            </Link>
 
-      {userEmail && (
-        <Link
-        onSubmit={handleLogout}
-          href="/admin/login"
-          className="inline-flex items-center gap-2 text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-100/60 dark:bg-rose-900/40 hover:bg-rose-200/60 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-800 px-4 py-2.5 rounded-xl transition-all cursor-pointer"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-          <span>تسجيل الخروج</span>
-        </Link>
-      )}
-    </div>
-  </div>
-</div>
+            {userEmail && (
+              <form action={logoutAction}>
+                <button
+                  type="submit"
+                  className="inline-flex items-center gap-2 text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-100/60 dark:bg-rose-900/40 hover:bg-rose-200/60 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-800 px-4 py-2.5 rounded-xl transition-all cursor-pointer"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span>تسجيل الخروج</span>
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -137,8 +120,6 @@ export default async function AdminUsersPage() {
   return (
     <div dir="rtl" className="min-h-screen bg-slate-50/50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 p-4 sm:p-6 lg:p-8 space-y-8 font-sans">
       <div className="max-w-7xl mx-auto space-y-8">
-      
-
         <UsersManagerClient
           roles={formattedRoles}
           permissions={permissions || []}
