@@ -3,6 +3,9 @@
 import { useState, useTransition } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { executePasswordResetAction } from '../users/actions';
+import {resetPasswordSchema} from  '@/lib/validations/adminValidations';
+
+
 
 
 export default function ResetPasswordPage() {
@@ -18,17 +21,13 @@ export default function ResetPasswordPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (password !== confirmPassword) {
-      setMessage({ text: 'كلمات المرور غير متطابقة.', type: 'error' });
+const result = resetPasswordSchema.safeParse({ password, confirmPassword });
+    
+    if (!result.success) {
+const firstError = result.error.issues[0]?.message;    
+  setMessage({ text: firstError, type: 'error' });
       return;
     }
-
-    if (password.length < 6) {
-      setMessage({ text: 'يجب أن تكون كلمة المرور 6 أحرف على الأقل.', type: 'error' });
-      return;
-    }
-
     setIsLoading(true); 
     startTransition(async () => {
       const res = await executePasswordResetAction(token, password);

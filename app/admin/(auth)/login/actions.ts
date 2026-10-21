@@ -3,11 +3,9 @@
 import { z } from 'zod';
 import { getSupabaseAdminClient, getSupabaseServerClient } from '@/lib/supabase/supabase-server';
 import { logActivity } from '@/lib/supabase/logger'; 
+import { loginSchema } from '@/lib/validations/adminValidations';
 
-const loginSchema = z.object({
-  email: z.string().email('البريد الإلكتروني غير صالح'),
-  password: z.string().min(6, 'كلمة المرور يجب أن لا تقل عن 6 أحرف'),
-});
+
 
 export async function loginAction(formData: { email: string; password: string }) {
   const parseResult = loginSchema.safeParse(formData);

@@ -50,8 +50,35 @@ export type CvPathRequest = z.infer<
 
 
 export const loginSchema = z.object({
-  email: z.string().trim().toLowerCase().email('البريد الإلكتروني غير صالح'),
-  password: z.string().min(6, 'كلمة المرور يجب أن لا تقل عن 6 أحرف'),
+ email: z
+    .string()
+    .min(1, 'البريد الإلكتروني مطلوب')
+    .email('البريد الإلكتروني غير صالح')
+    .max(255, 'البريد الإلكتروني طويل جداً')
+    .transform((val) => val.trim().toLowerCase()),
+    
+  password: z
+    .string()
+    .min(8, 'كلمة المرور يجب أن لا تقل عن 8 أحرف')
+    .max(100, 'كلمة المرور طويلة جداً')
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+      'كلمة المرور يجب أن تحتوي على حرف كبير، حرف صغير، رقم، ورمز خاص واحد على الأقل'
+    ),
+});
+export const resetPasswordSchema = z.object({
+  password: z
+    .string()
+    .min(8, 'كلمة المرور يجب أن لا تقل عن 8 أحرف')
+    .max(100, 'كلمة المرور طويلة جداً')
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!\%*?&])[A-Za-z\d@$!%*?&]/,
+      'كلمة المرور يجب أن تحتوي على حرف كبير، حرف صغير، رقم، ورمز خاص واحد على الأقل'
+    ),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'كلمات المرور غير متطابقة',
+  path: ['confirmPassword'],
 });
 export const createUserSchema = z.object({
   fullName: z.string().trim().min(2, { message: 'الاسم الكامل مطلوب بشكل صحيح.' }),
