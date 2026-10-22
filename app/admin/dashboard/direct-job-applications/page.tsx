@@ -9,7 +9,6 @@ export const revalidate = 0;
 export default async function jobApplicationsPage() {
   const supabase = await getSupabaseServerClient();
 
-  // 1. استخدام المصادقة المركزية الموحدة
   const authData = await getCurrentUserRole();
   
   if (!authData || !authData.user || !authData.isAuthorized) {
@@ -20,7 +19,6 @@ export default async function jobApplicationsPage() {
   const userEmail = user.email || '';
   const userRole = role || 'supervisor';
 
-  // 2. التحقق من الصلاحيات الديناميكية (عرض الداشبورد + صلاحيات التوظيف)
   const canViewDashboard = await hasPermission('dashboard.view');
   const allowdView = await hasPermission('careers.view');
   const allowdManage = await hasPermission('careers.manage');
@@ -30,7 +28,6 @@ export default async function jobApplicationsPage() {
     redirect('/admin/dashboard?error=unauthorized');
   }
 
-  // 3. جلب طلبات التوظيف
   const { data: applications, error: appError } = await supabase
     .from('careers')
     .select('*')

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation'; // 👈 استيراد الموجه للتحديث السلس
+import { useRouter } from 'next/navigation'; 
 import AdminHeader from '@/components/admin/AdminHeader';
 import Link from 'next/link';
 import {
@@ -65,7 +65,7 @@ export default function UsersManagerClient({
   roleDisplayName,
   canViewActivityLogs,
 }: UsersManagerProps) {
-  const router = useRouter(); // 👈 تفعيل الـ router لتحديث البيانات بدون إعادة تحميل الصفحة
+  const router = useRouter();
   const [users, setUsers] = useState<UserProfile[]>(initialUsers);
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
@@ -157,13 +157,12 @@ export default function UsersManagerClient({
     });
   };
 
-  // ⚡ إضافة المشرف بدون إعادة تحميل الصفحة بالكامل وبدون أخطاء في الرئيسية
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSavingUser) return;
 
     setIsSavingUser(true);
-    setMessage(null); // مسح أي أخطاء سابقة
+    setMessage(null); 
 
     try {
       const res = await createUserAction({
@@ -174,19 +173,16 @@ export default function UsersManagerClient({
       });
 
       if (res.success) {
-        // تفريغ الحقول وإغلاق المودال فوراً
         setFullName('');
         setEmail('');
         setPassword('');
         setSelectedAddRoleId(roles[0]?.id || '');
         setShowAddUserModal(false);
 
-        // تحديث البيانات في الخلفية بسلاسة تامة دون وميض الصفحة
         startTransition(() => {
           router.refresh();
         });
       } else {
-        // إظهار الخطأ حصرياً داخل المودال
         setMessage({ text: res.error || 'فشل إنشاء المستخدم.', type: 'error' });
       }
     } catch (err) {
@@ -309,7 +305,7 @@ export default function UsersManagerClient({
                     <tr key={u.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
                       <td className="p-4 font-mono text-xs text-emerald-600 font-bold whitespace-nowrap flex items-center justify-between gap-2">
                         <span>{u.email}</span>
-                        {currentUserRole === 'admin' && (
+                        {currentUserRole === 'super-admin' && (
                           <button
                             type="button"
                             onClick={async () => {

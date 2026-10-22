@@ -32,7 +32,6 @@ export async function loginAction(formData: { email: string; password: string })
   const supabaseAdmin = getSupabaseAdminClient();
   const supabase = await getSupabaseServerClient();
 
-  // 1. جلب بيانات البروفايل ومحاولة المصادقة بشكل متزامن (Parallel) لتوفير الوقت
   const [profileResult, authResult] = await Promise.all([
     supabaseAdmin
       .from('profiles')
@@ -75,7 +74,6 @@ export async function loginAction(formData: { email: string; password: string })
       const newAttempts = prevAttempts + 1;
       const shouldBlock = newAttempts >= 3;
 
-      // تحديث محاولات الفشل في الخلفية
       await supabaseAdmin
         .from('profiles')
         .update({
@@ -136,7 +134,6 @@ export async function loginAction(formData: { email: string; password: string })
     };
   }
 
-  // 4. في حال نجاح تسجيل الدخول: تصفير محاولات الفشل وتسجيل النشاط
   if (profile) {
     await supabaseAdmin
       .from('profiles')
