@@ -6,7 +6,6 @@ import { useTranslation } from '@/utils/useTranslation';
 
 interface JobsListProps {
   jobs: any[];
-  lang?: 'ar' | 'en';
 }
 
 export default function JobsList({ jobs }: JobsListProps) {
