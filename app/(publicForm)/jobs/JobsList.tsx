@@ -9,7 +9,9 @@ interface JobsListProps {
   lang?: 'ar' | 'en';
 }
 
-export default function JobsList({ jobs, lang = 'ar' }: JobsListProps) {
+export default function JobsList({ jobs }: JobsListProps) {
+    const { lang,t } = useTranslation();
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDept, setSelectedDept] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all'); 

@@ -46,6 +46,16 @@ export default function Footer() {
             </li>
           </ul>
         </div>
+            <div  className="space-y-2.5 text-xs">
+             <h5 className="text-white font-semibold mb-2">{lang === 'ar' ? 'الوظائف' : 'jobs'}</h5>
+            <p>
+            <a href="/jobs" className=" font-mono text-gray-400 hover:text-emerald-400" dir="ltr">{lang === 'ar' ? 'الوظائف الشاغرة ' : 'Job Vacancies'}</a>
+            </p>
+            <p>
+            <a href="/careers" className=" font-mono text-gray-400 hover:text-emerald-400" dir="ltr">{lang === 'ar' ? 'كن جزء من فريق العمل ': 'be a member of our team '}</a>
+
+            </p>
+            </div>
 
         <div className="space-y-2.5 text-xs">
           <h5 className="text-white font-semibold mb-2">{lang === 'ar' ? 'معلومات التواصل' : 'Contact Information'}</h5>

@@ -250,12 +250,12 @@ export default function UsersManagerClient({
         userRole={currentUserRole}
       />
 
-      {/* التنبيهات العامة للنجاح في الصفحة الرئيسية */}
       {message && message.type === 'success' && (
         <div className="p-4 rounded-2xl text-xs sm:text-sm font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
           {message.text}
         </div>
       )}
+        
 
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
@@ -305,8 +305,8 @@ export default function UsersManagerClient({
                     <tr key={u.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
                       <td className="p-4 font-mono text-xs text-emerald-600 font-bold whitespace-nowrap flex items-center justify-between gap-2">
                         <span>{u.email}</span>
-                        {currentUserRole === 'super-admin' && (
-                          <button
+                        {currentUserRole === 'super_admin' && (
+                                                    <button
                             type="button"
                             onClick={async () => {
                               if (confirm(`هل تريد إنشاء رابط إعادة تعيين كلمة المرور الآمن للمشرف: ${u.email}؟`)) {
@@ -412,7 +412,7 @@ export default function UsersManagerClient({
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
           <div>
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">إدارة صلاحيات الأقسام والأدوار</h2>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">تحديد الصلاحيات الحفظ التلقائي والفوري عند الضغط.</p>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">تحديد الصلاحيات .</p>
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -668,7 +668,6 @@ export default function UsersManagerClient({
                 </select>
               </div>
 
-              {/* 🔴 رسالة الخطأ حصرية داخل الموديل وفوق زر الحفظ فقط */}
               {message && message.type === 'error' && (
                 <div className="p-3 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800 text-xs font-bold text-center">
                   {message.text}

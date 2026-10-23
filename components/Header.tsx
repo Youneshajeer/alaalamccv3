@@ -26,7 +26,7 @@ export default function Header() {
     { name: lang === 'ar' ? 'خدماتنا' : 'Services', href: '/services' },
     { name: lang === 'ar' ? 'لماذا نحن' : 'Why Us', href: '/why_us' },
     { name: lang === 'ar' ? 'آلية العمل' : 'How It Works', href: '/how_it_works' },
-    { name: lang === 'ar' ? 'الوظائف' : 'careers', href: '/jobs' },
+    { name: lang === 'ar' ? 'الوظائف' : 'jobs', href: '/jobs' },
   ];
 
   const handleToggleDarkMode = (e: React.MouseEvent) => {

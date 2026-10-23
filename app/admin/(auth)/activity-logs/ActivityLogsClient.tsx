@@ -123,13 +123,6 @@ export default function ActivityLogsClient({
         userRole={(userRole === 'admin' || userRole === 'supervisor') ? userRole : 'admin'}
       />
 
-      {roleDisplayName && (
-        <div className="text-xs text-slate-500 bg-white dark:bg-slate-900 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-sm">
-          <span>{userEmail}</span>
-          <span className="font-bold text-emerald-600">{roleDisplayName}</span>
-        </div>
-      )}
-
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
         <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
           <h2 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
