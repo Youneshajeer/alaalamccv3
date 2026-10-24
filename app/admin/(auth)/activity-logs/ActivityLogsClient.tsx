@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import AdminHeader from '@/components/admin/AdminHeader';
 import { purgeOldActivityLogs } from './actions';
+import { useTranslation } from '@/utils/useTranslation';
 
 interface ActivityLogsClientProps {
   initialLogs: any[];
@@ -25,6 +26,9 @@ export default function ActivityLogsClient({
   userRole,
   roleDisplayName,
 }: ActivityLogsClientProps) {
+  const { lang, t } = useTranslation();
+  const logsText = (t as any).adminLogs || {};
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -77,13 +81,19 @@ export default function ActivityLogsClient({
   };
 
   const handlePurge = async () => {
-    if (confirm('هل أنت متأكد من رغبتك في حذف السجلات القديمة (أقدم من 90 يوم)؟')) {
+    if (
+      confirm(
+        lang === 'ar'
+          ? 'هل أنت متأكد من رغبتك في حذف السجلات القديمة (أقدم من 90 يوم)؟'
+          : 'Are you sure you want to delete records older than 90 days?'
+      )
+    ) {
       const res = await purgeOldActivityLogs();
       if (res.success) {
-        alert('تم تنظيف السجلات القديمة بنجاح.');
+        alert(lang === 'ar' ? 'تم تنظيف السجلات القديمة بنجاح.' : 'Old records successfully purged.');
         router.refresh();
       } else {
-        alert(res.error || 'حدث خطأ أثناء تنظيف السجلات.');
+        alert(res.error || (lang === 'ar' ? 'حدث خطأ أثناء تنظيف السجلات.' : 'An error occurred while purging records.'));
       }
     }
   };
@@ -114,49 +124,58 @@ export default function ActivityLogsClient({
   }, [initialLogs]);
 
   return (
-    <div dir="rtl" className="space-y-8 p-6 sm:p-10 min-h-screen bg-slate-50 dark:bg-slate-950">
+    <div dir={lang === 'ar' ? 'rtl' : 'ltr'} className="space-y-8 p-6 sm:p-10 min-h-screen bg-slate-50 dark:bg-slate-950">
       <AdminHeader
         titleAr="سجل نشاط المستخدمين"
         titleEn="Activity & Logs"
-        lang="ar"
+        lang={lang}
         userEmail={userEmail}
-        userRole={(userRole === 'admin' || userRole === 'supervisor') ? userRole : 'admin'}
+        userRole={userRole}
       />
 
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
         <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
           <h2 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
             <span>🔍</span>
-            <span>استعلام قاعدة البيانات</span>
+            <span>{logsText.dbQueryTitle || (lang === 'ar' ? 'استعلام قاعدة البيانات' : 'Database Query')}</span>
           </h2>
-          <button
-            onClick={handlePurge}
-            className="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer"
-          >
-            تطهير السجلات القديمة (90+ يوم) 🗑️
-          </button>
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl">
+              {lang === 'ar' ? `إجمالي السجلات: ${totalCount}` : `Total Records: ${totalCount}`}
+            </span>
+            <button
+              onClick={handlePurge}
+              className="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer"
+            >
+              {logsText.purgeBtn || (lang === 'ar' ? 'تطهير السجلات القديمة (90+ يوم) 🗑️' : 'Purge Old Logs (90+ Days) 🗑️')}
+            </button>
+          </div>
         </div>
 
         <form onSubmit={handleServerSearch} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <div>
-            <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">البريد الإلكتروني</label>
+            <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
+              {logsText.emailLabel || (lang === 'ar' ? 'البريد الإلكتروني' : 'Email')}
+            </label>
             <input
               type="text"
               value={emailQuery}
               onChange={(e) => setEmailQuery(e.target.value)}
-              placeholder="بحث بالإيميل..."
+              placeholder={logsText.emailPlaceholder || (lang === 'ar' ? 'بحث بالإيميل...' : 'Search by email...')}
               className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">نوع الإجراء</label>
+            <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
+              {logsText.actionTypeLabel || (lang === 'ar' ? 'نوع الإجراء' : 'Action Type')}
+            </label>
             <select
               value={actionType}
               onChange={(e) => setActionType(e.target.value)}
               className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none cursor-pointer"
             >
-              <option value="ALL">جميع الإجراءات</option>
+              <option value="ALL">{logsText.allActions || (lang === 'ar' ? 'جميع الإجراءات' : 'All Actions')}</option>
               <option value="LOGIN">تسجيل دخول (LOGIN)</option>
               <option value="CREATE">إنشاء (CREATE)</option>
               <option value="UPDATE">تحديث (UPDATE)</option>
@@ -167,13 +186,15 @@ export default function ActivityLogsClient({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الجدول المستهدف</label>
+            <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
+              {logsText.targetTableLabel || (lang === 'ar' ? 'الجدول المستهدف' : 'Target Table')}
+            </label>
             <select
               value={targetTable}
               onChange={(e) => setTargetTable(e.target.value)}
               className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none cursor-pointer"
             >
-              <option value="ALL">جميع الجداول</option>
+              <option value="ALL">{logsText.allTables || (lang === 'ar' ? 'جميع الجداول' : 'All Tables')}</option>
               <option value="profiles">الملفات الشخصية (profiles)</option>
               <option value="jobs">الوظائف (jobs)</option>
               <option value="careers">المتقدمين للوظائف (careers)</option>
@@ -183,7 +204,9 @@ export default function ActivityLogsClient({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">من تاريخ</label>
+            <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
+              {logsText.fromDate || (lang === 'ar' ? 'من تاريخ' : 'From Date')}
+            </label>
             <input
               type="date"
               value={startDate}
@@ -193,7 +216,9 @@ export default function ActivityLogsClient({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">إلى تاريخ</label>
+            <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
+              {logsText.toDate || (lang === 'ar' ? 'إلى تاريخ' : 'To Date')}
+            </label>
             <input
               type="date"
               value={endDate}
@@ -208,25 +233,31 @@ export default function ActivityLogsClient({
               onClick={handleReset}
               className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 font-bold text-xs rounded-xl transition-all cursor-pointer"
             >
-              إعادة ضبط الفلاتر
+              {logsText.resetFilters || (lang === 'ar' ? 'إعادة ضبط الفلاتر' : 'Reset Filters')}
             </button>
             <button
               type="submit"
               disabled={isPending}
               className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer"
             >
-              {isPending ? 'جاري البحث...' : 'بحث في قاعدة البيانات 🔍'}
+              {isPending
+                ? (lang === 'ar' ? 'جاري البحث...' : 'Searching...')
+                : (logsText.searchBtn || (lang === 'ar' ? 'بحث في قاعدة البيانات 🔍' : 'Search Database 🔍'))}
             </button>
           </div>
         </form>
       </div>
 
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden p-6 space-y-4">
-        
         <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-3">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <span className="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-              ⚡ <span>تصفية فورية للنتائج المعروضة حالياً ({filteredLogs.length} من {initialLogs.length})</span>
+              ⚡{' '}
+              <span>
+                {lang === 'ar'
+                  ? `تصفية فورية للنتائج المعروضة حالياً (${filteredLogs.length} من أصل ${totalCount} سجل إجمالي)`
+                  : `Instant filter for displayed results (${filteredLogs.length} of ${totalCount} total records)`}
+              </span>
             </span>
             {(clientSearchText || clientActionFilter !== 'ALL' || clientTableFilter !== 'ALL') && (
               <button
@@ -237,7 +268,7 @@ export default function ActivityLogsClient({
                 }}
                 className="text-[11px] text-rose-600 hover:underline font-bold"
               >
-                مسح التصفية الفورية
+                {lang === 'ar' ? 'مسح التصفية الفورية' : 'Clear Instant Filter'}
               </button>
             )}
           </div>
@@ -247,7 +278,7 @@ export default function ActivityLogsClient({
               type="text"
               value={clientSearchText}
               onChange={(e) => setClientSearchText(e.target.value)}
-              placeholder="تصفية سريعة بالبريد أو الوصف..."
+              placeholder={lang === 'ar' ? 'تصفية سريعة بالبريد أو الوصف...' : 'Quick filter by email or description...'}
               className="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white outline-none"
             />
 
@@ -256,9 +287,11 @@ export default function ActivityLogsClient({
               onChange={(e) => setClientActionFilter(e.target.value)}
               className="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white outline-none cursor-pointer"
             >
-              <option value="ALL">جميع إجراءات الصفحة الحالية</option>
+              <option value="ALL">{lang === 'ar' ? 'جميع إجراءات الصفحة الحالية' : 'All current page actions'}</option>
               {uniqueCurrentActions.map((act) => (
-                <option key={String(act)} value={String(act)}>{String(act)}</option>
+                <option key={String(act)} value={String(act)}>
+                  {String(act)}
+                </option>
               ))}
             </select>
 
@@ -267,39 +300,41 @@ export default function ActivityLogsClient({
               onChange={(e) => setClientTableFilter(e.target.value)}
               className="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white outline-none cursor-pointer"
             >
-              <option value="ALL">جميع جداول الصفحة الحالية</option>
+              <option value="ALL">{lang === 'ar' ? 'جميع جداول الصفحة الحالية' : 'All current page tables'}</option>
               {uniqueCurrentTables.map((tbl) => (
-                <option key={String(tbl)} value={String(tbl)}>{String(tbl)}</option>
+                <option key={String(tbl)} value={String(tbl)}>
+                  {String(tbl)}
+                </option>
               ))}
             </select>
           </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-right border-collapse">
+          <table className={`w-full ${lang === 'ar' ? 'text-right' : 'text-left'} border-collapse`}>
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 text-xs uppercase">
-                <th className="p-3">المستخدم / البريد</th>
-                <th className="p-3">نوع الإجراء</th>
-                <th className="p-3">الجدول المستهدف</th>
-                <th className="p-3">التفاصيل والوصف</th>
-                <th className="p-3">التاريخ والوقت</th>
+                <th className="p-3">{logsText.tableUser || (lang === 'ar' ? 'المستخدم / البريد' : 'User / Email')}</th>
+                <th className="p-3">{logsText.tableAction || (lang === 'ar' ? 'نوع الإجراء' : 'Action Type')}</th>
+                <th className="p-3">{logsText.tableTable || (lang === 'ar' ? 'الجدول المستهدف' : 'Target Table')}</th>
+                <th className="p-3">{logsText.tableDetails || (lang === 'ar' ? 'التفاصيل والوصف' : 'Details & Description')}</th>
+                <th className="p-3">{logsText.tableDate || (lang === 'ar' ? 'التاريخ والوقت' : 'Date & Time')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
               {filteredLogs.length > 0 ? (
                 filteredLogs.map((log: any) => (
-                  <tr 
-                    key={log.id} 
+                  <tr
+                    key={log.id}
                     onClick={() => router.push(`/admin/activity-logs/${log.id}`)}
                     className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
-                    title="انقر لعرض تفاصيل التعديل الكاملة"
+                    title={lang === 'ar' ? 'انقر لعرض تفاصيل التعديل الكاملة' : 'Click to view full update details'}
                   >
                     <td className="p-3 font-bold text-slate-900 dark:text-white" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => setClientSearchText(log.user_email)}
-                        className="hover:text-emerald-600 underline decoration-dotted cursor-pointer text-right"
-                        title="انقر لتصفية النتائج الحالية لهذا المستخدم"
+                        className={`hover:text-emerald-600 underline decoration-dotted cursor-pointer ${lang === 'ar' ? 'text-right' : 'text-left'}`}
+                        title={lang === 'ar' ? 'انقر لتصفية النتائج الحالية لهذا المستخدم' : 'Click to filter current results for this user'}
                       >
                         {log.user_email}
                       </button>
@@ -308,7 +343,7 @@ export default function ActivityLogsClient({
                       <button
                         onClick={() => setClientActionFilter(log.action_type)}
                         className="px-2.5 py-1 rounded-full font-bold bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 hover:bg-blue-100 transition-colors cursor-pointer"
-                        title="انقر لتصفية نتائج الإجراء فورياً"
+                        title={lang === 'ar' ? 'انقر لتصفية نتائج الإجراء فورياً' : 'Click to instantly filter action results'}
                       >
                         {log.action_type}
                       </button>
@@ -317,30 +352,34 @@ export default function ActivityLogsClient({
                       <button
                         onClick={() => setClientTableFilter(log.target_table)}
                         className="hover:underline cursor-pointer"
-                        title="انقر لتصفية نتائج الجدول فورياً"
+                        title={lang === 'ar' ? 'انقر لتصفية نتائج الجدول فورياً' : 'Click to instantly filter table results'}
                       >
                         {log.target_table}
                       </button>
                     </td>
                     <td className="p-3 text-slate-600 dark:text-slate-300 max-w-xs">
-                      <div className="max-h-20 overflow-y-auto pr-1 whitespace-pre-wrap text-[11px] leading-relaxed custom-scrollbar">
+                      <div className={`max-h-20 overflow-y-auto ${lang === 'ar' ? 'pr-1' : 'pl-1'} whitespace-pre-wrap text-[11px] leading-relaxed custom-scrollbar`}>
                         {log.description}
                         {log.field_name && (
                           <span className="block mt-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
-                            الحقل: {log.field_name} (من: {log.old_value || 'فارغ'} إلى: {log.new_value || 'فارغ'})
+                            {lang === 'ar'
+                              ? `الحقل: ${log.field_name} (من: ${log.old_value || 'فارغ'} إلى: ${log.new_value || 'فارغ'})`
+                              : `Field: ${log.field_name} (From: ${log.old_value || 'empty'} To: ${log.new_value || 'empty'})`}
                           </span>
                         )}
                       </div>
                     </td>
                     <td className="p-3 text-slate-400 whitespace-nowrap">
-                      {new Date(log.created_at).toLocaleString('ar-SA')}
+                      {new Date(log.created_at).toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td colSpan={5} className="text-center py-8 text-slate-400 font-medium">
-                    لا توجد سجلات مطابقة لخيارات التصفية الفورية الحالية.
+                    {lang === 'ar'
+                      ? 'لا توجد سجلات مطابقة لخيارات التصفية الفورية الحالية.'
+                      : 'No records match the current instant filter options.'}
                   </td>
                 </tr>
               )}
@@ -355,17 +394,19 @@ export default function ActivityLogsClient({
               disabled={currentPage <= 1 || isPending}
               className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 disabled:opacity-50 rounded-xl text-xs font-bold cursor-pointer"
             >
-              السابق
+              {lang === 'ar' ? 'السابق' : 'Previous'}
             </button>
             <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
-              صفحة {currentPage} من {totalPages}
+              {lang === 'ar'
+                ? `صفحة ${currentPage} من ${totalPages} (الإجمالي: ${totalCount})`
+                : `Page ${currentPage} of ${totalPages} (Total: ${totalCount})`}
             </span>
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage >= totalPages || isPending}
               className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 disabled:opacity-50 rounded-xl text-xs font-bold cursor-pointer"
             >
-              التالي
+              {lang === 'ar' ? 'التالي' : 'Next'}
             </button>
           </div>
         )}

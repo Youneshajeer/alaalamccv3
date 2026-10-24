@@ -22,7 +22,6 @@ export default async function MessagesPage({ searchParams }: PageProps) {
 
   const userEmail = user.email || '';
 
-  // 🔒 جلب الدور حصرياً من النظام الحديث user_roles فقط
   const { data: userRoleRecord } = await supabase
     .from('user_roles')
     .select(`
@@ -35,7 +34,6 @@ export default async function MessagesPage({ searchParams }: PageProps) {
 
   const dbRoleName = (userRoleRecord?.roles as any)?.name;
   
-  // ✅ الاعتماد حصرياً على الدور الحديث وإلغاء الاستعلام القديم من profiles تماماً
   const userRole = dbRoleName || 'supervisor';
 
   const allowed = await hasPermission('messages.view');

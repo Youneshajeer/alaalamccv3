@@ -214,7 +214,6 @@ export default function CareersForm({ lang, t, jobId, jobDetails }: CareersFormP
         </div>
       )}
 
-      {/* صندوق رسالة الخطأ الموحد فوق النموذج */}
       <FormErrorBox message={formError} success={false} />
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>

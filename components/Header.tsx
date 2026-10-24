@@ -171,7 +171,6 @@ export default function Header() {
   onClick={() => setIsMobileMenuOpen(false)}
   className="flex items-center justify-center gap-2 w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 px-4 rounded-2xl shadow-lg shadow-emerald-600/20 text-sm active:scale-95 transition-all"
 >
-  {/* أيقونة معلومات الاتصال / دفتر العناوين */}
   <svg 
     className="w-4 h-4" 
     fill="none" 
@@ -195,7 +194,6 @@ export default function Header() {
   onClick={() => setIsMobileMenuOpen(false)}
   className="flex items-center justify-center gap-2 w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 px-4 rounded-2xl shadow-lg shadow-emerald-600/20 text-sm active:scale-95 transition-all"
 >
-  {/* أيقونة المسجات / المحادثة */}
   <svg 
     className="w-4 h-4" 
     fill="none" 

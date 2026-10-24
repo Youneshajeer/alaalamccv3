@@ -15,12 +15,10 @@ export async function applyForJobAction(formData: FormData) {
     const position = formData.get('position') as string;
     const cvFile = formData.get('cv') as File;
 
-    // 1. التحقق من وجود ملف السيرة الذاتية
     if (!cvFile || cvFile.size === 0) {
       return { success: false, message: 'يرجى إرفاق ملف السيرة الذاتية (CV).' };
     }
 
-    // 2. رفع ملف السيرة الذاتية إلى Supabase Storage (Bucket باسم careers-cvs أو resumes)
     const fileExt = cvFile.name.split('.').pop();
     const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
     const filePath = `resumes/${fileName}`;
@@ -48,8 +46,8 @@ export async function applyForJobAction(formData: FormData) {
         experience: experience || 'غير محدد',
         department: departmentId || 'عام',
         position: position || 'تقديم عام',
-        job_id: jobId && jobId.trim() !== '' ? jobId : null, // ربط الوظيفة إن وُجدت أو تركها فارغة للتقديم العام
-        cv_url: cv_url,
+        job_id: jobId && jobId.trim() !== '' ? jobId : null, 
+         cv_url: cv_url,
         status: 'pending'
       }
     ]);

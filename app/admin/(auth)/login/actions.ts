@@ -47,7 +47,6 @@ export async function loginAction(formData: { email: string; password: string })
   const profile = profileResult.data;
   const { data, error } = authResult;
 
-  // 2. التحقق من حالة الحظر المسبق
   if (profile?.is_blocked) {
     await logActivity({
       userId: profile.id,

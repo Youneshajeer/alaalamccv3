@@ -60,7 +60,6 @@ export default function AdminJobsClient({
   const [formDeadline, setFormDeadline] = useState('');
   const [dateError, setDateError] = useState('');
   
-  // 🔴 متغير حالة جديد لرسائل الخطأ داخل الموديل
   const [modalError, setModalError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -639,7 +638,6 @@ export default function AdminJobsClient({
         </div>
       )}
 
-      {/* موديل إضافة وظيفة جديدة */}
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl w-full max-w-lg max-h-[95vh] flex flex-col p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-200 border border-slate-100 my-auto">
@@ -696,7 +694,6 @@ export default function AdminJobsClient({
                 )}
               </div>
 
-              {/* 🔴 رسالة الخطأ داخل الموديل */}
               {modalError && (
                 <div className="p-3 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold text-center">
                   {modalError}
@@ -726,7 +723,6 @@ export default function AdminJobsClient({
         </div>
       )}
 
-      {/* موديل تعديل وظيفة */}
       {isEditModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl w-full max-w-lg max-h-[95vh] flex flex-col p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-200 border border-slate-100 my-auto">
@@ -781,7 +777,6 @@ export default function AdminJobsClient({
                 )}
               </div>
 
-              {/* 🔴 رسالة الخطأ داخل الموديل */}
               {modalError && (
                 <div className="p-3 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold text-center">
                   {modalError}

@@ -10,10 +10,8 @@ export default function Hero() {
   const [lang, setLang] = useState<'ar' | 'en'>('ar');
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // دالة لجلب اللغة الحالية وتحديث الـ State
   useEffect(() => {
     const checkLang = () => {
-      // التحقق من localStorage أو أي طريقة أخرى مستخدمة في موقعك (مثل الـ DOM / HTML lang attribute)
       const htmlLang = document.documentElement.lang as 'ar' | 'en';
       const savedLang = (localStorage.getItem('lang') as 'ar' | 'en') || htmlLang || 'ar';
       setLang(savedLang === 'en' ? 'en' : 'ar');
@@ -21,11 +19,9 @@ export default function Hero() {
 
     checkLang();
 
-    // الاستماع لأي تغيير في الـ localStorage أو حدث مخصص لتغيير اللغة
     window.addEventListener('storage', checkLang);
     window.addEventListener('languageChanged', checkLang as EventListener);
     
-    // مراقبة التغييرات في الـ HTML lang attribute إذا كان زر التغيير يغيره مباشرة
     const observer = new MutationObserver(checkLang);
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['lang', 'dir'] });
 

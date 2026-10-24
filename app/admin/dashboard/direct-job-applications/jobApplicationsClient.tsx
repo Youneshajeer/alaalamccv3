@@ -216,7 +216,6 @@ export default function JobApplications({
           onLogout={handleLogout}
         />
 
-        {/* بطاقة معلومات سريعة عن الدور المستخدم */}
         {roleDisplayName && (
           <div className="text-xs text-slate-500 bg-white dark:bg-slate-900 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 flex justify-between items-center">
             <span>{userEmail}</span>

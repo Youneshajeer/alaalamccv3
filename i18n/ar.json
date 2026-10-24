@@ -812,6 +812,55 @@
     "featureTitle": "سعة مرنة وطاقات مؤهلة",
     "featureDesc": "كوادر احترافية وسعة تشغيلية تتوسع بسهولة لتناسب حجم أعمالك."
   }
-]
+],
+"adminLogs": {
+  "dbQueryTitle": "استعلام قاعدة البيانات",
+  "purgeBtn": "تطهير السجلات القديمة (90+ يوم) 🗑️",
+  "emailLabel": "البريد الإلكتروني",
+  "emailPlaceholder": "بحث بالإيميل...",
+  "actionTypeLabel": "نوع الإجراء",
+  "allActions": "جميع الإجراءات",
+  "targetTableLabel": "الجدول المستهدف",
+  "allTables": "جميع الجداول",
+  "fromDate": "من تاريخ",
+  "toDate": "إلى تاريخ",
+  "resetFilters": "إعادة ضبط الفلاتر",
+  "searchBtn": "بحث في قاعدة البيانات 🔍",
+  "tableUser": "المستخدم / البريد",
+  "tableAction": "نوع الإجراء",
+  "tableTable": "الجدول المستهدف",
+  "tableDetails": "التفاصيل والوصف",
+  "tableDate": "التاريخ والوقت"
+},
+"logDetails": {
+  "title": "تفاصيل سجل النشاط والأمان",
+  "titleEn": "Activity Audit Details",
+  "backToList": "العودة للقائمة ↩️",
+  "backToLogs": "العودة إلى سجل النشاطات ⬅️",
+  "userEmail": "المستخدم المسؤول / البريد",
+  "actionType": "نوع الإجراء (Action Type)",
+  "targetTable": "الجدول المستهدف (Target Table)",
+  "descriptionTitle": "📝 الوصف التفصيلي للحدث",
+  "comparisonTitle": "مقارنة التغييرات المباشرة",
+  "fieldLabel": "الحقل:",
+  "oldValue": "القيمة القديمة (Old Value)",
+  "newValue": "القيمة الجديدة (New Value)",
+  "systemEventNote": "ℹ️ ملاحظة: هذا السجل عبارة عن حدث عام أو عملية تسجيل دخول/خروج ولا يتضمن تعديلاً مباشراً على حقل منفرد.",
+  "recordId": "معرف السجل الفريد (UUID):",
+  "dateTime": "التاريخ والوقت:",
+  "system": "النظام",
+  "errorFetching": "حدث خطأ أثناء جلب تفاصيل السجل من قاعدة البيانات.",
+  "notFound": "سجل النشاط غير موجود أو تم حذفه.",
+  "nullVal": "فارغة (Null)",
+  "trueVal": "نعم (مفعل)",
+  "falseVal": "لا (معطل)",
+  "active": "نشط",
+  "closed": "مغلق",
+  "pending": "قيد الانتظار",
+  "accepted": "مقبول",
+  "rejected": "مرفوض",
+  "unread": "غير مقروء",
+  "read": "مقروء"
+}
 
 }

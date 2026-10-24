@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useTransition } from 'react';
 import { logoutAction } from './actions';
+import { useTranslation } from '@/utils/useTranslation';
 
 interface AdminHeaderProps {
   titleAr: string;
@@ -35,10 +36,11 @@ const roleNamesMap: Record<string, { label: string; bg: string }> = {
 export default function AdminHeader({
   titleAr,
   titleEn,
-  lang,
   userEmail,
   userRole,
 }: AdminHeaderProps) {
+
+  const {t,lang}=useTranslation()
   const [isPending, startTransition] = useTransition();
 
   const handleLogout = () => {

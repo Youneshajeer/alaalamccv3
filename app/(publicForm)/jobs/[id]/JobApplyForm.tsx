@@ -138,7 +138,7 @@ export default function JobApplyForm({ jobId, isClosed }: JobApplyFormProps) {
           value={selectedDeptId}
           onChange={(e) => {
             setSelectedDeptId(e.target.value);
-            setSelectedPosition(''); // تصفير المسمى عند تغيير القسم لتفعيل القائمة التابعة
+            setSelectedPosition(''); 
           }}
           required
           className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer pointer-events-auto relative z-40"
