@@ -1,5 +1,4 @@
-// components/EnterpriseStats.tsx
-// Saved information: components/EnterpriseStats.tsx
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -8,7 +7,7 @@ import { LucideIcon } from 'lucide-react';
 interface StatItem {
   number: string;
   label: string;
-  icon?: LucideIcon;
+  icon?: LucideIcon | string; 
 }
 
 interface EnterpriseStatsProps {
@@ -110,7 +109,8 @@ export default function EnterpriseStats({ enterpriseStats, lang }: EnterpriseSta
             : circumference;
 
           const is24_7 = stat.number.includes('24/7');
-          const IconComponent = stat.icon;
+          
+          const IconComponent = typeof stat.icon === 'function' ? (stat.icon as LucideIcon) : null;
 
           return (
             <div 
@@ -152,6 +152,7 @@ export default function EnterpriseStats({ enterpriseStats, lang }: EnterpriseSta
                 </svg>
 
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                
                   {IconComponent && <IconComponent className="w-5 h-5 text-emerald-400 mb-1 opacity-80 group-hover:scale-110 transition-transform" />}
                   <span className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-emerald-400">
                     {is24_7 ? `${Math.floor(currentVal)}/7` : `${currentVal}${stat.number.includes('%') ? '%' : ''}`}
