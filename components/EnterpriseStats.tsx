@@ -1,9 +1,18 @@
+// components/EnterpriseStats.tsx
+// Saved information: components/EnterpriseStats.tsx
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { LucideIcon } from 'lucide-react';
+
+interface StatItem {
+  number: string;
+  label: string;
+  icon?: LucideIcon;
+}
 
 interface EnterpriseStatsProps {
-  enterpriseStats: Array<{ number: string; label: string; icon?: string }>;
+  enterpriseStats: StatItem[];
   lang: string;
 }
 
@@ -20,7 +29,7 @@ export default function EnterpriseStats({ enterpriseStats, lang }: EnterpriseSta
           observer.disconnect();
         }
       },
-      { threshold: 0.2 }
+      { threshold: 0.25 }
     );
 
     if (sectionRef.current) {
@@ -39,30 +48,42 @@ export default function EnterpriseStats({ enterpriseStats, lang }: EnterpriseSta
       return isNaN(val) ? 100 : val;
     });
 
-    const duration = 2000; 
-    const steps = 60;
+    const duration = 2200; 
+    const steps = 70;
     const stepTime = duration / steps;
 
     let currentStep = 0;
     const timer = setInterval(() => {
       currentStep++;
       const progress = currentStep / steps;
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
 
       const newCounts: { [key: number]: number } = {};
       statsValues.forEach((val, idx) => {
-        const isDecimal = val === 99.9;
-        newCounts[idx] = Number((val * progress).toFixed(isDecimal ? 1 : 0));
+        const isDecimal = val.toString().includes('.') || statIsDecimal(enterpriseStats[idx]?.number);
+        const currentNum = val * easeProgress;
+        newCounts[idx] = Number(currentNum.toFixed(isDecimal ? 1 : 0));
       });
 
       setCounts(newCounts);
 
       if (currentStep >= steps) {
         clearInterval(timer);
+        const finalCounts: { [key: number]: number } = {};
+        statsValues.forEach((val, idx) => {
+          finalCounts[idx] = val;
+        });
+        setCounts(finalCounts);
       }
     }, stepTime);
 
     return () => clearInterval(timer);
   }, [isVisible, enterpriseStats]);
+
+  const statIsDecimal = (numStr?: string) => {
+    if (!numStr) return false;
+    return numStr.includes('.');
+  };
 
   const parsePercentage = (numStr: string) => {
     if (numStr.includes("24/7")) return 100;
@@ -71,32 +92,35 @@ export default function EnterpriseStats({ enterpriseStats, lang }: EnterpriseSta
   };
 
   return (
-    <div 
+    <section 
       ref={sectionRef}
-      className="bg-slate-100 text-slate-900 rounded-3xl p-8 sm:p-12 shadow-xl border border-slate-200 relative overflow-hidden"
+      className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white rounded-3xl p-8 sm:p-12 shadow-2xl border border-slate-700/60"
     >
-      <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
-      
-      <div className={`relative z-10 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center divide-y lg:divide-y-0 ${lang === 'ar' ? 'lg:divide-x lg:divide-x-reverse' : 'lg:divide-x'} divide-slate-200 items-center`}>
+      <div className="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div className={`relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 items-center ${lang === 'ar' ? 'rtl' : 'ltr'}`}>
         {enterpriseStats?.map((stat, idx) => {
           const currentVal = counts[idx] !== undefined ? counts[idx] : 0;
           const percentage = parsePercentage(stat.number);
-          const radius = 38;
+          const radius = 40;
           const circumference = 2 * Math.PI * radius;
           const strokeDashoffset = isVisible 
             ? circumference - (percentage / 100) * circumference 
             : circumference;
 
           const is24_7 = stat.number.includes('24/7');
+          const IconComponent = stat.icon;
 
           return (
-            <div key={idx} className={`${idx !== 0 ? 'pt-6 lg:pt-0' : ''} flex flex-col items-center space-y-4 group`}>
-              
-              <div className="relative w-28 h-28 flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
-                
+            <div 
+              key={idx} 
+              className="flex flex-col items-center text-center group p-6 rounded-2xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/5 hover:border-emerald-500/30 transition-all duration-300 transform hover:-translate-y-1 shadow-lg"
+            >
+              <div className="relative w-32 h-32 flex items-center justify-center mb-4">
                 <svg className="w-full h-full transform -rotate-90">
                   <defs>
-                    <linearGradient id={`blueToGreen-${idx}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                    <linearGradient id={`premiumGradient-${idx}`} x1="0%" y1="0%" x2="100%" y2="100%">
                       <stop offset="0%" stopColor="#38bdf8" /> 
                       <stop offset="50%" stopColor="#0ea5e9" /> 
                       <stop offset="100%" stopColor="#10b981" /> 
@@ -104,20 +128,20 @@ export default function EnterpriseStats({ enterpriseStats, lang }: EnterpriseSta
                   </defs>
 
                   <circle
-                    cx="56"
-                    cy="56"
+                    cx="64"
+                    cy="64"
                     r={radius}
                     stroke="currentColor"
                     strokeWidth="6"
-                    className="text-slate-200"
+                    className="text-slate-700/50"
                     fill="transparent"
                   />
 
                   <circle
-                    cx="56"
-                    cy="56"
+                    cx="64"
+                    cy="64"
                     r={radius}
-                    stroke={`url(#blueToGreen-${idx})`}
+                    stroke={`url(#premiumGradient-${idx})`}
                     strokeWidth="8"
                     strokeDasharray={circumference}
                     strokeDashoffset={strokeDashoffset}
@@ -128,19 +152,20 @@ export default function EnterpriseStats({ enterpriseStats, lang }: EnterpriseSta
                 </svg>
 
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                  <span className="text-xl sm:text-2xl font-black text-rose-600 drop-shadow-sm">
-                    {is24_7 ? `${currentVal}/7` : `${currentVal}${stat.number.includes('%') ? '%' : ''}`}
+                  {IconComponent && <IconComponent className="w-5 h-5 text-emerald-400 mb-1 opacity-80 group-hover:scale-110 transition-transform" />}
+                  <span className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-emerald-400">
+                    {is24_7 ? `${Math.floor(currentVal)}/7` : `${currentVal}${stat.number.includes('%') ? '%' : ''}`}
                   </span>
                 </div>
               </div>
 
-              <div className="text-xs sm:text-sm text-slate-600 font-medium px-2">
+              <h3 className="text-sm sm:text-base text-slate-300 font-medium px-2 leading-snug group-hover:text-white transition-colors">
                 {stat.label}
-              </div>
+              </h3>
             </div>
           );
         })}
       </div>
-    </div>
+    </section>
   );
 }
