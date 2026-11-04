@@ -57,7 +57,7 @@ export default function EnterpriseStats({ enterpriseStats, lang }: EnterpriseSta
     const timer = setInterval(() => {
       currentStep++;
       const progress = currentStep / steps;
-      const easeProgress = 1 - Math.pow(1 - progress, 3); // حركة انسيابية ناعمة
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
 
       const newCounts: { [key: number]: number } = {};
       statsValues.forEach((val, idx) => {
@@ -118,7 +118,7 @@ export default function EnterpriseStats({ enterpriseStats, lang }: EnterpriseSta
               key={idx} 
               className="relative group p-6 sm:p-8 rounded-2xl bg-white border border-slate-100 hover:border-slate-300 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col items-center justify-between overflow-hidden"
             >
-              {/* الدائرة البيانية */}
+              
               <div className="relative w-36 h-36 mx-auto flex items-center justify-center my-2">
                 <svg className="w-full h-full transform -rotate-90">
                 
@@ -145,7 +145,7 @@ export default function EnterpriseStats({ enterpriseStats, lang }: EnterpriseSta
                   />
                 </svg>
 
-                {/* القيمة النحوية بمنتصف الدائرة */}
+                
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                   <span className="text-2xl sm:text-3xl font-black tracking-tight text-slate-800">
                     {is24_7 ? `${Math.floor(currentVal)}/7` : `${Math.floor(currentVal)}%`}
