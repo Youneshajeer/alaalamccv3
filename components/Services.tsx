@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const dictionary = {
   ar: {
@@ -22,7 +22,7 @@ const dictionary = {
       {
         num: "03",
         title: "الدعم الفني",
-        desc: "معالجة أعطال المستوى الأول، تتبع التذاكر، والتصعيد المنظم لفريق العميل التقني بسرعة واحترانية.",
+        desc: "معالجة أعطال المستوى الأول، تتبع التذاكر، والتصعيد المنظم لفريق العميل التقني بسرعة واحترافية.",
         icon: "🛠"
       },
       {
@@ -67,7 +67,8 @@ const dictionary = {
 
 export default function Services() {
   const [lang, setLang] = useState<'ar' | 'en'>('ar');
-  const [activeCard, setActiveCard] = useState<string | null>(null);
+  const [activeCardNum, setActiveCardNum] = useState<string | null>("01");
+  const cardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   useEffect(() => {
     const savedLang = (localStorage.getItem('lang') as 'ar' | 'en') || 'ar';
@@ -82,6 +83,27 @@ export default function Services() {
 
     return () => clearInterval(checkLangInterval);
   }, [lang]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const windowHeight = window.innerHeight;
+      const triggerPoint = windowHeight / 2;
+
+      Object.entries(cardRefs.current).forEach(([num, el]) => {
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= triggerPoint && rect.bottom >= triggerPoint) {
+            setActiveCardNum(num);
+          }
+        }
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const t = dictionary[lang];
 
@@ -99,42 +121,42 @@ export default function Services() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
           {t.servicesList.map((service) => {
-            const isActive = activeCard === service.num;
+            const isActive = activeCardNum === service.num;
             return (
               <div
                 key={service.num}
-                onClick={() => setActiveCard(isActive ? null : service.num)}
-                className={`group relative bg-slate-50 dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border transition-all duration-300 flex flex-col justify-between cursor-pointer select-none h-full ${
+                ref={(el) => { cardRefs.current[service.num] = el; }}
+                className={`group relative rounded-3xl p-6 sm:p-8 border transition-all duration-500 flex flex-col justify-between h-full select-none ${
                   isActive 
-                    ? 'border-emerald-500 dark:border-emerald-400 shadow-xl ring-2 ring-emerald-500/20 bg-emerald-50/40 dark:bg-emerald-950/20 -translate-y-1' 
-                    : 'border-slate-200/80 dark:border-slate-800 hover:border-emerald-500 dark:hover:border-emerald-400 hover:shadow-xl hover:-translate-y-1'
+                    ? 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-500 dark:border-emerald-400 shadow-2xl ring-2 ring-emerald-500/20 lg:scale-105 -translate-y-2' 
+                    : 'bg-slate-50 dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 hover:border-emerald-500 dark:hover:border-emerald-400 hover:shadow-xl hover:-translate-y-1'
                 } ${lang === 'ar' ? 'text-right' : 'text-left'}`}
               >
                 <div>
                   <div className="flex items-center justify-between mb-6">
-                    <span className={`text-3xl font-black transition-colors ${isActive ? 'text-emerald-500 dark:text-emerald-400' : 'text-slate-300 dark:text-slate-500 group-hover:text-emerald-500 dark:group-hover:text-emerald-400'}`}>
+                    <span className={`text-3xl font-black transition-colors duration-300 ${isActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-300 dark:text-slate-500'}`}>
                       {service.num}
                     </span>
-                    <span className={`text-3xl p-3 rounded-2xl shadow-sm border transition-all duration-300 ${
+                    <span className={`text-3xl p-3 rounded-2xl shadow-sm border transition-all duration-500 ${
                       isActive 
-                        ? 'bg-emerald-500 text-white border-emerald-400 scale-110 shadow-emerald-500/30' 
-                        : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-800 dark:text-slate-200 group-hover:scale-110'
+                        ? 'bg-emerald-600 text-white border-emerald-500 scale-110 shadow-emerald-500/40 rotate-3' 
+                        : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-800 dark:text-slate-200'
                     }`}>
                       {service.icon}
                     </span>
                   </div>
-                  <h4 className={`text-xl font-bold mb-3 transition-colors ${isActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400'}`}>
+                  <h4 className={`text-xl font-bold mb-3 transition-colors duration-300 ${isActive ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-900 dark:text-white'}`}>
                     {service.title}
                   </h4>
-                  <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed transition-colors">
+                  <p className={`text-sm leading-relaxed transition-colors duration-300 ${isActive ? 'text-slate-700 dark:text-slate-200' : 'text-slate-600 dark:text-slate-300'}`}>
                     {service.desc}
                   </p>
                 </div>
 
-                <div className={`mt-6 pt-4 border-t transition-colors flex items-center justify-between text-xs font-semibold ${isActive ? 'border-emerald-200 dark:border-emerald-900/50 text-emerald-600 dark:text-emerald-400' : 'border-slate-200/60 dark:border-slate-800 text-slate-400'}`}>
-                  <span>{lang === 'ar' ? (isActive ? 'تم التحديد' : 'اضغط للتفاعل') : (isActive ? 'Selected' : 'Tap to interact')}</span>
-                  <span className={`transform transition-transform duration-300 ${isActive ? (lang === 'ar' ? '-rotate-90 text-emerald-500' : 'rotate-90 text-emerald-500') : ''}`}>
-                    {lang === 'ar' ? '←' : '→'}
+                <div className={`mt-6 pt-4 border-t transition-colors duration-300 flex items-center justify-between text-xs font-semibold ${isActive ? 'border-emerald-200 dark:border-emerald-900/50 text-emerald-600 dark:text-emerald-400' : 'border-slate-200/60 dark:border-slate-800 text-slate-400'}`}>
+                  
+                  <span className={`transform transition-transform duration-300 ${isActive ? 'scale-125 text-emerald-500' : 'opacity-40'}`}>
+                    ✦
                   </span>
                 </div>
               </div>
