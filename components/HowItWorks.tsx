@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const dictionary = {
   ar: {
@@ -59,6 +59,8 @@ const dictionary = {
 
 export default function HowItWorks() {
   const [lang, setLang] = useState<'ar' | 'en'>('ar');
+  const [activeStepNum, setActiveStepNum] = useState<string | null>("1");
+  const cardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   useEffect(() => {
     const savedLang = (localStorage.getItem('lang') as 'ar' | 'en') || 'ar';
@@ -74,6 +76,27 @@ export default function HowItWorks() {
     return () => clearInterval(checkLangInterval);
   }, [lang]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const windowHeight = window.innerHeight;
+      const triggerPoint = windowHeight / 2;
+
+      Object.entries(cardRefs.current).forEach(([num, el]) => {
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= triggerPoint && rect.bottom >= triggerPoint) {
+            setActiveStepNum(num);
+          }
+        }
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const t = dictionary[lang];
 
   return (
@@ -88,23 +111,44 @@ export default function HowItWorks() {
           </h3>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {t.steps.map((item) => (
-            <div
-              key={item.step}
-              className={`bg-white dark:bg-slate-950 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden transition-all duration-300 hover:shadow-md ${lang === 'ar' ? 'text-right' : 'text-left'}`}
-            >
-              <div className="w-10 h-10 rounded-2xl bg-linear-to-tr from-blue-600 to-emerald-500 text-white font-black flex items-center justify-center text-lg mb-4 shadow-sm">
-                {item.step}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+          {t.steps.map((item) => {
+            const isActive = activeStepNum === item.step;
+            return (
+              <div
+                key={item.step}
+                ref={(el) => { cardRefs.current[item.step] = el; }}
+                className={`relative rounded-3xl p-6 border transition-all duration-500 flex flex-col justify-between h-full select-none ${
+                  isActive 
+                    ? 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-500 dark:border-emerald-400 shadow-2xl ring-2 ring-emerald-500/20 lg:scale-105 -translate-y-2' 
+                    : 'bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 hover:border-emerald-500 dark:hover:border-emerald-400 hover:shadow-xl hover:-translate-y-1'
+                } ${lang === 'ar' ? 'text-right' : 'text-left'}`}
+              >
+                <div>
+                  <div className={`w-10 h-10 rounded-2xl font-black flex items-center justify-center text-lg mb-4 shadow-sm transition-all duration-500 ${
+                    isActive 
+                      ? 'bg-emerald-600 text-white scale-110 shadow-emerald-500/40 rotate-3' 
+                      : 'bg-linear-to-tr from-blue-600 to-emerald-500 text-white'
+                  }`}>
+                    {item.step}
+                  </div>
+                  <h4 className={`text-lg font-bold mb-2 transition-colors duration-300 ${isActive ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-900 dark:text-white'}`}>
+                    {item.title}
+                  </h4>
+                  <p className={`text-xs leading-relaxed transition-colors duration-300 ${isActive ? 'text-slate-700 dark:text-slate-200' : 'text-slate-600 dark:text-slate-300'}`}>
+                    {item.desc}
+                  </p>
+                </div>
+
+                <div className={`mt-6 pt-4 border-t transition-colors duration-300 flex items-center justify-between text-xs font-semibold ${isActive ? 'border-emerald-200 dark:border-emerald-900/50 text-emerald-600 dark:text-emerald-400' : 'border-slate-200/60 dark:border-slate-800 text-slate-400'}`}>
+                  
+                  <span className={`transform transition-transform duration-300 ${isActive ? 'scale-125 text-emerald-500' : 'opacity-40'}`}>
+                    ✦
+                  </span>
+                </div>
               </div>
-              <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
-                {item.title}
-              </h4>
-              <p className="text-slate-600 dark:text-slate-300 text-xs leading-relaxed">
-                {item.desc}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
