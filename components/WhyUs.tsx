@@ -1,12 +1,35 @@
 'use client';
 
 import { useTranslation } from '@/utils/useTranslation';
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import EnterpriseStats from '@/components/EnterpriseStats';
 
 export default function WhyUs() {
   const { lang, t } = useTranslation();
   const whyUsText = t.whyUsComponent;
+  const [activeFeatureId, setActiveFeatureId] = useState<string | null>(null);
+  const featureRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const windowHeight = window.innerHeight;
+      const triggerPoint = windowHeight / 2;
+
+      Object.entries(featureRefs.current).forEach(([id, el]) => {
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= triggerPoint && rect.bottom >= triggerPoint) {
+            setActiveFeatureId(id);
+          }
+        }
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <section id="why-us" className={`py-24 bg-white text-slate-900 relative overflow-hidden ${lang === 'ar' ? 'dir-rtl' : 'dir-ltr'}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
@@ -38,44 +61,56 @@ export default function WhyUs() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {whyUsText?.coreFeatures?.map((feature: any) => (
-            <div
-              key={feature.id}
-              className={`group relative bg-white border border-slate-200/90 rounded-3xl p-8 sm:p-10 transition-all duration-300 hover:shadow-2xl hover:shadow-slate-200/80 hover:border-emerald-400/80 flex flex-col justify-between overflow-hidden ${lang === 'ar' ? 'text-right' : 'text-left'}`}
-            >
-              <div className="absolute top-0 left-0 w-full h-1 bg-slate-100 group-hover:bg-linear-to-r group-hover:from-emerald-400 group-hover:to-amber-400 transition-all duration-500"></div>
+          {whyUsText?.coreFeatures?.map((feature: any) => {
+            const isActive = activeFeatureId === feature.id;
+            return (
+              <div
+                key={feature.id}
+                ref={(el) => { featureRefs.current[feature.id] = el; }}
+                className={`group relative border rounded-3xl p-8 sm:p-10 transition-all duration-500 flex flex-col justify-between overflow-hidden select-none ${
+                  isActive 
+                    ? 'bg-emerald-50/70 border-emerald-500 shadow-2xl ring-2 ring-emerald-500/20 lg:scale-[1.02] -translate-y-2' 
+                    : 'bg-white border-slate-200/90 hover:shadow-2xl hover:shadow-slate-200/80 hover:border-emerald-400/80 hover:-translate-y-1'
+                } ${lang === 'ar' ? 'text-right' : 'text-left'}`}
+              >
+                <div className={`absolute top-0 left-0 w-full h-1 transition-all duration-500 ${isActive ? 'bg-emerald-500' : 'bg-slate-100 group-hover:bg-linear-to-r group-hover:from-emerald-400 group-hover:to-amber-400'}`}></div>
 
-              <div className="space-y-6">
-                <div className={`flex justify-between items-center ${lang === 'en' ? 'flex-row-reverse' : ''}`}>
-                  <span className="text-xs font-bold px-3.5 py-1.5 rounded-full bg-emerald-50/80 border border-emerald-200/60 text-emerald-800">
-                    {feature.badge}
-                  </span>
-                  <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-3xl shadow-sm group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
-                    {feature.icon}
+                <div className="space-y-6">
+                  <div className={`flex justify-between items-center ${lang === 'en' ? 'flex-row-reverse' : ''}`}>
+                    <span className="text-xs font-bold px-3.5 py-1.5 rounded-full bg-emerald-50/80 border border-emerald-200/60 text-emerald-800">
+                      {feature.badge}
+                    </span>
+                    <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center text-3xl shadow-sm transition-all duration-300 ${
+                      isActive 
+                        ? 'bg-emerald-600 text-white border-emerald-500 scale-110 shadow-emerald-500/40 rotate-3' 
+                        : 'bg-slate-50 border-slate-100 text-slate-800 group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110'
+                    }`}>
+                      {feature.icon}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <h3 className={`text-xl sm:text-2xl font-bold transition-colors duration-300 ${isActive ? 'text-emerald-800' : 'text-slate-900 group-hover:text-emerald-800'}`}>
+                      {feature.title}
+                    </h3>
+                    <p className={`text-sm sm:text-base leading-relaxed transition-colors duration-300 ${isActive ? 'text-slate-700' : 'text-slate-600'}`}>
+                      {feature.desc}
+                    </p>
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <h3 className="text-xl sm:text-2xl font-bold text-slate-900 group-hover:text-emerald-800 transition-colors">
-                    {feature.title}
-                  </h3>
-                  <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-                    {feature.desc}
-                  </p>
+                <div className={`pt-6 mt-6 border-t flex items-center justify-between text-xs font-bold transition-colors duration-300 ${isActive ? 'border-emerald-200 text-emerald-700' : 'border-slate-100 text-slate-500'}`}>
+                  <span className="flex items-center gap-2 text-emerald-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    {feature.highlight}
+                  </span>
+                  <span className={`transform transition-transform duration-300 ${isActive ? 'scale-125 text-emerald-500' : 'text-slate-400 group-hover:-translate-x-1'}`}>
+                    {lang === 'ar' ? '←' : '→'}
+                  </span>
                 </div>
               </div>
-
-              <div className="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-500">
-                <span className="flex items-center gap-2 text-emerald-700">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  {feature.highlight}
-                </span>
-                <span className="text-slate-400 group-hover:-translate-x-1 transition-transform">
-                  {lang === 'ar' ? '←' : '→'}
-                </span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <EnterpriseStats enterpriseStats={whyUsText?.enterpriseStats} lang={lang} />
