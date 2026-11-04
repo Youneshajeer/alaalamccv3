@@ -22,7 +22,7 @@ const dictionary = {
       {
         num: "03",
         title: "الدعم الفني",
-        desc: "معالجة أعطال المستوى الأول، تتبع التذاكر، والتصعيد المنظم لفريق العميل التقني بسرعة واحترافية.",
+        desc: "معالجة أعطال المستوى الأول، تتبع التذاكر، والتصعيد المنظم لفريق العميل التقني بسرعة واحترانية.",
         icon: "🛠"
       },
       {
@@ -97,16 +97,16 @@ export default function Services() {
           </h3>
         </div>
 
-        <div className="flex lg:grid lg:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto lg:overflow-x-visible pb-4 lg:pb-0 snap-x snap-mandatory scrollbar-none px-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
           {t.servicesList.map((service) => {
             const isActive = activeCard === service.num;
             return (
               <div
                 key={service.num}
                 onClick={() => setActiveCard(isActive ? null : service.num)}
-                className={`group relative bg-slate-50 dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border transition-all duration-300 flex flex-col justify-between shrink-0 w-[80%] sm:w-[60%] lg:w-auto snap-center cursor-pointer active:scale-95 ${
+                className={`group relative bg-slate-50 dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border transition-all duration-300 flex flex-col justify-between cursor-pointer select-none h-full ${
                   isActive 
-                    ? 'border-emerald-500 dark:border-emerald-400 shadow-xl ring-2 ring-emerald-500/20 bg-emerald-50/30 dark:bg-emerald-950/20' 
+                    ? 'border-emerald-500 dark:border-emerald-400 shadow-xl ring-2 ring-emerald-500/20 bg-emerald-50/40 dark:bg-emerald-950/20 -translate-y-1' 
                     : 'border-slate-200/80 dark:border-slate-800 hover:border-emerald-500 dark:hover:border-emerald-400 hover:shadow-xl hover:-translate-y-1'
                 } ${lang === 'ar' ? 'text-right' : 'text-left'}`}
               >
@@ -115,20 +115,27 @@ export default function Services() {
                     <span className={`text-3xl font-black transition-colors ${isActive ? 'text-emerald-500 dark:text-emerald-400' : 'text-slate-300 dark:text-slate-500 group-hover:text-emerald-500 dark:group-hover:text-emerald-400'}`}>
                       {service.num}
                     </span>
-                    <span className="text-3xl p-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 transition-colors duration-300 group-hover:scale-110">
+                    <span className={`text-3xl p-3 rounded-2xl shadow-sm border transition-all duration-300 ${
+                      isActive 
+                        ? 'bg-emerald-500 text-white border-emerald-400 scale-110 shadow-emerald-500/30' 
+                        : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-800 dark:text-slate-200 group-hover:scale-110'
+                    }`}>
                       {service.icon}
                     </span>
                   </div>
-                  <h4 className={`text-xl font-bold mb-3 transition-colors ${isActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400'}`}>
+                  <h4 className={`text-xl font-bold mb-3 transition-colors ${isActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400'}`}>
                     {service.title}
                   </h4>
                   <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed transition-colors">
                     {service.desc}
                   </p>
                 </div>
-                <div className="mt-6 pt-4 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-xs font-semibold text-slate-400 lg:hidden">
-                  <span>{lang === 'ar' ? 'اضغط للتفاعل' : 'Tap to interact'}</span>
-                  <span className={`transform transition-transform duration-300 ${isActive ? 'rotate-90 text-emerald-500' : ''}`}>→</span>
+
+                <div className={`mt-6 pt-4 border-t transition-colors flex items-center justify-between text-xs font-semibold ${isActive ? 'border-emerald-200 dark:border-emerald-900/50 text-emerald-600 dark:text-emerald-400' : 'border-slate-200/60 dark:border-slate-800 text-slate-400'}`}>
+                  <span>{lang === 'ar' ? (isActive ? 'تم التحديد' : 'اضغط للتفاعل') : (isActive ? 'Selected' : 'Tap to interact')}</span>
+                  <span className={`transform transition-transform duration-300 ${isActive ? (lang === 'ar' ? '-rotate-90 text-emerald-500' : 'rotate-90 text-emerald-500') : ''}`}>
+                    {lang === 'ar' ? '←' : '→'}
+                  </span>
                 </div>
               </div>
             );
